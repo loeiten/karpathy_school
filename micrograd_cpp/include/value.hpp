@@ -3,9 +3,9 @@
 
 #include <cstddef>        // for size_t
 #include <cstdint>        // for uint64_t
-#include <functional>     // for equal_to, hash
-#include <memory>         // for shared_ptr, hash
+#include <functional>     // for equal_to, hash, function
 #include <ostream>        // for ostream
+#include <set>            // for set
 #include <string>         // for string
 #include <unordered_set>  // for unordered_set
 #include <utility>        // for pair
@@ -17,14 +17,13 @@ class Value;
 namespace std {
 // We need a hash function in order to use unordered_set
 template <>  // template<> is used to specialize a template for a specific type
-struct hash<shared_ptr<Value>> {
-  size_t operator()(const shared_ptr<Value> &value) const;
+struct hash<const Value *> {
+  size_t operator()(const Value *value) const;
 };
 // We need equal_to in order to use .find() on the unordered_set
 template <>
-struct equal_to<shared_ptr<Value>> {
-  bool operator()(const shared_ptr<Value> &lhs,
-                  const shared_ptr<Value> &rhs) const;
+struct equal_to<const Value *> {
+  bool operator()(const Value *lhs, const Value *rhs) const;
 };
 }  // namespace std
 
@@ -41,18 +40,17 @@ class Value {
   // data and op are copied to the new object even though they are passed as a
   // reference. We capture children as rvalue in order to save one copy call,
   // see implementation for details.
-  Value(const double &data,
-        std::unordered_set<std::shared_ptr<Value>> &&children,
+  Value(const double &data, std::set<Value *> &&children,
         const std::string &op);
 
   // Notice that both the grad of this and rhs is being altered by this
-  Value operator+(Value &rhs);
-  Value operator*(Value &rhs);
+  Value operator+(Value &rhs);  // NOLINT
+  Value operator*(Value &rhs);  // NOLINT
 
   // Accessors and mutators (get and set functions) may be named like variables.
   // These returns a copy as we do not want anything other than the class to
   // modify the value of these
-  const std::unordered_set<std::shared_ptr<Value>> &get_children() const;
+  const std::set<Value *> &get_children() const;
   const std::string &get_op() const;
   int get_id() const;
   void set_label(const std::string &label);
@@ -66,7 +64,8 @@ class Value {
  private:
   double data_;
   double grad_;
-  std::unordered_set<std::shared_ptr<Value>> prev_;
+  // We do care about the order of the children for printing purposes
+  std::set<Value *> prev_;
   std::unordered_set<const Value *> visited;
   std::vector<const Value *> topo;
   int id_;
@@ -79,22 +78,21 @@ class Value {
 
 // Define these functions here, so that other files can use it
 // We need to use inline so that only one copy is used
-inline size_t std::hash<std::shared_ptr<Value>>::operator()(
-    const std::shared_ptr<Value> &value) const {
+inline std::size_t std::hash<const Value *>::operator()(
+    const Value *value) const {
   return std::hash<int>()(value->get_id());
 }
 
-inline bool std::equal_to<std::shared_ptr<Value>>::operator()(
-    const std::shared_ptr<Value> &lhs,
-    const std::shared_ptr<Value> &rhs) const {
+inline bool std::equal_to<const Value *>::operator()(const Value *lhs,
+                                                     const Value *rhs) const {
   return lhs->get_id() == rhs->get_id();
 }
 
 namespace std {
 // We need a hash to use the pair of Values in an unordered_set
 template <>
-struct hash<pair<shared_ptr<Value>, shared_ptr<Value>>> {
-  size_t operator()(const pair<shared_ptr<Value>, shared_ptr<Value>> &p) const {
+struct hash<pair<const Value *, const Value *>> {
+  size_t operator()(const pair<const Value *, const Value *> &p) const {
     // Compute a hash value for the pair using FNV-1a
     // Note that SipHash is more sophisticated and has replaced this method in
     // python
@@ -110,9 +108,9 @@ struct hash<pair<shared_ptr<Value>, shared_ptr<Value>>> {
 // Finally, since unordered_set checks for equality we need to check for this as
 // well
 template <>
-struct equal_to<pair<shared_ptr<Value>, shared_ptr<Value>>> {
-  bool operator()(const pair<shared_ptr<Value>, shared_ptr<Value>> &lhs,
-                  const pair<shared_ptr<Value>, shared_ptr<Value>> &rhs) const {
+struct equal_to<pair<Value *, Value *>> {
+  bool operator()(const pair<Value *, Value *> &lhs,
+                  const pair<Value *, Value *> &rhs) const {
     return (lhs.first->get_id() == rhs.first->get_id()) &&
            (lhs.second->get_id() == rhs.second->get_id());
   }
