@@ -32,7 +32,7 @@ void BackProp() {
   x1w1.set_label("x1w1");
   auto x2w2 = x2 * w2;
   x2w2.set_label("x2w2");
-  auto x1w1x2w2 = x1w1 * x2w2;
+  auto x1w1x2w2 = x1w1 + x2w2;
   x1w1x2w2.set_label("x1w1 + x2w2");
   auto n = x1w1x2w2 + b;
   n.set_label("n");

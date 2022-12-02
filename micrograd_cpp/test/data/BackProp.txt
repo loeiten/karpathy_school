@@ -1,16 +1,32 @@
 digraph {
     graph [rankdir=LR]
-    "3" [label="{c | data 10.00 | grad 0.00}" shape=record]
-    "1" [label="{a | data 2.00 | grad 0.00}" shape=record]
-    "2" [label="{b | data -3.00 | grad 0.00}" shape=record]
-    "4" [label="{e | data -6.00 | grad 0.00}" shape=record]
-    "4*" [label="*"]
-    "4*" -> "4"
-    "5" [label="{d | data 4.00 | grad 0.00}" shape=record]
-    "5+" [label="+"]
-    "5+" -> "5"
-    "3" -> "5+"
-    "1" -> "4*"
-    "2" -> "4*"
-    "4" -> "5+"
+    "1" [label="{x1 | data 2.00 | grad -1.50}" shape=record]
+    "2" [label="{x2 | data 0.00 | grad 0.50}" shape=record]
+    "3" [label="{w1 | data -3.00 | grad 1.00}" shape=record]
+    "4" [label="{w2 | data 1.00 | grad 0.00}" shape=record]
+    "5" [label="{b | data 6.88 | grad 0.50}" shape=record]
+    "6" [label="{x1w1 | data -6.00 | grad 0.50}" shape=record]
+    "6*" [label="*"]
+    "6*" -> "6"
+    "7" [label="{x2w2 | data 0.00 | grad 0.50}" shape=record]
+    "7*" [label="*"]
+    "7*" -> "7"
+    "8" [label="{x1w1 + x2w2 | data -6.00 | grad 0.50}" shape=record]
+    "8+" [label="+"]
+    "8+" -> "8"
+    "9" [label="{n | data 0.88 | grad 0.50}" shape=record]
+    "9+" [label="+"]
+    "9+" -> "9"
+    "10" [label="{o | data 0.71 | grad 1.00}" shape=record]
+    "10tanh" [label="tanh"]
+    "10tanh" -> "10"
+    "1" -> "6*"
+    "2" -> "7*"
+    "3" -> "6*"
+    "4" -> "7*"
+    "5" -> "9+"
+    "6" -> "8+"
+    "7" -> "8+"
+    "8" -> "9+"
+    "9" -> "10tanh"
 }

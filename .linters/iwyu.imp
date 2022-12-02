@@ -23,6 +23,9 @@
     # Let strings be included from strings
     { include: [<iosfwd>, "public", <string>, "public"] },
 
+    # Let hash be included from strings
+    { include: [<memory>, "public", <functional>, "public"] },
+
     # Do not use the fwd includes
     { include: [<__fwd/ostream.h>, "public", <ostream>, "public"] },
     { include: [<__fwd/string.h>, "public", <string>, "public"] },

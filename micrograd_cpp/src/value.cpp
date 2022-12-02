@@ -1,7 +1,8 @@
 #include "../include/value.hpp"
 
 #include <cmath>
-#include <iomanip>        // for operator<<, setprecision
+#include <iomanip>  // for operator<<, setprecision
+#include <iostream>
 #include <unordered_set>  // for unordered_set
 
 int Value::instance_count = 0;
@@ -34,6 +35,10 @@ Value Value::operator+(Value &rhs) {  // NOLINT
   Value out = Value(this->data_ + rhs.data_, std::move(children), "+");
 
   // Finally, we define the backward function
+
+  // In a lambda: The compiler will create a "template" of the function
+  //              During runtime parameters of the function will be filled
+  // We copy out as this goes out of scope
   out.Backward_ = [this, &out, &rhs]() {
     this->grad_ = out.grad_;
     rhs.grad_ = out.grad_;
@@ -69,7 +74,8 @@ Value Value::tanh() {
   std::set<Value *> children;
   children.insert(this);
   Value out(t, std::move(children), "tanh");
-  out.Backward_ = [this, &out, &t]() {
+  // We copy t as this goes out of scope
+  out.Backward_ = [this, &out, t]() {
     this->grad_ = (1 - pow(t, 2)) * out.grad_;
   };
   return out;
@@ -77,21 +83,23 @@ Value Value::tanh() {
 
 void Value::Backward() {
   // Build the topology
-  BuildTopo(*this);
+  TopologicalSort(*this);
   this->grad_ = 1.0;
 
-  for (auto it = topo.rbegin(); it != topo.rend(); ++it) {
-    (*it)->Backward_();
+  for (auto it = topology.rbegin(); it != topology.rend(); ++it) {
+    if ((*it)->Backward_ != nullptr) {
+      (*it)->Backward_();
+    }
   }
 }
 
-void Value::BuildTopo(const Value &value) {
+void Value::TopologicalSort(const Value &value) {
   (void)value;
   if (visited.find(&value) == visited.end()) {
     visited.insert(&value);
     for (const auto &child : value.prev_) {
-      BuildTopo(*child);
+      TopologicalSort(*child);
     }
-    topo.push_back(&value);
+    topology.push_back(&value);
   }
 }

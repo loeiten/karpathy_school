@@ -59,21 +59,20 @@ class Value {
 
   void Backward();
 
-  std::function<void()> Backward_;
-
  private:
   double data_;
   double grad_;
   // We do care about the order of the children for printing purposes
   std::set<Value *> prev_;
   std::unordered_set<const Value *> visited;
-  std::vector<const Value *> topo;
+  std::vector<const Value *> topology;
   int id_;
   std::string label_ = "";
   std::string op_ = "";
   static int instance_count;
 
-  void BuildTopo(const Value &value);
+  std::function<void()> Backward_ = nullptr;
+  void TopologicalSort(const Value &value);
 };
 
 // Define these functions here, so that other files can use it
