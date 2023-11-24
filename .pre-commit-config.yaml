@@ -1,0 +1,45 @@
+---
+repos:
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.5.0
+      hooks:
+        - id: check-yaml
+        - id: check-merge-conflict
+        - id: debug-statements
+        - id: end-of-file-fixer
+        - id: mixed-line-ending
+        - id: trailing-whitespace
+        - id: check-added-large-files
+    - repo: https://github.com/jumanjihouse/pre-commit-hooks
+      rev: 3.0.0
+      hooks:
+        - id: shellcheck
+    - repo: https://github.com/markdownlint/markdownlint/
+      rev: v0.12.0
+      hooks:
+        - id: markdownlint
+    - repo: https://github.com/pocc/pre-commit-hooks
+      rev: v1.3.5
+      # Must include this directory in files as .git is in parent
+      hooks:
+        - id: clang-format
+          args: [
+              -i,  # Fix inplace
+              -style=Google
+          ]
+        - id: clang-tidy
+          args:
+            - "-p=build/"
+        - id: cppcheck
+          args:
+            - "--inline-suppr"  # Enable inline suppression
+        - id: cpplint
+          args: ["--filter=-legal/copyright,-build/include_order,-whitespace/comments"]
+        - id: include-what-you-use
+          args:
+            - "-Xiwyu"  # Xiwyu comes before iwyu arguments
+            - "--error"
+            - "-Xiwyu"
+            - "--mapping_file=.linters/iwyu.imp"
+            - "-Xiwyu"
+            - "--update_comments"
