@@ -1,9 +1,14 @@
 #ifndef MICROGRAD_CPP_INCLUDE_VALUE_HPP_
 #define MICROGRAD_CPP_INCLUDE_VALUE_HPP_
 
-#include <memory>
-#include <ostream>
-#include <unordered_set>
+#include <cstddef>        // for size_t
+#include <cstdint>        // for uint64_t
+#include <functional>     // for hash, equal_to
+#include <memory>         // for shared_ptr, hash
+#include <ostream>        // for ostream
+#include <string>         // for string
+#include <unordered_set>  // for unordered_set
+#include <utility>        // for pair
 
 class Value {
  public:

@@ -1,7 +1,9 @@
 #ifndef MICROGRAD_CPP_INCLUDE_PRINT_GRAPH_HPP_
 #define MICROGRAD_CPP_INCLUDE_PRINT_GRAPH_HPP_
 
+#include <string>
 #include <unordered_set>
+#include <utility>
 
 class Value;
 

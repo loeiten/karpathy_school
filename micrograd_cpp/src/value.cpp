@@ -1,8 +1,8 @@
 #include "../include/value.hpp"
 
-#include <iomanip>
-#include <memory>
-#include <unordered_set>
+#include <iomanip>        // for operator<<, setprecision
+#include <memory>         // for shared_ptr, make_shared
+#include <unordered_set>  // for unordered_set
 
 int Value::instance_count = 0;
 
@@ -14,7 +14,7 @@ std::ostream &operator<<(std::ostream &os, const Value &value) {
 Value::Value(const float &data) : data_(data) {
   ++instance_count;
   id_ = instance_count;
-};
+}
 
 Value::Value(const float &data,
              std::unordered_set<std::shared_ptr<Value>> &&children,
@@ -22,7 +22,7 @@ Value::Value(const float &data,
     : data_(data), prev_(children), op_(op) {
   ++instance_count;
   id_ = instance_count;
-};
+}
 
 Value Value::operator+(const Value &rhs) const {
   std::unordered_set<std::shared_ptr<Value>> children;
