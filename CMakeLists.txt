@@ -18,7 +18,7 @@ cmake_minimum_required(VERSION 3.15)
 project(KARPATHY_SCHOOL VERSION 1.0)
 
 # Specify the C++ standard
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Turn on compile commands
@@ -64,7 +64,7 @@ function(do_test)
    cmake_parse_arguments(
        TEST_ARGS            # Prefix of output variables
        ""                   # List of names of the boolean arguments (only defined ones will be true)
-       "NAME;NO;EXPECTED"   # List of names of mono-valued arguments
+       "NAME;NO"            # List of names of mono-valued arguments
        "ARGS"               # List of names of multi-valued arguments (output variables are lists)
        ${ARGN}              # Arguments of the function to parse, here we take the all original ones
    )
@@ -78,21 +78,13 @@ function(do_test)
    if(NOT TEST_ARGS_NO)
        message(FATAL_ERROR "You must provide a test number")
    endif(NOT TEST_ARGS_NO)
-   if(NOT TEST_ARGS_EXPECTED)
-       message(FATAL_ERROR "You must provide an expected outcome")
-   endif(NOT TEST_ARGS_EXPECTED)
 
    # Find path relative to this
    file(RELATIVE_PATH rel_path ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_LIST_DIR})
    string(REPLACE "/" "_" rel_path ${rel_path})
    set(full_name ${rel_path}_${TEST_ARGS_NAME}_${TEST_ARGS_NO})
-   add_test(NAME ${full_name} COMMAND ./${TEST_ARGS_NAME} ${TEST_ARGS_ARGS})
-   # The output must match this regex for the test to pass
-   # For other properties check
-   # https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html#test-properties
-   set_tests_properties(${full_name}
-   PROPERTIES PASS_REGULAR_EXPRESSION "^${TEST_ARGS_EXPECTED}$"
-   )
+   # Run the test and compare it with a file
+   add_test(NAME ${full_name} COMMAND bash -c "diff <(${CMAKE_CURRENT_BINARY_DIR}/${TEST_ARGS_NAME} ${TEST_ARGS_ARGS}) ${CMAKE_CURRENT_LIST_DIR}/test/data/${TEST_ARGS_ARGS}.txt")
 endfunction(do_test)
 
 
@@ -113,3 +105,5 @@ if(TSAN)
    add_compile_options(-fsanitize=thread)
    add_link_options(-fsanitize=thread)
 endif(TSAN)
+
+add_subdirectory(micrograd_cpp)

@@ -69,8 +69,10 @@ struct hash<std::pair<Value, Value>> {
     // Note that SipHash is more sophisticated and has replaced this method in
     // python
     uint64_t hash = 14695981039346656037ull;
-    hash = (hash ^ static_cast<uint64_t>(p.first.get_id())) * 1099511628211ull;
-    hash = (hash ^ static_cast<uint64_t>(p.second.get_id())) * 1099511628211ull;
+    hash ^= static_cast<uint64_t>(p.first.get_id());
+    hash *= 1099511628211ull;
+    hash ^= static_cast<uint64_t>(p.second.get_id());
+    hash *= 1099511628211ull;
     return hash;
   }
 };

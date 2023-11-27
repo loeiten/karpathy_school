@@ -24,5 +24,9 @@
 
     # Do not use the fwd includes
     { include: [<__fwd/string.h>, "public", <string>, "public"] },
+    { include: [<__fwd/sstream.h>, "public", <sstream>, "public"] },
     { include: [<__fwd/ostream.h>, "public", <ostream>, "public"] },
+
+    # unordered_set imports __hash_table
+    { include: [<__hash_table>, "public", <unordered_set>, "public"] },
 ]

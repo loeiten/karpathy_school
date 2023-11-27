@@ -44,6 +44,7 @@ Value Value::operator*(const Value &rhs) const {
   return out;
 }
 
+// FIXME: Rather return a const reference to this
 std::unordered_set<std::shared_ptr<Value>> Value::get_children() const {
   return prev_;
 }
