@@ -31,8 +31,8 @@ class Value {
   // Accessors and mutators (get and set functions) may be named like variables.
   // These returns a copy as we do not want anything other than the class to
   // modify the value of these
-  std::unordered_set<std::shared_ptr<Value>> get_children() const;
-  std::string get_op() const;
+  const std::unordered_set<std::shared_ptr<Value>> &get_children() const;
+  const std::string &get_op() const;
   int get_id() const;
 
  private:
@@ -43,35 +43,36 @@ class Value {
   static int instance_count;
 };
 
-// Declare these functions here, so that other files can use it
+// Declare (and define) these functions here, so that other files can use it
 namespace std {
 // We need a has function in order to use unordered_set
 template <>  // template<> is used to specialize a template for a specific type
-struct hash<Value> {
+struct hash<shared_ptr<Value>> {
   size_t operator()(const Value &value) const {
-    return std::hash<int>()(value.get_id());
+    return hash<int>()(value.get_id());
   }
 };
 
 // We need equal_to in order to use .find() on the unordered_set
 template <>
-struct equal_to<Value> {
-  bool operator()(const Value &lhs, const Value &rhs) const {
-    return lhs.get_id() == rhs.get_id();
+struct equal_to<shared_ptr<Value>> {
+  bool operator()(const shared_ptr<Value> &lhs,
+                  const shared_ptr<Value> &rhs) const {
+    return lhs->get_id() == rhs->get_id();
   }
 };
 
 // We need a hash to use the pair of Values in an unordered_set
 template <>
-struct hash<std::pair<Value, Value>> {
-  size_t operator()(const std::pair<Value, Value> &p) const {
+struct hash<pair<shared_ptr<Value>, shared_ptr<Value>>> {
+  size_t operator()(const pair<shared_ptr<Value>, shared_ptr<Value>> &p) const {
     // Compute a hash value for the pair using FNV-1a
     // Note that SipHash is more sophisticated and has replaced this method in
     // python
     uint64_t hash = 14695981039346656037ull;
-    hash ^= static_cast<uint64_t>(p.first.get_id());
+    hash ^= static_cast<uint64_t>(p.first->get_id());
     hash *= 1099511628211ull;
-    hash ^= static_cast<uint64_t>(p.second.get_id());
+    hash ^= static_cast<uint64_t>(p.second->get_id());
     hash *= 1099511628211ull;
     return hash;
   }
@@ -80,11 +81,11 @@ struct hash<std::pair<Value, Value>> {
 // Finally, since unordered_set checks for equality we need to check for this as
 // well
 template <>
-struct equal_to<std::pair<Value, Value>> {
-  bool operator()(const std::pair<Value, Value> &lhs,
-                  const std::pair<Value, Value> &rhs) const {
-    return (lhs.first.get_id() == rhs.first.get_id()) &&
-           (lhs.second.get_id() == rhs.second.get_id());
+struct equal_to<pair<shared_ptr<Value>, shared_ptr<Value>>> {
+  bool operator()(const pair<shared_ptr<Value>, shared_ptr<Value>> &lhs,
+                  const pair<shared_ptr<Value>, shared_ptr<Value>> &rhs) const {
+    return (lhs.first->get_id() == rhs.first->get_id()) &&
+           (lhs.second->get_id() == rhs.second->get_id());
   }
 };
 }  // namespace std

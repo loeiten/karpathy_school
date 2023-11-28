@@ -7,8 +7,10 @@
 
 class Value;
 
-void Trace(const Value &value, std::unordered_set<Value> *nodes,
-           std::unordered_set<std::pair<Value, Value>> *edges);
+void Trace(
+    const Value &value, std::unordered_set<std::shared_ptr<Value>> *nodes,
+    std::unordered_set<
+        std::pair<std::shared_ptr<Value>, std::shared_ptr<Value>>> *edges);
 
 std::string ReturnDot(const Value &root);
 
