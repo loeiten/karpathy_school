@@ -1,9 +1,10 @@
 #ifndef MICROGRAD_CPP_INCLUDE_PRINT_GRAPH_HPP_
 #define MICROGRAD_CPP_INCLUDE_PRINT_GRAPH_HPP_
 
-#include <string>
-#include <unordered_set>
-#include <utility>
+#include <memory>         // for shared_ptr
+#include <string>         // for string
+#include <unordered_set>  // for unordered_set
+#include <utility>        // for pair
 
 class Value;
 

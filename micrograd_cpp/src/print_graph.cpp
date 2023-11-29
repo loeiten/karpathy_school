@@ -1,6 +1,6 @@
-#include <memory>         // for shared_ptr
-#include <sstream>        // for operator<<, basic_ostream, char_traits
-#include <string>         // for string, operator!=
+#include <memory>         // for shared_ptr, make_shared
+#include <sstream>        // for operator<<, basic_ostream, stringstream
+#include <string>         // for char_traits, string, operator!=
 #include <unordered_set>  // for unordered_set, operator!=, __hash_co...
 #include <utility>        // for pair, make_pair
 
@@ -36,7 +36,7 @@ std::string ReturnDot(const Value &root) {
   for (const auto &node : nodes) {
     // Create the node
     dot_stream << std::string(indent, ' ') << "\"" << node->get_id() << "\""
-               << " [label=\"{" << node << "}\" shape=record]\n";
+               << " [label=\"{" << *node << "}\" shape=record]\n";
     if (node->get_op() != "") {
       // Connect op to the children
       dot_stream << std::string(indent, ' ') << "\"" << node->get_id()

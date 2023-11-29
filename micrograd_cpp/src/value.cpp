@@ -7,11 +7,13 @@
 int Value::instance_count = 0;
 
 std::ostream &operator<<(std::ostream &os, const Value &value) {
-  os << std::fixed << std::setprecision(2) << value.data_;
+  os << std::fixed << std::setprecision(2) << value.label_ << " | data "
+     << value.data_ << " | grad " << value.grad_;
   return os;
 }
 
-Value::Value(const float &data) : data_(data) {
+Value::Value(const float &data, const std::string &label)
+    : data_(data), grad_(0), label_(label) {
   ++instance_count;
   id_ = instance_count;
 }
@@ -19,7 +21,7 @@ Value::Value(const float &data) : data_(data) {
 Value::Value(const float &data,
              std::unordered_set<std::shared_ptr<Value>> &&children,
              const std::string &op)
-    : data_(data), prev_(children), op_(op) {
+    : data_(data), grad_(0), prev_(children), op_(op) {
   ++instance_count;
   id_ = instance_count;
 }
@@ -51,3 +53,5 @@ const std::unordered_set<std::shared_ptr<Value>> &Value::get_children() const {
 const std::string &Value::get_op() const { return op_; }
 
 int Value::get_id() const { return id_; }
+
+void Value::set_label(const std::string &label) { label_ = label; }

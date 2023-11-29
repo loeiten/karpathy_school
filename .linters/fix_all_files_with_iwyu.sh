@@ -16,12 +16,12 @@ PARENT_DIR="$(realpath "$(dirname "$SCRIPT_DIR")")"
 # read will read lines of input
 # -r disables backslash escaping
 # found_file is the where the result of the read is stored
-find "$PARENT_DIR" -type f \( -name "*.c" -o -name "*.h" \) | while read -r found_file; do
+find "$PARENT_DIR" -type f \( -name "*.cpp" -o -name "*.hpp" \) | while read -r found_file; do
     # Run my_command with the file as an argument
     include-what-you-use \
     -Xiwyu --mapping_file=iwyu.imp \
     -Xiwyu --update_comments \
-    -I../home_exam/assignment_files "$found_file" \
+    "$found_file" \
     > /tmp/iwyu.out 2>&1
     fix_includes.py \
     --comments \
