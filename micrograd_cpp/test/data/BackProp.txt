@@ -1,0 +1,16 @@
+digraph {
+    graph [rankdir=LR]
+    "3" [label="{c | data 10.00 | grad 0.00}" shape=record]
+    "1" [label="{a | data 2.00 | grad 0.00}" shape=record]
+    "2" [label="{b | data -3.00 | grad 0.00}" shape=record]
+    "4" [label="{e | data -6.00 | grad 0.00}" shape=record]
+    "4*" [label="*"]
+    "4*" -> "4"
+    "5" [label="{d | data 4.00 | grad 0.00}" shape=record]
+    "5+" [label="+"]
+    "5+" -> "5"
+    "3" -> "5+"
+    "1" -> "4*"
+    "2" -> "4*"
+    "4" -> "5+"
+}

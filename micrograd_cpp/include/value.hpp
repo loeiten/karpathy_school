@@ -9,6 +9,7 @@
 #include <string>         // for string
 #include <unordered_set>  // for unordered_set
 #include <utility>        // for pair
+#include <vector>         // for vector
 
 // Forward declarations
 class Value;
@@ -36,16 +37,17 @@ class Value {
   friend std::ostream &operator<<(std::ostream &os, const Value &value);
 
   // Constructors
-  Value(const float &data, const std::string &label);
+  Value(const double &data, const std::string &label);
   // data and op are copied to the new object even though they are passed as a
   // reference. We capture children as rvalue in order to save one copy call,
   // see implementation for details.
-  Value(const float &data,
+  Value(const double &data,
         std::unordered_set<std::shared_ptr<Value>> &&children,
         const std::string &op);
 
-  Value operator+(const Value &rhs) const;
-  Value operator*(const Value &rhs) const;
+  // Notice that both the grad of this and rhs is being altered by this
+  Value operator+(Value &rhs);
+  Value operator*(Value &rhs);
 
   // Accessors and mutators (get and set functions) may be named like variables.
   // These returns a copy as we do not want anything other than the class to
@@ -54,15 +56,25 @@ class Value {
   const std::string &get_op() const;
   int get_id() const;
   void set_label(const std::string &label);
+  void set_grad(const double &grad);
+  Value tanh();
+
+  void Backward();
+
+  std::function<void()> Backward_;
 
  private:
-  float data_;
-  float grad_;
+  double data_;
+  double grad_;
   std::unordered_set<std::shared_ptr<Value>> prev_;
+  std::unordered_set<const Value *> visited;
+  std::vector<const Value *> topo;
   int id_;
   std::string label_ = "";
   std::string op_ = "";
   static int instance_count;
+
+  void BuildTopo(const Value &value);
 };
 
 // Define these functions here, so that other files can use it
