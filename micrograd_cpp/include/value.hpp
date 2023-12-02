@@ -61,7 +61,7 @@ class Value {
 
  private:
   double data_;
-  double grad_;
+  double grad_ = 0;
   // We do care about the order of the children for printing purposes
   std::set<Value *> prev_;
   std::unordered_set<const Value *> visited;

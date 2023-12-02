@@ -40,8 +40,8 @@ Value Value::operator+(Value &rhs) {  // NOLINT
   //              During runtime parameters of the function will be filled
   // We copy out as this goes out of scope
   out.Backward_ = [this, &out, &rhs]() {
-    this->grad_ = out.grad_;
-    rhs.grad_ = out.grad_;
+    this->grad_ += out.grad_;
+    rhs.grad_ += out.grad_;
   };
   return out;
 }
@@ -52,8 +52,8 @@ Value Value::operator*(Value &rhs) {  // NOLINT
   children.insert(&rhs);
   Value out(this->data_ * rhs.data_, std::move(children), "*");
   out.Backward_ = [this, &out, &rhs]() {
-    this->grad_ = rhs.data_ * out.grad_;
-    rhs.grad_ = this->data_ * out.grad_;
+    this->grad_ += rhs.data_ * out.grad_;
+    rhs.grad_ += this->data_ * out.grad_;
   };
   return out;
 }
@@ -76,7 +76,7 @@ Value Value::tanh() {
   Value out(t, std::move(children), "tanh");
   // We copy t as this goes out of scope
   out.Backward_ = [this, &out, t]() {
-    this->grad_ = (1 - pow(t, 2)) * out.grad_;
+    this->grad_ += (1 - pow(t, 2)) * out.grad_;
   };
   return out;
 }

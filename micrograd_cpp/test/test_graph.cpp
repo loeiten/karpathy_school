@@ -45,6 +45,21 @@ void BackProp() {
   std::cout << ReturnDot(o) << std::endl;
 }
 
+void ReuseVariable() {
+  auto a = Value(-2.0, "a");
+  auto b = Value(3.0, "b");
+  auto d = a * b;
+  d.set_label("d");
+  auto e = a + b;
+  e.set_label("e");
+  auto f = d * e;
+  f.set_label("f");
+
+  f.Backward();
+
+  std::cout << ReturnDot(f) << std::endl;
+}
+
 int main(int argc, char** argv) {
   std::string filename = std::filesystem::path(argv[0]).filename();
   if (argc < 2) {
@@ -56,6 +71,8 @@ int main(int argc, char** argv) {
     SimpleGraph();
   } else if (std::string(argv[1]).compare("BackProp") == 0) {
     BackProp();
+  } else if (std::string(argv[1]).compare("ReuseVariable") == 0) {
+    ReuseVariable();
   } else {
     std::cerr << "No test named " << argv[1] << " in " << filename << std::endl;
     return EXIT_FAILURE;
