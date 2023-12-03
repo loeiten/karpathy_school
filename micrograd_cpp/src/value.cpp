@@ -3,6 +3,7 @@
 #include <cmath>
 #include <iomanip>  // for operator<<, setprecision
 #include <iostream>
+#include <sstream>
 #include <unordered_set>  // for unordered_set
 
 int Value::instance_count = 0;
@@ -11,6 +12,17 @@ std::ostream &operator<<(std::ostream &os, const Value &value) {
   os << std::fixed << std::setprecision(2) << value.label_ << " | data "
      << value.data_ << " | grad " << value.grad_;
   return os;
+}
+
+Value pow(const Value &a, const float &n) {
+  std::stringstream ss;
+  ss << "^" << a.data_;
+  auto out = Value(std::pow(a.data_, n), ss.str());
+
+  out.Backward_ = [n, &a, &out]() {
+    out.grad_ += n * a.data_ * std::pow(a.data_, n - 1) * out.grad_;
+  };
+  return out;
 }
 
 Value::Value(const double &data, const std::string &label)
@@ -58,6 +70,17 @@ Value Value::operator*(Value &rhs) {  // NOLINT
   return out;
 }
 
+Value Value::operator/(Value &rhs) {  // NOLINT
+  auto tmp = pow(rhs, -1.0f);
+  auto out = (*this) * tmp;
+  return out;
+}
+
+Value Value::operator-() {
+  auto out = (*this) * (-1.0f);
+  return out;
+}
+
 const std::set<Value *> &Value::get_children() const { return prev_; }
 
 const std::string &Value::get_op() const { return op_; }
@@ -70,7 +93,7 @@ void Value::set_grad(const double &grad) { grad_ = grad; }
 
 Value Value::tanh() {
   const double &x = data_;
-  const double &t = (exp(2 * x) - 1) / (exp(2 * x) + 1);
+  const double &t = (::exp(2 * x) - 1) / (::exp(2 * x) + 1);
   std::set<Value *> children;
   children.insert(this);
   Value out(t, std::move(children), "tanh");
@@ -78,6 +101,14 @@ Value Value::tanh() {
   out.Backward_ = [this, &out, t]() {
     this->grad_ += (1 - pow(t, 2)) * out.grad_;
   };
+  return out;
+}
+
+Value Value::exp() {
+  std::set<Value *> children;
+  children.insert(this);
+  Value out(::exp(data_), std::move(children), "exp");
+  out.Backward_ = [this, &out]() { this->grad_ += out.data_ * out.grad_; };
   return out;
 }
 
@@ -102,4 +133,50 @@ void Value::TopologicalSort(const Value &value) {
     }
     topology.push_back(&value);
   }
+}
+
+Value operator+(const float &lhs, Value &rhs) {
+  auto tmp = Value(lhs, "");
+  auto out = tmp + rhs;
+  return out;
+}
+
+Value operator+(Value &lhs, const float &rhs) {
+  auto tmp = Value(rhs, "");
+  auto out = lhs + tmp;
+  return out;
+}
+
+Value operator-(const float &lhs, Value &rhs) {
+  auto tmp = (-rhs);
+  auto out = lhs + tmp;
+  return out;
+}
+
+Value operator-(Value &lhs, const float &rhs) {
+  auto out = lhs + (-rhs);
+  return out;
+}
+
+Value operator*(const float &lhs, Value &rhs) {
+  auto tmp = Value(lhs, "");
+  auto out = tmp * rhs;
+  return out;
+}
+
+Value operator*(Value &lhs, const float &rhs) {
+  auto tmp = Value(rhs, "");
+  auto out = lhs * tmp;
+  return out;
+}
+
+Value operator/(const float &lhs, Value &rhs) {
+  auto tmp = pow(rhs, -1.0f);
+  auto out = lhs * tmp;
+  return out;
+}
+
+Value operator/(Value &lhs, const float &rhs) {
+  auto out = lhs * std::pow(rhs, -1.0f);
+  return out;
 }

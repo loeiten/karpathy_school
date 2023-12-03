@@ -34,6 +34,7 @@ class Value {
   // Overloads for the streaming output operators (<<) cannot be class members,
   // because the ostream& must be on the left in use and declaration.
   friend std::ostream &operator<<(std::ostream &os, const Value &value);
+  friend Value pow(const Value &a, const float &n);
 
   // Constructors
   Value(const double &data, const std::string &label);
@@ -46,6 +47,8 @@ class Value {
   // Notice that both the grad of this and rhs is being altered by this
   Value operator+(Value &rhs);  // NOLINT
   Value operator*(Value &rhs);  // NOLINT
+  Value operator/(Value &rhs);  // NOLINT
+  Value operator-();
 
   // Accessors and mutators (get and set functions) may be named like variables.
   // These returns a copy as we do not want anything other than the class to
@@ -56,6 +59,7 @@ class Value {
   void set_label(const std::string &label);
   void set_grad(const double &grad);
   Value tanh();
+  Value exp();
 
   void Backward();
 
@@ -74,6 +78,15 @@ class Value {
   std::function<void()> Backward_ = nullptr;
   void TopologicalSort(const Value &value);
 };
+
+Value operator+(const float &lhs, Value &rhs);
+Value operator+(Value &lhs, const float &rhs);
+Value operator-(const float &lhs, Value &rhs);
+Value operator-(Value &lhs, const float &rhs);
+Value operator*(const float &lhs, Value &rhs);
+Value operator*(Value &lhs, const float &rhs);
+Value operator/(const float &lhs, Value &rhs);
+Value operator/(Value &lhs, const float &rhs);
 
 // Define these functions here, so that other files can use it
 // We need to use inline so that only one copy is used
