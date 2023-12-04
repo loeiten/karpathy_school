@@ -4,15 +4,13 @@
 #include "../include/value.hpp"        // for Value
 
 int main() {
-  auto a = Value(2.0, "a");
-  auto b = Value(-3.0, "b");
-  auto c = Value(10.0, "c");
-  auto e = a * b;
+  auto n = Value(1.0f, "n");
+  auto e = 2.0f * n;
   e.set_label("e");
-  auto d = e + c;
-  d.set_label("d");
 
-  std::cout << ReturnDot(d) << std::endl;
+  e.Backward();
+
+  std::cout << ReturnDot(e) << std::endl;
 
   return 0;
 }

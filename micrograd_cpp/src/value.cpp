@@ -1,5 +1,7 @@
 #include "../include/value.hpp"
 
+#include <memory.h>
+
 #include <cmath>
 #include <iomanip>  // for operator<<, setprecision
 #include <iostream>
@@ -50,11 +52,15 @@ Value Value::operator+(Value &rhs) {  // NOLINT
 
   // In a lambda: The compiler will create a "template" of the function
   //              During runtime parameters of the function will be filled
-  // We copy out as this goes out of scope
   out.Backward_ = [this, &out, &rhs]() {
     this->grad_ += out.grad_;
     rhs.grad_ += out.grad_;
   };
+  // NOTE: It looks like out goes out of scope and is copied
+  //       However, this is not the case due to named return value optimization
+  //       See
+  //       https://artificial-mind.net/blog/2021/10/23/return-moves#:~:text=Returning%20a%20Local%20Variable&text=No%20temporary%20object%20is%20created,return%20value%20optimization%E2%80%9D%20or%20NRVO.
+  //       for details
   return out;
 }
 
@@ -125,10 +131,15 @@ void Value::Backward() {
 }
 
 void Value::TopologicalSort(const Value &value) {
-  (void)value;
+  // FIXME:
+  std::cout << "Start toposort" << std::endl;
   if (visited.find(&value) == visited.end()) {
     visited.insert(&value);
+    // FIXME:
+    std::cout << "Not visited" << std::endl;
     for (const auto &child : value.prev_) {
+      std::cout << "  data: " << child->data_ << std::endl;
+      std::cout << "Label: " << child->label_ << std::endl;
       TopologicalSort(*child);
     }
     topology.push_back(&value);
