@@ -79,9 +79,16 @@ void TanhSpelledOut() {
   auto n = x1w1x2w2 + b;
   n.set_label("n");
   // Output
-  auto e = (2.0f * n).exp();
-  auto tmp = (e + 1.0f);
-  auto o = (e - 1.0f) / tmp;
+  /* FIXME:
+  auto e = (2.0f*n).exp();
+  auto o = (e-1.0f)/(e+1.0f);
+  o.set_label("o");
+  */
+  auto tmp1 = (2.0f * n);
+  auto e = tmp1.exp();
+  auto tmp2 = (e + 1.0f);
+  auto tmp3 = (e - 1.0f);
+  auto o = tmp3 / tmp2;
   o.set_label("o");
 
   o.Backward();

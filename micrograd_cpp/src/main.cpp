@@ -5,7 +5,8 @@
 
 int main() {
   auto n = Value(1.0f, "n");
-  auto e = 2.0f * n;
+  auto tmp = (2.0f * n);
+  auto e = tmp.exp();
   e.set_label("e");
 
   e.Backward();

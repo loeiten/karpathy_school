@@ -5,7 +5,9 @@
 #include <cmath>
 #include <iomanip>  // for operator<<, setprecision
 #include <iostream>
-#include <sstream>
+#include <memory>
+#include <string>
+#include <type_traits>
 #include <unordered_set>  // for unordered_set
 
 int Value::instance_count = 0;
@@ -16,14 +18,87 @@ std::ostream &operator<<(std::ostream &os, const Value &value) {
   return os;
 }
 
-Value pow(const Value &a, const float &n) {
-  std::stringstream ss;
-  ss << "^" << a.data_;
-  auto out = Value(std::pow(a.data_, n), ss.str());
+Value pow(Value &a, const float &n) {
+  std::set<Value *> children;
+  children.insert(&a);
+  // FIXME: Verify this
+  // We are moving the children, which is a set of pointer
+  // Hence, we are not moving the members themselves
+  auto out = Value(std::pow(a.data_, n), std::move(children), "^");
+
+  // FIXME:
+  std::cout << "Inside pow: out.label_=" << out.label_ << std::endl;
 
   out.Backward_ = [n, &a, &out]() {
     out.grad_ += n * a.data_ * std::pow(a.data_, n - 1) * out.grad_;
   };
+  return out;
+}
+
+Value operator+(const float &lhs, Value &rhs) {
+  auto tmp = std::make_unique<Value>(lhs, "literal " + std::to_string(lhs));
+  auto out = (*tmp) + rhs;
+  out.dynamic_values.push_back(std::move(tmp));
+  return out;
+}
+
+Value operator+(Value &lhs, const float &rhs) {
+  auto tmp = std::make_unique<Value>(rhs, "literal " + std::to_string(rhs));
+  auto out = lhs + (*tmp);
+  out.dynamic_values.push_back(std::move(tmp));
+  return out;
+}
+
+Value operator-(const float &lhs, Value &rhs) {
+  // operator-() will call
+  // operator*(Value &lhs, const float &rhs)
+  // This will create a tmp for -1.0f multiply it with (*this)
+  // (*this) in this context is the reference of rhs
+  // the out resulting from (*this) * (-1.0f) should also be
+  // outputted as named return value optimization (copy elision)
+  // However tmp does go out of scope
+  // Hence we copy the object to a smart pointer
+  auto tmp = (-rhs);
+  // FIXME: Why does move work here? I didn't specify a move constructor
+  auto tmpPtr = std::make_unique<Value>(std::move(tmp));
+  auto out = lhs + tmp;
+  out.dynamic_values.push_back(std::move(tmpPtr));
+  return out;
+}
+
+Value operator-(Value &lhs, const float &rhs) {
+  auto tmp = std::make_unique<Value>(-rhs, "literal -" + std::to_string(rhs));
+  auto out = lhs + (*tmp);
+  out.dynamic_values.push_back(std::move(tmp));
+  return out;
+}
+
+Value operator*(const float &lhs, Value &rhs) {
+  auto tmp = std::make_unique<Value>(lhs, "literal " + std::to_string(lhs));
+  auto out = (*tmp) * rhs;
+  out.dynamic_values.push_back(std::move(tmp));
+  return out;
+}
+
+Value operator*(Value &lhs, const float &rhs) {
+  auto tmp = std::make_unique<Value>(rhs, "literal " + std::to_string(rhs));
+  auto out = lhs * (*tmp);
+  return out;
+}
+
+Value operator/(const float &lhs, Value &rhs) {
+  auto tmp = pow(rhs, -1.0f);
+  auto tmpPtr = std::make_unique<Value>(std::move(tmp));
+  auto out = lhs * tmp;
+  out.dynamic_values.push_back(std::move(tmpPtr));
+  return out;
+}
+
+Value operator/(Value &lhs, const float &rhs) {
+  // Here there will be a multiplication of a literal and the
+  // operator*(Value &lhs, const float &rhs)
+  // will create the temporary
+  auto out = lhs * std::pow(rhs, -1.0f);
   return out;
 }
 
@@ -38,6 +113,19 @@ Value::Value(const double &data, std::set<Value *> &&children,
     : data_(data), grad_(0), prev_(children), op_(op) {
   ++instance_count;
   id_ = instance_count;
+  label_ = "tmp" + std::to_string(id_);
+}
+
+// FIXME: I only have a copy constructor due to
+// auto tmpPtr = std::make_unique<Value>(tmp);
+// How do I now implement the rule of 3?
+Value::Value(const Value &value)
+    : data_(value.data_), grad_(value.grad_), prev_(value.prev_) {
+  // FIXME:
+  std::cout << "I'm inside the copy ctor" << std::endl;
+  ++instance_count;
+  id_ = instance_count;
+  label_ = "tmp" + std::to_string(id_);
 }
 
 Value Value::operator+(Value &rhs) {  // NOLINT
@@ -77,8 +165,29 @@ Value Value::operator*(Value &rhs) {  // NOLINT
 }
 
 Value Value::operator/(Value &rhs) {  // NOLINT
+  // We create the temporary object...
   auto tmp = pow(rhs, -1.0f);
+  // ...we copy it to a dynamically allocated memory...
+  // FIXME:
+  std::cout << "Before the make_unique<Value>(tmp)" << std::endl;
+  std::cout << "tmp.label_ = " << tmp.label_ << std::endl;
+  std::cout << "children of tmp " << std::endl;
+  for (const auto &child : tmp.prev_) {
+    std::cout << "  label_=" << child->label_ << std::endl;
+  }
+  auto tmpPtr = std::make_unique<Value>(tmp);
+  std::cout << "After the make_unique<Value>(tmp)" << std::endl;
+  std::cout << "tmp.label_ = " << tmp.label_ << std::endl;
+  std::cout << "tmpPtr->label_ = " << tmpPtr->label_ << std::endl;
+  std::cout << "children of tmpPtr " << std::endl;
+  for (const auto &child : tmpPtr->prev_) {
+    std::cout << "  label_=" << child->label_ << std::endl;
+  }
+  std::cout << std::endl;
+  // FIXME: You are here: Maybe this is where the funk happens?
   auto out = (*this) * tmp;
+  // ...then we change ownership of that memory to out
+  out.dynamic_values.push_back(std::move(tmpPtr));
   return out;
 }
 
@@ -132,62 +241,16 @@ void Value::Backward() {
 
 void Value::TopologicalSort(const Value &value) {
   // FIXME:
-  std::cout << "Start toposort" << std::endl;
+  std::cout << "Enter toposort from " << value.label_ << std::endl;
   if (visited.find(&value) == visited.end()) {
     visited.insert(&value);
     // FIXME:
-    std::cout << "Not visited" << std::endl;
+    std::cout << "  " << value.label_ << " not visited" << std::endl;
     for (const auto &child : value.prev_) {
-      std::cout << "  data: " << child->data_ << std::endl;
-      std::cout << "Label: " << child->label_ << std::endl;
+      std::cout << "    child label: " << child->label_ << std::endl;
+      std::cout << "    child data: " << child->data_ << std::endl;
       TopologicalSort(*child);
     }
     topology.push_back(&value);
   }
-}
-
-Value operator+(const float &lhs, Value &rhs) {
-  auto tmp = Value(lhs, "");
-  auto out = tmp + rhs;
-  return out;
-}
-
-Value operator+(Value &lhs, const float &rhs) {
-  auto tmp = Value(rhs, "");
-  auto out = lhs + tmp;
-  return out;
-}
-
-Value operator-(const float &lhs, Value &rhs) {
-  auto tmp = (-rhs);
-  auto out = lhs + tmp;
-  return out;
-}
-
-Value operator-(Value &lhs, const float &rhs) {
-  auto out = lhs + (-rhs);
-  return out;
-}
-
-Value operator*(const float &lhs, Value &rhs) {
-  auto tmp = Value(lhs, "");
-  auto out = tmp * rhs;
-  return out;
-}
-
-Value operator*(Value &lhs, const float &rhs) {
-  auto tmp = Value(rhs, "");
-  auto out = lhs * tmp;
-  return out;
-}
-
-Value operator/(const float &lhs, Value &rhs) {
-  auto tmp = pow(rhs, -1.0f);
-  auto out = lhs * tmp;
-  return out;
-}
-
-Value operator/(Value &lhs, const float &rhs) {
-  auto out = lhs * std::pow(rhs, -1.0f);
-  return out;
 }

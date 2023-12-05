@@ -1,9 +1,10 @@
 #ifndef MICROGRAD_CPP_INCLUDE_VALUE_HPP_
 #define MICROGRAD_CPP_INCLUDE_VALUE_HPP_
 
-#include <cstddef>        // for size_t
-#include <cstdint>        // for uint64_t
-#include <functional>     // for equal_to, hash, function
+#include <cstddef>     // for size_t
+#include <cstdint>     // for uint64_t
+#include <functional>  // for equal_to, hash, function
+#include <memory>
 #include <ostream>        // for ostream
 #include <set>            // for set
 #include <string>         // for string
@@ -34,7 +35,15 @@ class Value {
   // Overloads for the streaming output operators (<<) cannot be class members,
   // because the ostream& must be on the left in use and declaration.
   friend std::ostream &operator<<(std::ostream &os, const Value &value);
-  friend Value pow(const Value &a, const float &n);
+  friend Value pow(Value &a, const float &n);
+  friend Value operator+(const float &lhs, Value &rhs);
+  friend Value operator+(Value &lhs, const float &rhs);
+  friend Value operator-(const float &lhs, Value &rhs);
+  friend Value operator-(Value &lhs, const float &rhs);
+  friend Value operator*(const float &lhs, Value &rhs);
+  friend Value operator*(Value &lhs, const float &rhs);
+  friend Value operator/(const float &lhs, Value &rhs);
+  friend Value operator/(Value &lhs, const float &rhs);
 
   // Constructors
   Value(const double &data, const std::string &label);
@@ -43,6 +52,12 @@ class Value {
   // see implementation for details.
   Value(const double &data, std::set<Value *> &&children,
         const std::string &op);
+  // Copy constructor
+  Value(const Value &value);
+
+  // FIXME: Verify this
+  // We have dynamically allocated Values stored in dynamic_values
+  // these values are automatically freed when vector goes out of scope
 
   // Notice that both the grad of this and rhs is being altered by this
   Value operator+(Value &rhs);  // NOLINT
@@ -70,6 +85,7 @@ class Value {
   std::set<Value *> prev_;
   std::unordered_set<const Value *> visited;
   std::vector<const Value *> topology;
+  std::vector<std::unique_ptr<Value>> dynamic_values;
   int id_;
   std::string label_ = "";
   std::string op_ = "";
@@ -78,15 +94,6 @@ class Value {
   std::function<void()> Backward_ = nullptr;
   void TopologicalSort(const Value &value);
 };
-
-Value operator+(const float &lhs, Value &rhs);
-Value operator+(Value &lhs, const float &rhs);
-Value operator-(const float &lhs, Value &rhs);
-Value operator-(Value &lhs, const float &rhs);
-Value operator*(const float &lhs, Value &rhs);
-Value operator*(Value &lhs, const float &rhs);
-Value operator/(const float &lhs, Value &rhs);
-Value operator/(Value &lhs, const float &rhs);
 
 // Define these functions here, so that other files can use it
 // We need to use inline so that only one copy is used
