@@ -53,7 +53,7 @@ class Value {
   Value(const double &data, std::set<Value *> &&children,
         const std::string &op);
   // Copy constructor
-  Value(const Value &value);
+  // Value(const Value &value);
 
   // FIXME: Verify this
   // We have dynamically allocated Values stored in dynamic_values

@@ -6,6 +6,7 @@
 #include <iomanip>  // for operator<<, setprecision
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <type_traits>
 #include <unordered_set>  // for unordered_set
@@ -21,29 +22,48 @@ std::ostream &operator<<(std::ostream &os, const Value &value) {
 Value pow(Value &a, const float &n) {
   std::set<Value *> children;
   children.insert(&a);
+
+  // FIXME:
+  std::cout << "Inside pow: a.label_=" << a.label_ << std::endl;
+
   // FIXME: Verify this
   // We are moving the children, which is a set of pointer
   // Hence, we are not moving the members themselves
-  auto out = Value(std::pow(a.data_, n), std::move(children), "^");
+  std::stringstream ss;
+  ss << "^(" <<std::fixed << std::setprecision(2) << n << ")";
+  // FIXME: You are here: What happens if we dynamically allocate and move to a which will be in scope?
+  auto out = Value(std::pow(a.data_, n), std::move(children), ss.str());
 
   // FIXME:
   std::cout << "Inside pow: out.label_=" << out.label_ << std::endl;
 
   out.Backward_ = [n, &a, &out]() {
+    // FIXME:
+    // You are here: Problem is to capture out as this is out of scope
+    std::cout << "  Backward_ of pow:" << std::endl;
+    std::cout << "  n=" << n << std::endl;
+    std::cout << "  a.label_=" << a.label_ << std::endl;
+    std::cout << "  a.data_=" << a.data_ << std::endl;
+    std::cout << "  out.label_=" << out.label_ << std::endl;
     out.grad_ += n * a.data_ * std::pow(a.data_, n - 1) * out.grad_;
+    std::cout << "  out.grad_=" << out.grad_ << std::endl;
   };
   return out;
 }
 
 Value operator+(const float &lhs, Value &rhs) {
-  auto tmp = std::make_unique<Value>(lhs, "literal " + std::to_string(lhs));
+  std::stringstream ss;
+  ss << "literal " << std::fixed << std::setprecision(2) << lhs;
+  auto tmp = std::make_unique<Value>(lhs, ss.str());
   auto out = (*tmp) + rhs;
   out.dynamic_values.push_back(std::move(tmp));
   return out;
 }
 
 Value operator+(Value &lhs, const float &rhs) {
-  auto tmp = std::make_unique<Value>(rhs, "literal " + std::to_string(rhs));
+  std::stringstream ss;
+ss << "literal " << std::fixed << std::setprecision(2) << rhs;
+  auto tmp = std::make_unique<Value>(rhs, ss.str());
   auto out = lhs + (*tmp);
   out.dynamic_values.push_back(std::move(tmp));
   return out;
@@ -67,21 +87,27 @@ Value operator-(const float &lhs, Value &rhs) {
 }
 
 Value operator-(Value &lhs, const float &rhs) {
-  auto tmp = std::make_unique<Value>(-rhs, "literal -" + std::to_string(rhs));
+  std::stringstream ss;
+  ss << "literal -" << std::fixed << std::setprecision(2) << rhs;
+  auto tmp = std::make_unique<Value>(-rhs, ss.str());
   auto out = lhs + (*tmp);
   out.dynamic_values.push_back(std::move(tmp));
   return out;
 }
 
 Value operator*(const float &lhs, Value &rhs) {
-  auto tmp = std::make_unique<Value>(lhs, "literal " + std::to_string(lhs));
+  std::stringstream ss;
+  ss << "literal " << std::fixed << std::setprecision(2) << lhs;
+  auto tmp = std::make_unique<Value>(lhs, ss.str());
   auto out = (*tmp) * rhs;
   out.dynamic_values.push_back(std::move(tmp));
   return out;
 }
 
 Value operator*(Value &lhs, const float &rhs) {
-  auto tmp = std::make_unique<Value>(rhs, "literal " + std::to_string(rhs));
+  std::stringstream ss;
+  ss << "literal " << std::fixed << std::setprecision(2) << rhs;
+  auto tmp = std::make_unique<Value>(rhs, ss.str());
   auto out = lhs * (*tmp);
   return out;
 }
@@ -116,17 +142,19 @@ Value::Value(const double &data, std::set<Value *> &&children,
   label_ = "tmp" + std::to_string(id_);
 }
 
+/* FIXME: Not needed
 // FIXME: I only have a copy constructor due to
 // auto tmpPtr = std::make_unique<Value>(tmp);
 // How do I now implement the rule of 3?
 Value::Value(const Value &value)
-    : data_(value.data_), grad_(value.grad_), prev_(value.prev_) {
+    : data_(value.data_), grad_(value.grad_), prev_(value.prev_), op_(value.op_), Backward_(value.Backward_) {
   // FIXME:
   std::cout << "I'm inside the copy ctor" << std::endl;
   ++instance_count;
   id_ = instance_count;
   label_ = "tmp" + std::to_string(id_);
 }
+*/
 
 Value Value::operator+(Value &rhs) {  // NOLINT
   std::set<Value *> children;
@@ -156,11 +184,20 @@ Value Value::operator*(Value &rhs) {  // NOLINT
   std::set<Value *> children;
   children.insert(this);
   children.insert(&rhs);
+  std::cout << "      Inside *" << std::endl;
+  std::cout << "      children " << std::endl;
+  for (const auto &child : children) {
+    std::cout << "        children label_=" << child->label_ << std::endl;
+  }
   Value out(this->data_ * rhs.data_, std::move(children), "*");
   out.Backward_ = [this, &out, &rhs]() {
     this->grad_ += rhs.data_ * out.grad_;
     rhs.grad_ += this->data_ * out.grad_;
   };
+  std::cout << "      Now things should reside in out:" << std::endl;
+  for (const auto &child : out.prev_) {
+    std::cout << "        out.prev_.label_=" << child->label_ << std::endl;
+  }
   return out;
 }
 
@@ -175,7 +212,7 @@ Value Value::operator/(Value &rhs) {  // NOLINT
   for (const auto &child : tmp.prev_) {
     std::cout << "  label_=" << child->label_ << std::endl;
   }
-  auto tmpPtr = std::make_unique<Value>(tmp);
+  auto tmpPtr = std::make_unique<Value>(std::move(tmp));
   std::cout << "After the make_unique<Value>(tmp)" << std::endl;
   std::cout << "tmp.label_ = " << tmp.label_ << std::endl;
   std::cout << "tmpPtr->label_ = " << tmpPtr->label_ << std::endl;
@@ -183,11 +220,20 @@ Value Value::operator/(Value &rhs) {  // NOLINT
   for (const auto &child : tmpPtr->prev_) {
     std::cout << "  label_=" << child->label_ << std::endl;
   }
-  std::cout << std::endl;
   // FIXME: You are here: Maybe this is where the funk happens?
-  auto out = (*this) * tmp;
+  std::cout << "Before (*this) * tmp" << std::endl;
+  auto out = (*this) * (*tmpPtr);
   // ...then we change ownership of that memory to out
+  // FIXME:
+  std::cout << "After (*this) * tmp" << std::endl;
+  std::cout << "tmp.label_ = " << tmp.label_ << std::endl;
+  std::cout << "tmpPtr->label_ = " << tmpPtr->label_ << std::endl;
+  std::cout << "children of tmpPtr " << std::endl;
+  for (const auto &child : tmpPtr->prev_) {
+    std::cout << "  label_=" << child->label_ << std::endl;
+  }
   out.dynamic_values.push_back(std::move(tmpPtr));
+  std::cout << std::endl;
   return out;
 }
 
@@ -232,9 +278,14 @@ void Value::Backward() {
   TopologicalSort(*this);
   this->grad_ = 1.0;
 
+  // FIXME:
+  std::cout << "Backprop:" << std::endl;
   for (auto it = topology.rbegin(); it != topology.rend(); ++it) {
     if ((*it)->Backward_ != nullptr) {
+      std::cout << "Label: " << (*it)->label_ << std::endl;
       (*it)->Backward_();
+      // FIXME:
+      std::cout << " grad_:" << (*it)->grad_ << std::endl;
     }
   }
 }
