@@ -20,11 +20,12 @@ std::ostream &operator<<(std::ostream &os, const Value &value) {
 }
 
 Value pow(Value &a, const float &n) {
+  // FIXME: Overall we need out and a to be alive
   std::set<Value *> children;
   children.insert(&a);
 
   // FIXME:
-  std::cout << "Inside pow: a.label_=" << a.label_ << std::endl;
+  std::cout << "Inside pow:" << std::endl;
 
   // FIXME: Verify this
   // We are moving the children, which is a set of pointer
@@ -35,7 +36,9 @@ Value pow(Value &a, const float &n) {
   auto out = Value(std::pow(a.data_, n), std::move(children), ss.str());
 
   // FIXME:
-  std::cout << "Inside pow: out.label_=" << out.label_ << std::endl;
+  std::cout << "   out.label_=" << out.label_ << std::endl;
+  std::cout << "   &out=" << &out << std::endl;
+  std::cout << "   a.label_=" << a.label_ << std::endl;
 
   out.Backward_ = [n, &a, &out]() {
     // FIXME:
@@ -44,9 +47,11 @@ Value pow(Value &a, const float &n) {
     std::cout << "  n=" << n << std::endl;
     std::cout << "  a.label_=" << a.label_ << std::endl;
     std::cout << "  a.data_=" << a.data_ << std::endl;
+    std::cout << "   &out=" << &out << std::endl;
     std::cout << "  out.label_=" << out.label_ << std::endl;
+    std::cout << "  out.grad_ before=" << out.grad_ << std::endl;
     out.grad_ += n * a.data_ * std::pow(a.data_, n - 1) * out.grad_;
-    std::cout << "  out.grad_=" << out.grad_ << std::endl;
+    std::cout << "  out.grad_ after=" << out.grad_ << std::endl;
   };
   return out;
 }
@@ -203,6 +208,19 @@ Value Value::operator*(Value &rhs) {  // NOLINT
 
 Value Value::operator/(Value &rhs) {  // NOLINT
   // We create the temporary object...
+  
+  // FIXME: Overall we need tmp and rhs to be alive
+  // Inside pow:
+  //    out.label_=tmp17
+  //    &out=0x16d3bcb00
+  //    a.label_=tmp14
+  //   Backward_ of pow:
+  //        n=-1
+  //        a.label_=tmp14
+  //        a.data_=6.82843
+  //      &out=0x16d3bcb00
+  //        out.label_=
+  //        out.grad_=0
   auto tmp = pow(rhs, -1.0f);
   // ...we copy it to a dynamically allocated memory...
   // FIXME:
@@ -212,7 +230,73 @@ Value Value::operator/(Value &rhs) {  // NOLINT
   for (const auto &child : tmp.prev_) {
     std::cout << "  label_=" << child->label_ << std::endl;
   }
+
+  // FIXME: Experiment to check if out is still defined
+  // std::cout << "!!!Starting experiment before moving to unique ptr" << std::endl;
+  // tmp.Backward();
+  // std::cout << "!!!End experiment" << std::endl;
+  // exit(-1);
+  // Result:
+  //    Backprop:
+  //    Label: tmp17
+  //       tmp17: &(*it)=0x60c0000003b0
+  //      Backward_ of pow:
+  //      n=-1
+  //      a.label_=tmp14
+  //      a.data_=6.82843
+  //       &out=0x16bd08ee0
+  //      out.label_=tmp17
+  //      out.grad_=0.853553
+  //     grad_:0.853553
+
+  // FIXME: New experiment:
+  tmp.grad_ = 5;
+  // tmp.Backward_();
+  // exit(-1);
+  // Result:
+  // Backward_ of pow:
+  // n=-1
+  // a.label_=tmp14
+  // a.data_=6.82843
+  //  &out=0x16fc58f00
+  // out.label_=tmp17
+  // out.grad_ before=5
+  // out.grad_ after=4.26777
+
   auto tmpPtr = std::make_unique<Value>(std::move(tmp));
+
+  // FIXME: Experiment to check if out is still defined
+  // std::cout << "!!!Starting experiment after moving to unique ptr" << std::endl;
+  // tmpPtr->Backward();
+  // std::cout << "!!!End experiment" << std::endl;
+  // exit(-1);
+  // Result:
+  //   Backward_ of pow:
+  //   n=-1
+  //   a.label_=tmp14
+  //   a.data_=6.82843
+  //    &out=0x16ae24ec0
+  //   out.label_=  // <- !!!!!
+  //   out.grad_=0
+  // Hypothesis: Moving has invalidated the capture
+  
+  // FIXME: New experiment:
+  std::cout << "I'm testing whether move is the problem" << std::endl;
+  tmpPtr->Backward_();
+  exit(-1);
+  // Result:
+  // I'm testing whether move is the problem
+  //   Backward_ of pow:
+  //   n=-1
+  //   a.label_=tmp14
+  //   a.data_=6.82843
+  //    &out=0x16fc70ec0
+  //   out.label_=  // <- !!!!!
+  //   out.grad_ before=5  // <- ???
+  //   out.grad_ after=4.26777
+
+
+  // FIXME:
   std::cout << "After the make_unique<Value>(tmp)" << std::endl;
   std::cout << "tmp.label_ = " << tmp.label_ << std::endl;
   std::cout << "tmpPtr->label_ = " << tmpPtr->label_ << std::endl;
@@ -254,13 +338,13 @@ void Value::set_grad(const double &grad) { grad_ = grad; }
 
 Value Value::tanh() {
   const double &x = data_;
-  const double &t = (::exp(2 * x) - 1) / (::exp(2 * x) + 1);
+  const double &t = (std::exp(2 * x) - 1) / (std::exp(2 * x) + 1);
   std::set<Value *> children;
   children.insert(this);
   Value out(t, std::move(children), "tanh");
   // We copy t as this goes out of scope
   out.Backward_ = [this, &out, t]() {
-    this->grad_ += (1 - pow(t, 2)) * out.grad_;
+    this->grad_ += (1 - std::pow(t, 2)) * out.grad_;
   };
   return out;
 }
@@ -268,7 +352,7 @@ Value Value::tanh() {
 Value Value::exp() {
   std::set<Value *> children;
   children.insert(this);
-  Value out(::exp(data_), std::move(children), "exp");
+  Value out(std::exp(data_), std::move(children), "exp");
   out.Backward_ = [this, &out]() { this->grad_ += out.data_ * out.grad_; };
   return out;
 }
@@ -282,7 +366,11 @@ void Value::Backward() {
   std::cout << "Backprop:" << std::endl;
   for (auto it = topology.rbegin(); it != topology.rend(); ++it) {
     if ((*it)->Backward_ != nullptr) {
+      // FIXME:
       std::cout << "Label: " << (*it)->label_ << std::endl;
+      if((*it)->label_ == "tmp17"){
+        std::cout << "   tmp17: &(*it)=" << &(*it) << std::endl;
+      }
       (*it)->Backward_();
       // FIXME:
       std::cout << " grad_:" << (*it)->grad_ << std::endl;
