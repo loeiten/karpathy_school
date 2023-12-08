@@ -53,11 +53,87 @@ class Value {
   Value(const double &data, std::set<Value *> &&children,
         const std::string &op);
   // Copy constructor
-  // Value(const Value &value);
+  // FIXME: Move impl to .cpp
+  // FIXME: Are the rule of five really needed?
+  // FIXME: Is the problem that I'm using std::function? Would it be better to
+  // use a plain pointer?
+  Value(const Value &value)
+      : data_(value.data_),
+        grad_(value.grad_),
+        prev_(value.prev_),
+        visited(value.visited),
+        topology(value.topology),
+        id_(value.id_),
+        label_(value.label_),
+        op_(value.op_),
+        Backward_(value.Backward_) {
+    // As dynamic_values are unique pointers we need to deep copy them
+    for (const auto &dynamic_value : value.dynamic_values) {
+      dynamic_values.emplace_back(std::make_unique<Value>(*dynamic_value));
+    }
+  }
+
+  Value(const Value &&value)
+      : data_(value.data_),  // Not movable
+        grad_(value.grad_),  // Not movable
+        prev_(std::move(value.prev_)),
+        visited(std::move(value.visited)),
+        topology(std::move(value.topology)),
+        id_(value.id_),  // Not movable
+        label_(std::move(value.label_)),
+        op_(std::move(value.op_)),
+        Backward_(std::move(value.Backward_)) {
+          // NOTE: We need to move each element individually
+          for (const auto& dynamic_value : value.dynamic_values) {
+            // FIXME: Push or emplace?
+            dynamic_values.emplace_back(std::move(dynamic_value));
+          }
+        }
 
   // FIXME: Verify this
   // We have dynamically allocated Values stored in dynamic_values
   // these values are automatically freed when vector goes out of scope
+
+  // FIXME: Rule of 5
+  Value &operator=(const Value &value) {
+    data_ = value.data_;
+    grad_ = value.grad_;
+    prev_ = value.prev_;
+    visited = value.visited;
+    topology = value.topology;
+    id_ = value.id_;
+    label_ = value.label_;
+    op_ = value.op_;
+    Backward_ = value.Backward_;
+
+    // As dynamic_values are unique pointers we need to deep copy them
+    // Clear before making deep copies
+    dynamic_values.clear();
+    for (const auto &dynamic_value : value.dynamic_values) {
+      dynamic_values.emplace_back(std::make_unique<Value>(*dynamic_value));
+    }
+    return *this;
+  }
+
+  Value &operator=(Value &&value) {
+    data_ = value.data_;  // Not movable
+    grad_ = value.grad_;  // Not movable
+    prev_ = std::move(value.prev_);
+    visited = std::move(value.visited);
+    topology = std::move(value.topology);
+
+          // NOTE: We need to move each element individually
+          for (const auto& dynamic_value : value.dynamic_values) {
+            // FIXME: Push or emplace?
+            dynamic_values.emplace_back(std::move(dynamic_value));
+          }
+
+    id_ = value.id_;  // Not movable
+    label_ = std::move(value.label_);
+    op_ = std::move(value.op_);
+    Backward_ = std::move(value.Backward_);
+    return *this;
+  }
 
   // Notice that both the grad of this and rhs is being altered by this
   Value operator+(Value &rhs);  // NOLINT
