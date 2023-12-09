@@ -40,8 +40,11 @@ Value pow(Value &a, const float &n) {
   std::cout << "   &out=" << &out << std::endl;
   std::cout << "   a.label_=" << a.label_ << std::endl;
 
-  out.Backward_ = [n, &a, &out]() {
+  // FIXME:
+  auto outPtr = &out;
+  out.Backward_ = [n, &a, outPtr]() {
     // FIXME:
+    /*
     // You are here: Problem is to capture out as this is out of scope
     std::cout << "  Backward_ of pow:" << std::endl;
     std::cout << "  n=" << n << std::endl;
@@ -52,6 +55,18 @@ Value pow(Value &a, const float &n) {
     std::cout << "  out.grad_ before=" << out.grad_ << std::endl;
     out.grad_ += n * a.data_ * std::pow(a.data_, n - 1) * out.grad_;
     std::cout << "  out.grad_ after=" << out.grad_ << std::endl;
+    */
+
+    // You are here: Problem is to capture out as this is out of scope
+    std::cout << "  Backward_ of pow:" << std::endl;
+    std::cout << "  n=" << n << std::endl;
+    std::cout << "  a.label_=" << a.label_ << std::endl;
+    std::cout << "  a.data_=" << a.data_ << std::endl;
+    std::cout << "   outPtr=" << outPtr << std::endl;
+    std::cout << "  outPtr->label_=" << outPtr->label_ << std::endl;
+    std::cout << "  outPtr->grad_ before=" << outPtr->grad_ << std::endl;
+    outPtr->grad_ += n * a.data_ * std::pow(a.data_, n - 1) * outPtr->grad_;
+    std::cout << "  outPtr->grad_ after=" << outPtr->grad_ << std::endl;
   };
   return out;
 }
@@ -83,6 +98,7 @@ Value operator-(const float &lhs, Value &rhs) {
   // outputted as named return value optimization (copy elision)
   // However tmp does go out of scope
   // Hence we copy the object to a smart pointer
+  // FIXME: named is not guaranteed
   auto tmp = (-rhs);
   // FIXME: Why does move work here? I didn't specify a move constructor
   auto tmpPtr = std::make_unique<Value>(std::move(tmp));
@@ -173,6 +189,13 @@ Value Value::operator+(Value &rhs) {  // NOLINT
 
   // In a lambda: The compiler will create a "template" of the function
   //              During runtime parameters of the function will be filled
+  // FIXME: YOU ARE HERE: Could make a separate Ops class which has a fwd and a bwd
+  //        You can also register the arguments in this. The arguments can be pointers
+  //        One can also create a graph which stores these nodes as pointers
+  //        So when we are calling + we are actually creating a new node (value) in the graph
+  //        The object returned here would then be a reference to what is stored in the graph
+  //        Graph could have a .addValue method which returns a ref to the Value
+  //        It would then be the graph which owns the TopoSort and print
   out.Backward_ = [this, &out, &rhs]() {
     this->grad_ += out.grad_;
     rhs.grad_ += out.grad_;

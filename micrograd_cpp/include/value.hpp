@@ -12,6 +12,12 @@
 #include <utility>        // for pair
 #include <vector>         // for vector
 
+// FIXME:
+// These issues needs to be addressed:
+// 1. One cannot move a function lambda, only the captured values
+// 2. Named return value optimization is optional, so one should not rely on this (https://en.cppreference.com/w/cpp/language/copy_elision)
+// 3. Chaining
+
 // Forward declarations
 class Value;
 
@@ -68,12 +74,12 @@ class Value {
         op_(value.op_),
         Backward_(value.Backward_) {
     // As dynamic_values are unique pointers we need to deep copy them
-    for (const auto &dynamic_value : value.dynamic_values) {
+    for (auto &dynamic_value : value.dynamic_values) {
       dynamic_values.emplace_back(std::make_unique<Value>(*dynamic_value));
     }
   }
 
-  Value(const Value &&value)
+  Value(Value &&value)
       : data_(value.data_),  // Not movable
         grad_(value.grad_),  // Not movable
         prev_(std::move(value.prev_)),
@@ -84,8 +90,10 @@ class Value {
         op_(std::move(value.op_)),
         Backward_(std::move(value.Backward_)) {
           // NOTE: We need to move each element individually
-          for (const auto& dynamic_value : value.dynamic_values) {
+          // NOTE: We cannot have const since we want to move
+          for (auto& dynamic_value : value.dynamic_values) {
             // FIXME: Push or emplace?
+            // Doesn't matter if it's emplace_back or push_back
             dynamic_values.emplace_back(std::move(dynamic_value));
           }
         }
@@ -109,7 +117,7 @@ class Value {
     // As dynamic_values are unique pointers we need to deep copy them
     // Clear before making deep copies
     dynamic_values.clear();
-    for (const auto &dynamic_value : value.dynamic_values) {
+    for (auto &dynamic_value : value.dynamic_values) {
       dynamic_values.emplace_back(std::make_unique<Value>(*dynamic_value));
     }
     return *this;
@@ -123,7 +131,7 @@ class Value {
     topology = std::move(value.topology);
 
           // NOTE: We need to move each element individually
-          for (const auto& dynamic_value : value.dynamic_values) {
+          for (auto& dynamic_value : value.dynamic_values) {
             // FIXME: Push or emplace?
             dynamic_values.emplace_back(std::move(dynamic_value));
           }
@@ -134,6 +142,8 @@ class Value {
     Backward_ = std::move(value.Backward_);
     return *this;
   }
+
+  // FIXME: Write dtor
 
   // Notice that both the grad of this and rhs is being altered by this
   Value operator+(Value &rhs);  // NOLINT
