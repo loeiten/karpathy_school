@@ -1,9 +1,20 @@
-#ifndef MICROGRAD_CPP_INCLUDE_OP_HPP_
-#define MICROGRAD_CPP_INCLUDE_OP_HPP_
+#ifndef MICROGRAD_CPP_INCLUDE_OPS_OP_HPP_
+#define MICROGRAD_CPP_INCLUDE_OPS_OP_HPP_
+
+#include <memory>
+class Value;
+class Graph;
 
 class Op{
-    virtual void Forward() = 0;
+  public:
+    Op() = delete;
+    Op(const Op &) = delete;
+    Op(const Op &&) = delete;
+    virtual std::shared_ptr<Value> Forward() = 0;
     virtual void Backward() = 0;
+  protected:
+    const Graph& graph;
+    Op(std::shared_ptr<Value> val);
 };
 
 /*
@@ -46,4 +57,4 @@ Op - class which has fwd and bwd and all inputs and outputs
 */
 
 
-#endif  // MICROGRAD_CPP_INCLUDE_OP_HPP_
+#endif  // MICROGRAD_CPP_INCLUDE_OPS_OP_HPP_
