@@ -10,7 +10,7 @@ class Add: private Op{
     Add(std::shared_ptr<Value> rhs, std::shared_ptr<Value> lhs);
     Add(const float &rhs, std::shared_ptr<Value> lhs);
     Add(std::shared_ptr<Value> rhs, const float &lhs);
-    std::shared_ptr<Value> Forward() final ;
+    Value& Forward() final ;
     void Backward() final ;
   private:
     std::shared_ptr<Value> rhs_;

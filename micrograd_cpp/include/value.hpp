@@ -20,6 +20,7 @@
 
 // Forward declarations
 class Value;
+class Graph;
 
 namespace std {
 // We need a hash function in order to use unordered_set
@@ -33,6 +34,7 @@ struct equal_to<const Value *> {
   bool operator()(const Value *lhs, const Value *rhs) const;
 };
 }  // namespace std
+
 
 class Value {
  public:
@@ -156,11 +158,13 @@ class Value {
   // modify the value of these
   const std::set<Value *> &get_children() const;
   const std::string &get_op() const;
+  const float &get_data() const;
   int get_id() const;
   void set_label(const std::string &label);
   void set_grad(const double &grad);
   Value tanh();
   Value exp();
+  const Graph& get_graph();
 
   void Backward();
 
@@ -179,6 +183,9 @@ class Value {
 
   std::function<void()> Backward_ = nullptr;
   void TopologicalSort(const Value &value);
+
+  class ValueImpl;  // Forward declaration
+  std::unique_ptr<ValueImpl> impl;
 };
 
 // Define these functions here, so that other files can use it

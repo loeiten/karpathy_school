@@ -3,9 +3,10 @@
 #include <string>   // for char_traits, string, operator!=
 #include <utility>  // for pair, make_pair
 
+#include "../include/graph.hpp"  // for Value, hash, equal_to, operator<<
 #include "../include/value.hpp"  // for Value, hash, equal_to, operator<<
 
-void Trace(const Value &value, std::set<const Value *> *nodes,
+void Graph::Trace(const Value &value, std::set<const Value *> *nodes,
            std::set<std::pair<const Value *, const Value *>> *edges) {
   auto iterator_not_exist = nodes->insert(&value);
   // If the emplace succeeds (an insert happened), then the return returns true
@@ -18,7 +19,7 @@ void Trace(const Value &value, std::set<const Value *> *nodes,
   }
 }
 
-std::string ReturnDot(const Value &root) {
+std::string Graph::ReturnDot(const Value &root) {
   const int indent = 4;
   std::set<const Value *> nodes;
   std::set<std::pair<const Value *, const Value *>> edges;

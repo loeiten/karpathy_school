@@ -3,3 +3,4 @@
 #include <memory>
 
 Op::Op(std::shared_ptr<Value> val) : graph(val->get_graph()) {}
+Op::~Op() {}

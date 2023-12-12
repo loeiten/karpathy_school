@@ -7,14 +7,17 @@ class Graph;
 
 class Op{
   public:
+    // We don't need to delete these, I just want to be explicit
     Op() = delete;
     Op(const Op &) = delete;
     Op(const Op &&) = delete;
-    virtual std::shared_ptr<Value> Forward() = 0;
+    virtual Value& Forward() = 0;
     virtual void Backward() = 0;
   protected:
-    const Graph& graph;
+    Graph& graph;
     Op(std::shared_ptr<Value> val);
+    // This is not needed, I just want to be explicit
+    ~Op();
 };
 
 /*
