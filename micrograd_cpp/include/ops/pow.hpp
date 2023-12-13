@@ -2,17 +2,21 @@
 #define MICROGRAD_CPP_INCLUDE_OPS_POW_HPP_
 
 #include <memory>
+
 #include "op.hpp"
 
 class Value;
 
-class Pow: private Op{
-    Pow(std::shared_ptr<Value> base, float &exponent);
-    void Forward()  final ;
-    void Backward() final ;
-  private:
-    std::shared_ptr<Value> base_;
-    std::shared_ptr<Value> exponent_;
+class Pow : private Op {
+ public:
+  Pow(std::shared_ptr<Value> base, const double &exponent);
+  Value &Forward() final;
+  void Backward() final;
+
+ private:
+  std::shared_ptr<Value> base_;
+  const double exponent_;
+  std::shared_ptr<Value> out_;
 };
 
 #endif  // MICROGRAD_CPP_INCLUDE_OPS_POW_HPP_

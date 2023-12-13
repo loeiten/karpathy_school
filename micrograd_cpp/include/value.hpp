@@ -15,7 +15,8 @@
 // FIXME:
 // These issues needs to be addressed:
 // 1. One cannot move a function lambda, only the captured values
-// 2. Named return value optimization is optional, so one should not rely on this (https://en.cppreference.com/w/cpp/language/copy_elision)
+// 2. Named return value optimization is optional, so one should not rely on
+// this (https://en.cppreference.com/w/cpp/language/copy_elision)
 // 3. Chaining
 
 // Forward declarations
@@ -35,7 +36,6 @@ struct equal_to<const Value *> {
 };
 }  // namespace std
 
-
 class Value {
  public:
   // We define as a friend as this is not a class member function, but need
@@ -43,15 +43,17 @@ class Value {
   // Overloads for the streaming output operators (<<) cannot be class members,
   // because the ostream& must be on the left in use and declaration.
   friend std::ostream &operator<<(std::ostream &os, const Value &value);
-  friend Value pow(Value &a, const float &n);
-  friend Value operator+(const float &lhs, Value &rhs);
-  friend Value operator+(Value &lhs, const float &rhs);
-  friend Value operator-(const float &lhs, Value &rhs);
-  friend Value operator-(Value &lhs, const float &rhs);
-  friend Value operator*(const float &lhs, Value &rhs);
-  friend Value operator*(Value &lhs, const float &rhs);
-  friend Value operator/(const float &lhs, Value &rhs);
-  friend Value operator/(Value &lhs, const float &rhs);
+  friend Value& pow(Value &a, const double &n);
+  friend Value& operator+(const double &lhs, Value &rhs);
+  friend Value& operator+(Value &lhs, const double &rhs);
+  friend Value& operator-(const double &lhs, Value &rhs);
+  friend Value& operator-(Value &lhs, const double &rhs);
+  friend Value& operator*(const double &lhs, Value &rhs);
+  friend Value& operator*(Value &lhs, const double &rhs);
+  friend Value& operator/(const double &lhs, Value &rhs);
+  friend Value& operator/(Value &lhs, const double &rhs);
+  friend Value& tanh(Value &value);
+  friend Value& exp(Value &value);
 
   // Constructors
   Value(const double &data, const std::string &label);
@@ -91,14 +93,14 @@ class Value {
         label_(std::move(value.label_)),
         op_(std::move(value.op_)),
         Backward_(std::move(value.Backward_)) {
-          // NOTE: We need to move each element individually
-          // NOTE: We cannot have const since we want to move
-          for (auto& dynamic_value : value.dynamic_values) {
-            // FIXME: Push or emplace?
-            // Doesn't matter if it's emplace_back or push_back
-            dynamic_values.emplace_back(std::move(dynamic_value));
-          }
-        }
+    // NOTE: We need to move each element individually
+    // NOTE: We cannot have const since we want to move
+    for (auto &dynamic_value : value.dynamic_values) {
+      // FIXME: Push or emplace?
+      // Doesn't matter if it's emplace_back or push_back
+      dynamic_values.emplace_back(std::move(dynamic_value));
+    }
+  }
 
   // FIXME: Verify this
   // We have dynamically allocated Values stored in dynamic_values
@@ -132,11 +134,11 @@ class Value {
     visited = std::move(value.visited);
     topology = std::move(value.topology);
 
-          // NOTE: We need to move each element individually
-          for (auto& dynamic_value : value.dynamic_values) {
-            // FIXME: Push or emplace?
-            dynamic_values.emplace_back(std::move(dynamic_value));
-          }
+    // NOTE: We need to move each element individually
+    for (auto &dynamic_value : value.dynamic_values) {
+      // FIXME: Push or emplace?
+      dynamic_values.emplace_back(std::move(dynamic_value));
+    }
 
     id_ = value.id_;  // Not movable
     label_ = std::move(value.label_);
@@ -148,27 +150,32 @@ class Value {
   // FIXME: Write dtor
 
   // Notice that both the grad of this and rhs is being altered by this
-  Value operator+(Value &rhs);  // NOLINT
-  Value operator*(Value &rhs);  // NOLINT
-  Value operator/(Value &rhs);  // NOLINT
-  Value operator-();
+  Value& operator+(Value &rhs);  
+  Value& operator*(Value &rhs);  
+  Value& operator/(Value &rhs);  
+  Value& operator-();
 
   // Accessors and mutators (get and set functions) may be named like variables.
   // These returns a copy as we do not want anything other than the class to
   // modify the value of these
   const std::set<Value *> &get_children() const;
   const std::string &get_op() const;
-  const float &get_data() const;
+  const double &get_data() const;
+  const double &get_grad() const;
   int get_id() const;
+  Graph &get_graph() const;
+  std::shared_ptr<Value> get_shared_ptr() const;
   void set_label(const std::string &label);
   void set_grad(const double &grad);
-  Value tanh();
-  Value exp();
-  const Graph& get_graph();
+  void set_op(const std::string &op);
+
+  void AddProducer(std::shared_ptr<Value> producer);
+  void UpdateGrad(const double &grad);
 
   void Backward();
 
  private:
+  // FIXME: All of this should be part of the pImpl
   double data_;
   double grad_ = 0;
   // We do care about the order of the children for printing purposes

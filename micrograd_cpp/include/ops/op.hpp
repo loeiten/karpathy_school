@@ -21,6 +21,7 @@ class Op{
 };
 
 /*
+FIXME:
 I have a graph like so
 
 t1        t4

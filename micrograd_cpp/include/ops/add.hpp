@@ -2,19 +2,23 @@
 #define MICROGRAD_CPP_INCLUDE_OPS_ADD_HPP_
 
 #include <memory>
+
 #include "op.hpp"
 
 class Value;
 
-class Add: private Op{
-    Add(std::shared_ptr<Value> rhs, std::shared_ptr<Value> lhs);
-    Add(const float &rhs, std::shared_ptr<Value> lhs);
-    Add(std::shared_ptr<Value> rhs, const float &lhs);
-    Value& Forward() final ;
-    void Backward() final ;
-  private:
-    std::shared_ptr<Value> rhs_;
-    std::shared_ptr<Value> lhs_;
+class Add : private Op {
+  public:
+  Add(std::shared_ptr<Value> lhs, std::shared_ptr<Value> rhs);
+  Add(std::shared_ptr<Value> lhs, const double &rhs);
+  Add(const double &lhs, std::shared_ptr<Value> rhs);
+  Value &Forward() final;
+  void Backward() final;
+
+ private:
+  std::shared_ptr<Value> rhs_;
+  std::shared_ptr<Value> lhs_;
+  std::shared_ptr<Value> out_;
 };
 
 #endif  // MICROGRAD_CPP_INCLUDE_OPS_ADD_HPP_

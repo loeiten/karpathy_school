@@ -1,15 +1,17 @@
-#include "../../include/ops/add.hpp"
+#include "../../include/ops/div.hpp"
 
 #include <memory>
 #include <sstream>
 #include <iomanip>  // for operator<<, setprecision
 
 #include "../../include/graph.hpp"
+#include "../../include/ops/mul.hpp"
+#include "../../include/ops/pow.hpp"
 #include "../../include/value.hpp"
 
-Add::Add(std::shared_ptr<Value> lhs, std::shared_ptr<Value> rhs)
+Div::Div(std::shared_ptr<Value> lhs, std::shared_ptr<Value> rhs)
     : Op(rhs), rhs_(rhs), lhs_(lhs) {}
-Add::Add(const double& rhs, std::shared_ptr<Value> lhs) : Op(lhs), lhs_(lhs) {
+Div::Div(std::shared_ptr<Value> lhs, const double &rhs) : Op(lhs), lhs_(lhs) {
   // Create the rhs in the graph
   auto& tmp = graph.CreateValue(rhs);
   // Add a label to the tmp
@@ -19,7 +21,7 @@ Add::Add(const double& rhs, std::shared_ptr<Value> lhs) : Op(lhs), lhs_(lhs) {
   // Store the pointer
   rhs_ = tmp.get_shared_ptr();
 }
-Add::Add(std::shared_ptr<Value> rhs, const double& lhs) : Op(rhs), rhs_(rhs) {
+Div::Div(const double &lhs, std::shared_ptr<Value> rhs) : Op(rhs), rhs_(rhs) {
   // Create the lhs in the graph
   auto& tmp = graph.CreateValue(lhs);
   // Add a label to the tmp
@@ -30,16 +32,15 @@ Add::Add(std::shared_ptr<Value> rhs, const double& lhs) : Op(rhs), rhs_(rhs) {
   lhs_ = tmp.get_shared_ptr();
 }
 
-Value& Add::Forward() {
-  auto& out = graph.CreateValue(lhs_->get_data() + rhs_->get_data());
-  out_ = out.get_shared_ptr();
-  out.AddProducer(lhs_);
-  out.AddProducer(rhs_);
-  out.set_op("+");
+Value &Div::Forward() {
+  auto pow_op = Pow(rhs_, -1.0);
+  auto &tmp = pow_op.Forward();
+  auto tmpPtr = tmp.get_shared_ptr();
+  auto mul_op = Mul(lhs_, tmpPtr);
+  auto &out = mul_op.Forward();
   return out;
 }
 
-void Add::Backward() {
-  lhs_->UpdateGrad(out_->get_grad());
-  rhs_->UpdateGrad(out_->get_grad());
+void Div::Backward() {
+  // NOTE: The back-propagation is controlled by the the other backward passes
 }
