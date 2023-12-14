@@ -1,7 +1,17 @@
-add_executable(main src/main.cpp src/value.cpp src/print_graph.cpp)
+# Use file(GLOB ...) to gather all the op files into the OP_FILES variable
+# alternatively one could add the ops manually or make a library out of them
+file(GLOB OP_FILES src/ops/*.cpp)
+
+# Set the main classes as a variable
+set(MAIN_CLASSES
+    src/graph.cpp
+    src/value.cpp
+)
+
+add_executable(main src/main.cpp ${OP_FILES} ${MAIN_CLASSES})
 
 # Test
-add_executable(test_graph test/test_graph.cpp src/value.cpp src/print_graph.cpp)
+add_executable(test_graph test/test_graph.cpp ${OP_FILES} ${MAIN_CLASSES})
 do_test(NAME test_graph NO 1 ARGS "SimpleGraph")
 do_test(NAME test_graph NO 2 ARGS "BackProp")
 do_test(NAME test_graph NO 3 ARGS "ReuseVariable")
