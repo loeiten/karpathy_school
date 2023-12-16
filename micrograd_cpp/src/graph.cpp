@@ -8,7 +8,7 @@
 
 #include "../include/value.hpp"  // for Value, hash, equal_to, operator<<
 
-std::shared_ptr<Value> Graph::CreateValue(const double &value) {
+Value& Graph::CreateValue(const double &value) {
   // FIXME: Call pImpl in ctor
   auto it_existing = values.emplace(value);
   return *(it_existing.first);

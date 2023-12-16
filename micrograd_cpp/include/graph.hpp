@@ -16,6 +16,7 @@ class Graph {
   // t2 = graph.CreateValue(3.0);
   // t3 = t1 + t2;
   Value& CreateValue(const double &value);
+  Value& CreateValue(const double &value, const std::string &label);
   // FIXME: Fix these stray dogs
   // NOTE: We use set here as we want the printed result to be reproducible
   void Trace(const Value &value, std::set<const Value *> *nodes,
