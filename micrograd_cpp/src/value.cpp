@@ -1,5 +1,6 @@
 #include "../include/value.hpp"
 #include "../include/ops/add.hpp"
+#include "../include/ops/cos.hpp"
 #include "../include/ops/div.hpp"
 #include "../include/ops/exp.hpp"
 #include "../include/ops/mul.hpp"
@@ -83,6 +84,12 @@ Value& operator/(Value &lhs, const double &rhs) {
 Value& tanh(Value &value) {
   auto tanh_op = Tanh(value.get_shared_ptr());
   auto& out = tanh_op.Forward();
+  return out;
+}
+
+Value& cos(Value &value) {
+  auto cos_op = Cos(value.get_shared_ptr());
+  auto& out = cos_op.Forward();
   return out;
 }
 
