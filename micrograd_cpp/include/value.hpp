@@ -54,6 +54,7 @@ class Value {
   friend Value& operator/(Value &lhs, const double &rhs);
   friend Value& tanh(Value &value);
   friend Value& exp(Value &value);
+  friend Value& cos(Value &value);
 
   // Constructors
   Value(const double &data, const std::string &label);
