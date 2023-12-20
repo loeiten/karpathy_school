@@ -11,7 +11,8 @@
 Value& Graph::CreateValue(const double &value) {
   // FIXME: Call pImpl in ctor
   auto it_existing = values.emplace(value);
-  return *(it_existing.first);
+  // FIXME: Check if this is ok
+  return *(it_existing.first->get());
 }
 
 // FIXME: Fix these stray dogs
