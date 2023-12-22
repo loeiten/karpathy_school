@@ -1,4 +1,13 @@
 #include "../include/value.hpp"
+
+#include <memory.h>
+
+#include <cmath>
+#include <iomanip>  // for operator<<, setprecision
+#include <iostream>
+#include <string>
+#include <unordered_set>  // for unordered_set
+
 #include "../include/ops/add.hpp"
 #include "../include/ops/cos.hpp"
 #include "../include/ops/div.hpp"
@@ -8,14 +17,6 @@
 #include "../include/ops/pow.hpp"
 #include "../include/ops/sub.hpp"
 #include "../include/ops/tanh.hpp"
-
-#include <memory.h>
-
-#include <cmath>
-#include <iomanip>  // for operator<<, setprecision
-#include <iostream>
-#include <string>
-#include <unordered_set>  // for unordered_set
 
 int Value::instance_count = 0;
 
@@ -27,81 +28,86 @@ std::ostream &operator<<(std::ostream &os, const Value &value) {
   return os;
 }
 
-Value& pow(Value &a, const double &n) {
+Value &pow(Value &a, const double &n) {
   auto pow_op = Pow(a.get_shared_ptr(), n);
-  auto& out = pow_op.Forward();
+  auto &out = pow_op.Forward();
   return out;
 }
 
-Value& operator+(const double &lhs, Value &rhs) {
+Value &operator+(const double &lhs, Value &rhs) {
   auto add_op = Add(lhs, rhs.get_shared_ptr());
-  auto& out = add_op.Forward();
+  auto &out = add_op.Forward();
   return out;
 }
 
-Value& operator+(Value &lhs, const double &rhs) {
+Value &operator+(Value &lhs, const double &rhs) {
   auto add_op = Add(lhs.get_shared_ptr(), rhs);
-  auto& out = add_op.Forward();
+  auto &out = add_op.Forward();
   return out;
 }
 
-Value& operator-(const double &lhs, Value &rhs) {
+Value &operator-(const double &lhs, Value &rhs) {
   auto sub_op = Sub(lhs, rhs.get_shared_ptr());
-  auto& out = sub_op.Forward();
+  auto &out = sub_op.Forward();
   return out;
 }
 
-Value& operator-(Value &lhs, const double &rhs) {
+Value &operator-(Value &lhs, const double &rhs) {
   auto sub_op = Sub(lhs.get_shared_ptr(), rhs);
-  auto& out = sub_op.Forward();
+  auto &out = sub_op.Forward();
   return out;
 }
 
-Value& operator*(const double &lhs, Value &rhs) {
+Value &operator*(const double &lhs, Value &rhs) {
   auto mul_op = Mul(lhs, rhs.get_shared_ptr());
-  auto& out = mul_op.Forward();
+  auto &out = mul_op.Forward();
   return out;
 }
 
-Value& operator*(Value &lhs, const double &rhs) {
+Value &operator*(Value &lhs, const double &rhs) {
   auto mul_op = Mul(lhs.get_shared_ptr(), rhs);
-  auto& out = mul_op.Forward();
+  auto &out = mul_op.Forward();
   return out;
 }
 
-Value& operator/(const double &lhs, Value &rhs) {
+Value &operator/(const double &lhs, Value &rhs) {
   auto div_op = Div(lhs, rhs.get_shared_ptr());
-  auto& out = div_op.Forward();
+  auto &out = div_op.Forward();
   return out;
 }
 
-Value& operator/(Value &lhs, const double &rhs) {
+Value &operator/(Value &lhs, const double &rhs) {
   auto div_op = Div(lhs.get_shared_ptr(), rhs);
-  auto& out = div_op.Forward();
+  auto &out = div_op.Forward();
   return out;
 }
 
-Value& tanh(Value &value) {
+Value &tanh(Value &value) {
   auto tanh_op = Tanh(value.get_shared_ptr());
-  auto& out = tanh_op.Forward();
+  auto &out = tanh_op.Forward();
   return out;
 }
 
-Value& cos(Value &value) {
+Value &cos(Value &value) {
   auto cos_op = Cos(value.get_shared_ptr());
-  auto& out = cos_op.Forward();
+  auto &out = cos_op.Forward();
   return out;
 }
 
-Value& exp(Value &value) {
+Value &exp(Value &value) {
   auto exp_op = Exp(value.get_shared_ptr());
-  auto& out = exp_op.Forward();
+  auto &out = exp_op.Forward();
   return out;
 }
 // =============================================================================
 
 // Constructors
 // =============================================================================
+Value::Value(const double &data) : data_(data), grad_(0) {
+  ++instance_count;
+  id_ = instance_count;
+}
+
 Value::Value(const double &data, const std::string &label)
     : data_(data), grad_(0), label_(label) {
   ++instance_count;
@@ -117,30 +123,29 @@ Value::Value(const double &data, std::set<Value *> &&children,
 }
 // =============================================================================
 
-
 // Member functions: Operator overloads
 // =============================================================================
-Value& Value::operator+(Value &rhs) { 
+Value &Value::operator+(Value &rhs) {
   auto add_op = Add(get_shared_ptr(), rhs.get_shared_ptr());
-  auto& out = add_op.Forward();
+  auto &out = add_op.Forward();
   return out;
 }
 
-Value& Value::operator*(Value &rhs) { 
+Value &Value::operator*(Value &rhs) {
   auto mul_op = Mul(get_shared_ptr(), rhs.get_shared_ptr());
-  auto& out = mul_op.Forward();
+  auto &out = mul_op.Forward();
   return out;
 }
 
-Value& Value::operator/(Value &rhs) {  
+Value &Value::operator/(Value &rhs) {
   auto div_op = Div(get_shared_ptr(), rhs.get_shared_ptr());
-  auto& out = div_op.Forward();
+  auto &out = div_op.Forward();
   return out;
 }
 
-Value& Value::operator-() {
+Value &Value::operator-() {
   auto neg_op = Neg(get_shared_ptr());
-  auto& out = neg_op.Forward();
+  auto &out = neg_op.Forward();
   return out;
 }
 // =============================================================================

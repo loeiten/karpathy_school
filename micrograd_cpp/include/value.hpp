@@ -43,20 +43,21 @@ class Value {
   // Overloads for the streaming output operators (<<) cannot be class members,
   // because the ostream& must be on the left in use and declaration.
   friend std::ostream &operator<<(std::ostream &os, const Value &value);
-  friend Value& pow(Value &a, const double &n);
-  friend Value& operator+(const double &lhs, Value &rhs);
-  friend Value& operator+(Value &lhs, const double &rhs);
-  friend Value& operator-(const double &lhs, Value &rhs);
-  friend Value& operator-(Value &lhs, const double &rhs);
-  friend Value& operator*(const double &lhs, Value &rhs);
-  friend Value& operator*(Value &lhs, const double &rhs);
-  friend Value& operator/(const double &lhs, Value &rhs);
-  friend Value& operator/(Value &lhs, const double &rhs);
-  friend Value& tanh(Value &value);
-  friend Value& exp(Value &value);
-  friend Value& cos(Value &value);
+  friend Value &pow(Value &a, const double &n);
+  friend Value &operator+(const double &lhs, Value &rhs);
+  friend Value &operator+(Value &lhs, const double &rhs);
+  friend Value &operator-(const double &lhs, Value &rhs);
+  friend Value &operator-(Value &lhs, const double &rhs);
+  friend Value &operator*(const double &lhs, Value &rhs);
+  friend Value &operator*(Value &lhs, const double &rhs);
+  friend Value &operator/(const double &lhs, Value &rhs);
+  friend Value &operator/(Value &lhs, const double &rhs);
+  friend Value &tanh(Value &value);
+  friend Value &exp(Value &value);
+  friend Value &cos(Value &value);
 
   // Constructors
+  Value(const double &data);
   Value(const double &data, const std::string &label);
   // data and op are copied to the new object even though they are passed as a
   // reference. We capture children as rvalue in order to save one copy call,
@@ -65,10 +66,10 @@ class Value {
         const std::string &op);
 
   // Notice that both the grad of this and rhs is being altered by this
-  Value& operator+(Value &rhs);  
-  Value& operator*(Value &rhs);  
-  Value& operator/(Value &rhs);  
-  Value& operator-();
+  Value &operator+(Value &rhs);
+  Value &operator*(Value &rhs);
+  Value &operator/(Value &rhs);
+  Value &operator-();
 
   // Accessors and mutators (get and set functions) may be named like variables.
   // These returns a copy as we do not want anything other than the class to
@@ -97,7 +98,6 @@ class Value {
   std::set<Value *> prev_;
   std::unordered_set<const Value *> visited;
   std::vector<const Value *> topology;
-  std::vector<std::unique_ptr<Value>> dynamic_values;
   int id_;
   std::string label_ = "";
   std::string op_ = "";
