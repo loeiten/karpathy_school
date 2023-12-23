@@ -15,6 +15,13 @@ Value& Graph::CreateValue(const double &value) {
   return *(it_existing.first->get());
 }
 
+Value& Graph::CreateValue(const double &value, const std::string &label){
+  // FIXME: Call pImpl in ctor
+  auto it_existing = values.emplace(value, label);
+  // FIXME: Check if this is ok
+  return *(it_existing.first->get());
+}
+
 // FIXME: Fix these stray dogs
 void Graph::Trace(const Value &value, std::set<const Value *> *nodes,
                   std::set<std::pair<const Value *, const Value *>> *edges) {
