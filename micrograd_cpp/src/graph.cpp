@@ -8,14 +8,14 @@
 
 #include "../include/value.hpp"  // for Value, hash, equal_to, operator<<
 
-Value& Graph::CreateValue(const double &value) {
+Value &Graph::CreateValue(const double &value) {
   // FIXME: Call pImpl in ctor
   auto it_existing = values.emplace(std::make_shared<Value>(value));
   // FIXME: Check if this is ok
   return *(it_existing.first->get());
 }
 
-Value& Graph::CreateValue(const double &value, const std::string &label){
+Value &Graph::CreateValue(const double &value, const std::string &label) {
   // FIXME: Call pImpl in ctor
   auto it_existing = values.emplace(std::make_shared<Value>(value, label));
   // FIXME: Check if this is ok
@@ -23,8 +23,10 @@ Value& Graph::CreateValue(const double &value, const std::string &label){
 }
 
 // FIXME: Fix these stray dogs
-void Graph::Trace(const Value &value, std::set<const Value *> *nodes,
-                  std::set<std::pair<const Value *, const Value *>> *edges) {
+void Graph::Trace(const Value &value,
+                  std::set<const std::shared_ptr<Value>> *nodes,
+                  std::set<std::pair<const std::shared_ptr<Value>,
+                                     const std::shared_ptr<Value>>> *edges) {
   auto iterator_not_exist = nodes->insert(&value);
   // If the emplace succeeds (an insert happened), then the return returns true
   // which means that the element didn't existed in the past
@@ -38,8 +40,10 @@ void Graph::Trace(const Value &value, std::set<const Value *> *nodes,
 
 std::string Graph::ReturnDot(const Value &root) {
   const int indent = 4;
-  std::set<const Value *> nodes;
-  std::set<std::pair<const Value *, const Value *>> edges;
+  std::set<const std::shared_ptr<Value>> nodes;
+  std::set<
+      std::pair<const std::shared_ptr<Value>, const std::shared_ptr<Value>>>
+      edges;
   Trace(root, &nodes, &edges);
 
   std::stringstream dot_stream;

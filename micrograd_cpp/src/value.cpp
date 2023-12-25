@@ -114,7 +114,8 @@ Value::Value(const double &data, const std::string &label)
   id_ = instance_count;
 }
 
-Value::Value(const double &data, std::set<Value *> &&children,
+// FIXME: Check if this is still in use
+Value::Value(const double &data, std::set<std::shared_ptr<Value>> &&children,
              const std::string &op)
     : data_(data), grad_(0), prev_(children), op_(op) {
   ++instance_count;
@@ -152,7 +153,9 @@ Value &Value::operator-() {
 
 // Member functions: Accessors and mutators
 // =============================================================================
-const std::set<Value *> &Value::get_children() const { return prev_; }
+const std::set<std::shared_ptr<Value>> &Value::get_children() const {
+  return prev_;
+}
 
 const std::string &Value::get_op() const { return op_; }
 
@@ -161,6 +164,12 @@ int Value::get_id() const { return id_; }
 void Value::set_label(const std::string &label) { label_ = label; }
 
 void Value::set_grad(const double &grad) { grad_ = grad; }
+// =============================================================================
+
+// Member functions: Other
+// =============================================================================
+void Value::AddProducer(std::shared_ptr<Value> producer) {}
+void Value::UpdateGrad(const double &grad) { grad_ = grad; }
 // =============================================================================
 
 // FIXME: Move to graph

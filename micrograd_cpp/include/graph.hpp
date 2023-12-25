@@ -15,12 +15,13 @@ class Graph {
   // t1 = graph.CreateValue(2.0);
   // t2 = graph.CreateValue(3.0);
   // t3 = t1 + t2;
-  Value& CreateValue(const double &value);
-  Value& CreateValue(const double &value, const std::string &label);
+  Value &CreateValue(const double &value);
+  Value &CreateValue(const double &value, const std::string &label);
   // FIXME: Fix these stray dogs
   // NOTE: We use set here as we want the printed result to be reproducible
-  void Trace(const Value &value, std::set<const Value *> *nodes,
-             std::set<std::pair<const Value *, const Value *>> *edges);
+  void Trace(const Value &value, std::set<const std::shared_ptr<Value>> *nodes,
+             std::set<std::pair<const std::shared_ptr<Value>,
+                                const std::shared_ptr<Value>>> *edges);
 
   std::string ReturnDot(const Value &root);
 
