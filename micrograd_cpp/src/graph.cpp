@@ -31,7 +31,7 @@ void Graph::Trace(const Value &value,
   // If the emplace succeeds (an insert happened), then the return returns true
   // which means that the element didn't existed in the past
   if (iterator_not_exist.second == true) {
-    for (const auto &child : value.get_children()) {
+    for (const auto &child : value.get_producers()) {
       edges->insert(std::make_pair(child, &value));
       Trace(*child, nodes, edges);
     }
@@ -50,13 +50,13 @@ std::string Graph::ReturnDot(const Value &root) {
   dot_stream << "digraph {\n"
              << std::string(indent, ' ') << "graph [rankdir=LR]\n";
 
-  // Create the nodes and connect the op to it's children
+  // Create the nodes and connect the op to it's producers
   for (const auto &node : nodes) {
     // Create the node
     dot_stream << std::string(indent, ' ') << "\"" << node->get_id() << "\""
                << " [label=\"{" << *node << "}\" shape=record]\n";
     if (node->get_op() != "") {
-      // Connect op to the children
+      // Connect op to the producers
       dot_stream << std::string(indent, ' ') << "\"" << node->get_id()
                  << node->get_op() << "\" [label=\"" << node->get_op()
                  << "\"]\n";

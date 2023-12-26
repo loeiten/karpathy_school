@@ -5,6 +5,7 @@
 #include <cmath>
 #include <iomanip>  // for operator<<, setprecision
 #include <iostream>
+#include <memory>
 #include <string>
 #include <unordered_set>  // for unordered_set
 
@@ -115,9 +116,9 @@ Value::Value(const double &data, const std::string &label)
 }
 
 // FIXME: Check if this is still in use
-Value::Value(const double &data, std::set<std::shared_ptr<Value>> &&children,
+Value::Value(const double &data, std::set<std::shared_ptr<Value>> &&producers,
              const std::string &op)
-    : data_(data), grad_(0), prev_(children), op_(op) {
+    : data_(data), grad_(0), producers(producers), op_(op) {
   ++instance_count;
   id_ = instance_count;
   label_ = "tmp" + std::to_string(id_);
@@ -153,8 +154,8 @@ Value &Value::operator-() {
 
 // Member functions: Accessors and mutators
 // =============================================================================
-const std::set<std::shared_ptr<Value>> &Value::get_children() const {
-  return prev_;
+const std::set<std::shared_ptr<Value>> &Value::get_producers() const {
+  return producers;
 }
 
 const std::string &Value::get_op() const { return op_; }
@@ -168,7 +169,10 @@ void Value::set_grad(const double &grad) { grad_ = grad; }
 
 // Member functions: Other
 // =============================================================================
-void Value::AddProducer(std::shared_ptr<Value> producer) {}
+void Value::AddProducer(std::shared_ptr<Value> producer) {
+  producers.insert(producer);
+}
+
 void Value::UpdateGrad(const double &grad) { grad_ = grad; }
 // =============================================================================
 
@@ -186,9 +190,10 @@ void Value::Backward() {
 }
 
 void Value::TopologicalSort(const Value &value) {
+  auto value_pointer = std::make_shared<Value>(value);
   if (visited.find(&value) == visited.end()) {
     visited.insert(&value);
-    for (const auto &child : value.prev_) {
+    for (const auto &child : value.producers) {
       TopologicalSort(*child);
     }
     topology.push_back(&value);
