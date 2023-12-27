@@ -27,12 +27,12 @@ void Graph::Trace(const Value &value,
                   std::set<const std::shared_ptr<Value>> *nodes,
                   std::set<std::pair<const std::shared_ptr<Value>,
                                      const std::shared_ptr<Value>>> *edges) {
-  auto iterator_not_exist = nodes->insert(&value);
+  auto iterator_not_exist = nodes->insert(value.get_shared_ptr());
   // If the emplace succeeds (an insert happened), then the return returns true
   // which means that the element didn't existed in the past
   if (iterator_not_exist.second == true) {
     for (const auto &child : value.get_producers()) {
-      edges->insert(std::make_pair(child, &value));
+      edges->insert(std::make_pair(child, value.get_shared_ptr()));
       Trace(*child, nodes, edges);
     }
   }

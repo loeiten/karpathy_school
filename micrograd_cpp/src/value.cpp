@@ -190,12 +190,11 @@ void Value::Backward() {
 }
 
 void Value::TopologicalSort(const Value &value) {
-  auto value_pointer = std::make_shared<Value>(value);
-  if (visited.find(&value) == visited.end()) {
-    visited.insert(&value);
+  if (visited.find(value.get_id()) == visited.end()) {
+    visited.insert(value.get_id());
     for (const auto &child : value.producers) {
       TopologicalSort(*child);
     }
-    topology.push_back(&value);
+    topology.push_back(value.get_shared_ptr());
   }
 }

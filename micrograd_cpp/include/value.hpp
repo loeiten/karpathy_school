@@ -97,7 +97,7 @@ class Value {
   double grad_ = 0;
   // We do care about the order of the producers for printing purposes
   std::set<std::shared_ptr<Value>> producers;  // Aka prev_ aka children
-  std::unordered_set<std::shared_ptr<Value>> visited;
+  std::unordered_set<int> visited;
   std::vector<const std::shared_ptr<Value>> topology;
   int id_;
   std::string label_ = "";
