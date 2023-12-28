@@ -104,24 +104,15 @@ Value &exp(Value &value) {
 
 // Constructors
 // =============================================================================
-Value::Value(const double &data) : data_(data), grad_(0) {
+Value::Value(Graph& graph, const double &data) : graph_(graph), data_(data), grad_(0) {
   ++instance_count;
   id_ = instance_count;
 }
 
-Value::Value(const double &data, const std::string &label)
-    : data_(data), grad_(0), label_(label) {
+Value::Value(Graph& graph, const double &data, const std::string &label)
+    : graph_(graph), data_(data), grad_(0), label_(label) {
   ++instance_count;
   id_ = instance_count;
-}
-
-// FIXME: Check if this is still in use
-Value::Value(const double &data, std::set<std::shared_ptr<Value>> &&producers,
-             const std::string &op)
-    : data_(data), grad_(0), producers(producers), op_(op) {
-  ++instance_count;
-  id_ = instance_count;
-  label_ = "tmp" + std::to_string(id_);
 }
 // =============================================================================
 
@@ -160,7 +151,15 @@ const std::set<std::shared_ptr<Value>> &Value::get_producers() const {
 
 const std::string &Value::get_op() const { return op_; }
 
+const double &Value::get_data() const { return data_; }
+
+const double &Value::get_grad() const { return grad_; }
+
 int Value::get_id() const { return id_; }
+
+Graph &Value::get_graph() const{
+  return graph_;
+}
 
 void Value::set_label(const std::string &label) { label_ = label; }
 
@@ -176,7 +175,7 @@ void Value::AddProducer(std::shared_ptr<Value> producer) {
 void Value::UpdateGrad(const double &grad) { grad_ = grad; }
 // =============================================================================
 
-// FIXME: Move to graph
+// FIXME: Move to graph?
 void Value::Backward() {
   // Build the topology
   TopologicalSort(*this);

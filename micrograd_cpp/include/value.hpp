@@ -58,13 +58,8 @@ class Value {
   friend Value &cos(Value &value);
 
   // Constructors
-  Value(const double &data);
-  Value(const double &data, const std::string &label);
-  // data and op are copied to the new object even though they are passed as a
-  // reference. We capture producers as rvalue in order to save one copy call,
-  // see implementation for details.
-  Value(const double &data, std::set<std::shared_ptr<Value>> &&producers,
-        const std::string &op);
+  Value(Graph& graph, const double &data);
+  Value(Graph& graph, const double &data, const std::string &label);
 
   // Notice that both the grad of this and rhs is being altered by this
   Value &operator+(Value &rhs);
@@ -93,6 +88,7 @@ class Value {
 
  private:
   // FIXME: Consider to use pImpl
+  Graph &graph_;
   double data_;
   double grad_ = 0;
   // We do care about the order of the producers for printing purposes

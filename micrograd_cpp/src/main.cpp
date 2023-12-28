@@ -5,7 +5,7 @@
 
 int main() {
   auto graph = Graph();
-  auto n = Value(1.0f, "n");
+  auto n = graph.CreateValue(1.0f, "n");
   auto tmp = (2.0f * n);
   auto e = exp(tmp);
   e.set_label("e");

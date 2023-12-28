@@ -10,14 +10,14 @@
 
 Value &Graph::CreateValue(const double &value) {
   // FIXME: Call pImpl in ctor
-  auto it_existing = values.emplace(std::make_shared<Value>(value));
+  auto it_existing = values.emplace(std::make_shared<Value>(*this, value));
   // FIXME: Check if this is ok
   return *(it_existing.first->get());
 }
 
 Value &Graph::CreateValue(const double &value, const std::string &label) {
   // FIXME: Call pImpl in ctor
-  auto it_existing = values.emplace(std::make_shared<Value>(value, label));
+  auto it_existing = values.emplace(std::make_shared<Value>(*this, value, label));
   // FIXME: Check if this is ok
   return *(it_existing.first->get());
 }
