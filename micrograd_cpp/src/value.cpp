@@ -104,12 +104,13 @@ Value &exp(Value &value) {
 
 // Constructors
 // =============================================================================
-Value::Value(Graph& graph, const double &data) : graph_(graph), data_(data), grad_(0) {
+Value::Value(Graph &graph, const double &data)
+    : graph_(graph), data_(data), grad_(0) {
   ++instance_count;
   id_ = instance_count;
 }
 
-Value::Value(Graph& graph, const double &data, const std::string &label)
+Value::Value(Graph &graph, const double &data, const std::string &label)
     : graph_(graph), data_(data), grad_(0), label_(label) {
   ++instance_count;
   id_ = instance_count;
@@ -157,13 +158,21 @@ const double &Value::get_grad() const { return grad_; }
 
 int Value::get_id() const { return id_; }
 
-Graph &Value::get_graph() const{
-  return graph_;
+Graph &Value::get_graph() const { return graph_; }
+
+std::shared_ptr<Value> Value::get_shared_ptr() const{
+  return value_shared_ptr_;
+}
+
+void Value::set_shared_ptr(const std::shared_ptr<Value> &value_shared_ptr) {
+  value_shared_ptr_ = value_shared_ptr;
 }
 
 void Value::set_label(const std::string &label) { label_ = label; }
 
 void Value::set_grad(const double &grad) { grad_ = grad; }
+
+void Value::set_op(const std::string &op){op_=op;}
 // =============================================================================
 
 // Member functions: Other

@@ -58,8 +58,8 @@ class Value {
   friend Value &cos(Value &value);
 
   // Constructors
-  Value(Graph& graph, const double &data);
-  Value(Graph& graph, const double &data, const std::string &label);
+  Value(Graph &graph, const double &data);
+  Value(Graph &graph, const double &data, const std::string &label);
 
   // Notice that both the grad of this and rhs is being altered by this
   Value &operator+(Value &rhs);
@@ -77,6 +77,7 @@ class Value {
   int get_id() const;
   Graph &get_graph() const;
   std::shared_ptr<Value> get_shared_ptr() const;
+  void set_shared_ptr(const std::shared_ptr<Value> &value_shared_ptr);
   void set_label(const std::string &label);
   void set_grad(const double &grad);
   void set_op(const std::string &op);
@@ -87,6 +88,7 @@ class Value {
   void Backward();
 
  private:
+  std::shared_ptr<Value> value_shared_ptr_;
   // FIXME: Consider to use pImpl
   Graph &graph_;
   double data_;
