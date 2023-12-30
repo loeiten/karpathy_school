@@ -9,12 +9,12 @@
 void SimpleGraph() {
   // Create graph where Values reside
   auto graph = Graph();
-  auto a = graph.CreateValue(2.0, "a");
-  auto b = graph.CreateValue(-3.0, "b");
-  auto c = graph.CreateValue(10.0, "c");
-  auto e = a * b;
+  auto &a = graph.CreateValue(2.0, "a");
+  auto &b = graph.CreateValue(-3.0, "b");
+  auto &c = graph.CreateValue(10.0, "c");
+  auto &e = a * b;
   e.set_label("e");
-  auto d = e + c;
+  auto &d = e + c;
   d.set_label("d");
 
   std::cout << graph.ReturnDot(d) << std::endl;
@@ -24,24 +24,24 @@ void BackProp() {
   // Create graph where Values reside
   auto graph = Graph();
   // Inputs x1, x2
-  auto x1 = graph.CreateValue(2.0, "x1");
-  auto x2 = graph.CreateValue(0.0, "x2");
+  auto &x1 = graph.CreateValue(2.0, "x1");
+  auto &x2 = graph.CreateValue(0.0, "x2");
   // Weights w1, w2
-  auto w1 = graph.CreateValue(-3.0, "w1");
-  auto w2 = graph.CreateValue(1.0, "w2");
+  auto &w1 = graph.CreateValue(-3.0, "w1");
+  auto &w2 = graph.CreateValue(1.0, "w2");
   // Bias of the neuron
-  auto b = graph.CreateValue(6.8813735870195432, "b");
+  auto &b = graph.CreateValue(6.8813735870195432, "b");
   // x1w1 + x2w2 + b
-  auto x1w1 = x1 * w1;
+  auto &x1w1 = x1 * w1;
   x1w1.set_label("x1w1");
-  auto x2w2 = x2 * w2;
+  auto &x2w2 = x2 * w2;
   x2w2.set_label("x2w2");
-  auto x1w1x2w2 = x1w1 + x2w2;
+  auto &x1w1x2w2 = x1w1 + x2w2;
   x1w1x2w2.set_label("x1w1 + x2w2");
-  auto n = x1w1x2w2 + b;
+  auto &n = x1w1x2w2 + b;
   n.set_label("n");
   // Output
-  auto o = tanh(n);
+  auto &o = tanh(n);
   o.set_label("o");
 
   o.Backward();
@@ -92,10 +92,10 @@ void GraphWithTemporaries() {
 
   // Create graph where Values reside
   auto graph = Graph();
-  auto t1 = graph.CreateValue(0.0471975512, "t1");
-  auto t2 = graph.CreateValue(1, "t2");
-  auto t4 = graph.CreateValue(3, "t4");
-  auto o = cos((t1 + t2) * t4);
+  auto &t1 = graph.CreateValue(0.0471975512, "t1");
+  auto &t2 = graph.CreateValue(1, "t2");
+  auto &t4 = graph.CreateValue(3, "t4");
+  auto &o = cos((t1 + t2) * t4);
   o.set_label("o");
 
   o.Backward();
@@ -106,13 +106,13 @@ void GraphWithTemporaries() {
 void ReuseVariable() {
   // Create graph where Values reside
   auto graph = Graph();
-  auto a = graph.CreateValue(-2.0, "a");
-  auto b = graph.CreateValue(3.0, "b");
-  auto d = a * b;
+  auto &a = graph.CreateValue(-2.0, "a");
+  auto &b = graph.CreateValue(3.0, "b");
+  auto &d = a * b;
   d.set_label("d");
-  auto e = a + b;
+  auto &e = a + b;
   e.set_label("e");
-  auto f = d * e;
+  auto &f = d * e;
   f.set_label("f");
 
   f.Backward();
@@ -124,25 +124,25 @@ void TanhSpelledOut() {
   // Create graph where Values reside
   auto graph = Graph();
   // Inputs x1, x2
-  auto x1 = graph.CreateValue(2.0, "x1");
-  auto x2 = graph.CreateValue(0.0, "x2");
+  auto &x1 = graph.CreateValue(2.0, "x1");
+  auto &x2 = graph.CreateValue(0.0, "x2");
   // Weights w1, w2
-  auto w1 = graph.CreateValue(-3.0, "w1");
-  auto w2 = graph.CreateValue(1.0, "w2");
+  auto &w1 = graph.CreateValue(-3.0, "w1");
+  auto &w2 = graph.CreateValue(1.0, "w2");
   // Bias of the neuron
-  auto b = graph.CreateValue(6.8813735870195432, "b");
+  auto &b = graph.CreateValue(6.8813735870195432, "b");
   // x1w1 + x2w2 + b
-  auto x1w1 = x1 * w1;
+  auto &x1w1 = x1 * w1;
   x1w1.set_label("x1w1");
-  auto x2w2 = x2 * w2;
+  auto &x2w2 = x2 * w2;
   x2w2.set_label("x2w2");
-  auto x1w1x2w2 = x1w1 + x2w2;
+  auto &x1w1x2w2 = x1w1 + x2w2;
   x1w1x2w2.set_label("x1w1 + x2w2");
-  auto n = x1w1x2w2 + b;
+  auto &n = x1w1x2w2 + b;
   n.set_label("n");
   // Output
-  auto e = exp(2.0f * n);
-  auto o = (e - 1.0f) / (e + 1.0f);
+  auto &e = exp(2.0f * n);
+  auto &o = (e - 1.0f) / (e + 1.0f);
   o.set_label("o");
 
   o.Backward();

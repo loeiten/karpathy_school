@@ -12,6 +12,7 @@ Value &Graph::CreateValue(const double &value) {
   // FIXME: Call pImpl in ctor
   auto it_existing = values.emplace(std::make_shared<Value>(*this, value));
   auto value_shared_ptr = *(it_existing.first);
+  value_shared_ptr->set_shared_ptr(value_shared_ptr);
   // FIXME: Check if this is ok
   return *(value_shared_ptr.get());
 }
@@ -20,6 +21,7 @@ Value &Graph::CreateValue(const double &value, const std::string &label) {
   // FIXME: Call pImpl in ctor
   auto it_existing = values.emplace(std::make_shared<Value>(*this, value, label));
   auto value_shared_ptr = *(it_existing.first);
+  value_shared_ptr->set_shared_ptr(value_shared_ptr);
   // FIXME: Check if this is ok
   return *(value_shared_ptr.get());
 }
