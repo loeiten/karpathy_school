@@ -84,8 +84,11 @@ Value &operator/(Value &lhs, const double &rhs) {
 }
 
 Value &tanh(Value &value) {
-  auto tanh_op = Tanh(value.get_shared_ptr());
-  auto &out = tanh_op.Forward();
+  // NOTE: We need to dynamically allocate the op for it to be in scope when 
+  //       out.Backward_ is called
+  auto tanh_op = std::make_shared<Tanh>(value.get_shared_ptr());
+  auto &out = tanh_op->Forward();
+  out.Backward_ = std::bind(&Tanh::Backward, tanh_op);
   return out;
 }
 
