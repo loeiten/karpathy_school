@@ -15,4 +15,4 @@ Value &Exp::Forward() {
   return out;
 }
 
-void Exp::Backward() { out_->UpdateGrad(out_->get_data() * out_->get_grad()); }
+void Exp::Backward() { exponent_->UpdateGrad(out_->get_data() * out_->get_grad()); }

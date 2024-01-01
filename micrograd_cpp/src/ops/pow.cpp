@@ -21,6 +21,6 @@ Value &Pow::Forward() {
 }
 
 void Pow::Backward() {
-  out_->UpdateGrad(exponent_ * std::pow(base_->get_data(), exponent_ - 1) *
+  base_->UpdateGrad(exponent_ * std::pow(base_->get_data(), exponent_ - 1) *
                    out_->get_grad());
 }

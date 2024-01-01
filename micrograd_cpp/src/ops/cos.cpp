@@ -15,4 +15,4 @@ Value &Cos::Forward() {
   return out;
 }
 
-void Cos::Backward() { out_->UpdateGrad(-std::sin(arg_->get_data()) * out_->get_grad()); }
+void Cos::Backward() { arg_->UpdateGrad(-std::sin(arg_->get_data()) * out_->get_grad()); }

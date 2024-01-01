@@ -18,5 +18,5 @@ Value &Tanh::Forward() {
 }
 
 void Tanh::Backward() {
-  out_->UpdateGrad((1 - std::pow(t_, 2)) * out_->get_grad()); 
+  arg_->UpdateGrad((1 - std::pow(t_, 2)) * out_->get_grad()); 
 }
