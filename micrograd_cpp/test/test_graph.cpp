@@ -92,7 +92,7 @@ void GraphWithTemporaries() {
 
   // Create graph where Values reside
   auto graph = Graph();
-  auto &t1 = graph.CreateValue(0.0471975512, "t1");
+  auto &t1 = graph.CreateValue(4, "t1");
   auto &t2 = graph.CreateValue(1, "t2");
   auto &t4 = graph.CreateValue(3, "t4");
   auto &o = cos((t1 + t2) * t4);
