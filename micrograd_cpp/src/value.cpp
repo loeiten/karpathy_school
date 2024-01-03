@@ -100,7 +100,7 @@ Value &operator/(const double &lhs, Value &rhs) {
   //       out.Backward_ is called
   auto div_op = std::make_shared<Div>(lhs, rhs.get_shared_ptr());
   auto &out = div_op->Forward();
-  out.Backward_ = std::bind(&Div::Backward, div_op);
+  // NOTE: We are not binding out.Backward_ as this is done in the op
   return out;
 }
 
@@ -109,7 +109,7 @@ Value &operator/(Value &lhs, const double &rhs) {
   //       out.Backward_ is called
   auto div_op = std::make_shared<Div>(lhs.get_shared_ptr(), rhs);
   auto &out = div_op->Forward();
-  out.Backward_ = std::bind(&Div::Backward, div_op);
+  // NOTE: We are not binding out.Backward_ as this is done in the op
   return out;
 }
 
@@ -186,8 +186,7 @@ Value &Value::operator/(Value &rhs) {
   //       out.Backward_ is called
   auto div_op = std::make_shared<Div>(get_shared_ptr(), rhs.get_shared_ptr());
   auto &out = div_op->Forward();
-  // FIXME:
-  //out.Backward_ = std::bind(&Div::Backward, div_op);
+  // NOTE: We are not binding out.Backward_ as this is done in the op
   return out;
 }
 
@@ -245,38 +244,23 @@ void Value::UpdateGrad(const double &grad) { grad_ += grad; }
 
 // FIXME: Move to graph?
 void Value::Backward() {
-  // FIXME:
-  std::cout << "IN Backward():" << std::endl;
   // Build the topology
   TopologicalSort(*this);
   this->grad_ = 1.0;
 
-  std::cout << "  rloop of topology:" << std::endl;
   for (auto it = topology.rbegin(); it != topology.rend(); ++it) {
-    // FIXME:
-    std::cout << "    *it: id " << (*it)->get_id() << " | " << *(*it) << std::endl;
     if ((*it)->Backward_ != nullptr) {
-      // FIXME:
-      std::cout << "      Has Backward_" << std::endl;
       (*it)->Backward_();
     }
   }
 }
 
 void Value::TopologicalSort(const Value &value) {
-  // FIXME:
-  std::cout << "Toposort: id " << value.get_id() << " | " << value << std::endl;
-  // FIXME:
-    for (const auto &child : value.producers) {
-      std::cout << "  id=" << value.get_id() << " has producer: id " << child->get_id() << " | " << *child << std::endl;
-    }
   if (visited.find(value.get_id()) == visited.end()) {
     visited.insert(value.get_id());
     for (const auto &child : value.producers) {
-      std::cout << "  With id=" << value.get_id() << " entering: id " << child->get_id() << std::endl;
       TopologicalSort(*child);
     }
-  std::cout << " Pushing back " << value.get_id() << ": " << value.label_ << std::endl;
     topology.push_back(value.get_shared_ptr());
   }
 }
