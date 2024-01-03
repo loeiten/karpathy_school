@@ -120,6 +120,19 @@ void ReuseVariable() {
   std::cout << graph.ReturnDot(f) << std::endl;
 }
 
+void CompoundOps(){
+  // Create graph where Values reside
+  auto graph = Graph();
+  auto &a = graph.CreateValue(4.0, "a");
+  auto &b = graph.CreateValue(2.0, "b");
+  auto &o = a / b;
+  o.set_label("o");
+
+  o.Backward();
+
+  std::cout << graph.ReturnDot(o) << std::endl;
+}
+
 void TanhSpelledOut() {
   // Create graph where Values reside
   auto graph = Graph();
@@ -165,6 +178,8 @@ int main(int argc, char** argv) {
     GraphWithTemporaries();
   } else if (std::string(argv[1]).compare("ReuseVariable") == 0) {
     ReuseVariable();
+  } else if (std::string(argv[1]).compare("CompoundOps") == 0) {
+    CompoundOps();
   } else if (std::string(argv[1]).compare("TanhSpelledOut") == 0) {
     TanhSpelledOut();
   } else {

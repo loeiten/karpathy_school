@@ -11,6 +11,7 @@
 
 Sub::Sub(std::shared_ptr<Value> lhs, std::shared_ptr<Value> rhs)
     : Op(rhs), rhs_(rhs), lhs_(lhs) {}
+
 Sub::Sub(std::shared_ptr<Value> lhs, const double &rhs) : Op(lhs), lhs_(lhs) {
   // Create the rhs in the graph
   auto& tmp = graph.CreateValue(rhs);
@@ -21,6 +22,7 @@ Sub::Sub(std::shared_ptr<Value> lhs, const double &rhs) : Op(lhs), lhs_(lhs) {
   // Store the pointer
   rhs_ = tmp.get_shared_ptr();
 }
+
 Sub::Sub(const double &lhs, std::shared_ptr<Value> rhs) : Op(rhs), rhs_(rhs) {
   // Create the lhs in the graph
   auto& tmp = graph.CreateValue(lhs);

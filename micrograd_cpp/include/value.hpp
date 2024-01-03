@@ -11,6 +11,7 @@
 #include <unordered_set>  // for unordered_set
 #include <utility>        // for pair
 #include <vector>         // for vector
+#include <iostream>         // for vector
 
 // FIXME:
 // These issues needs to be addressed:
@@ -60,6 +61,8 @@ class Value {
   // Constructors
   Value(Graph &graph, const double &data);
   Value(Graph &graph, const double &data, const std::string &label);
+  // FIXME:
+  Value(Value &value);
 
   // Notice that both the grad of this and rhs is being altered by this
   Value &operator+(Value &rhs);
@@ -81,6 +84,7 @@ class Value {
   void set_label(const std::string &label);
   void set_grad(const double &grad);
   void set_op(const std::string &op);
+  void set_backward(const std::function<void()> &func);
 
   void AddProducer(std::shared_ptr<Value> producer);
   void UpdateGrad(const double &grad);

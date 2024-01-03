@@ -1,14 +1,15 @@
 #include "../../include/ops/add.hpp"
 
+#include <iomanip>  // for operator<<, setprecision
 #include <memory>
 #include <sstream>
-#include <iomanip>  // for operator<<, setprecision
 
 #include "../../include/graph.hpp"
 #include "../../include/value.hpp"
 
 Add::Add(std::shared_ptr<Value> lhs, std::shared_ptr<Value> rhs)
     : Op(rhs), rhs_(rhs), lhs_(lhs) {}
+
 Add::Add(const double& rhs, std::shared_ptr<Value> lhs) : Op(lhs), lhs_(lhs) {
   // Create the rhs in the graph
   auto& tmp = graph.CreateValue(rhs);
@@ -19,6 +20,7 @@ Add::Add(const double& rhs, std::shared_ptr<Value> lhs) : Op(lhs), lhs_(lhs) {
   // Store the pointer
   rhs_ = tmp.get_shared_ptr();
 }
+
 Add::Add(std::shared_ptr<Value> rhs, const double& lhs) : Op(rhs), rhs_(rhs) {
   // Create the lhs in the graph
   auto& tmp = graph.CreateValue(lhs);

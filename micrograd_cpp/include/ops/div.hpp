@@ -19,6 +19,8 @@ class Div : private Op {
   std::shared_ptr<Value> rhs_;
   std::shared_ptr<Value> lhs_;
   // NOTE: out_ not needed as the gradient is handled by Pow and Mul
+  // FIXME:
+  std::shared_ptr<Value> out_;
 };
 
 #endif  // MICROGRAD_CPP_INCLUDE_OPS_DIV_HPP_

@@ -154,6 +154,11 @@ Value::Value(Graph &graph, const double &data, const std::string &label)
   ++instance_count;
   id_ = instance_count;
 }
+
+// FIXME:
+Value::Value(Value& value): graph_(value.graph_), data_(value.data_), grad_(value.grad_), label_(value.label_){
+    std::cout << "Call to copy ctor" << std::endl;
+  }
 // =============================================================================
 
 // Member functions: Operator overloads
@@ -224,6 +229,8 @@ void Value::set_label(const std::string &label) { label_ = label; }
 void Value::set_grad(const double &grad) { grad_ = grad; }
 
 void Value::set_op(const std::string &op) { op_ = op; }
+
+void Value::set_backward(const std::function<void()> &func){Backward_ = func;}
 // =============================================================================
 
 // Member functions: Other
@@ -237,21 +244,31 @@ void Value::UpdateGrad(const double &grad) { grad_ += grad; }
 
 // FIXME: Move to graph?
 void Value::Backward() {
+  // FIXME:
+  std::cout << "IN Backward():" << std::endl;
   // Build the topology
   TopologicalSort(*this);
   this->grad_ = 1.0;
 
+  std::cout << "  rloop of topology:" << std::endl;
   for (auto it = topology.rbegin(); it != topology.rend(); ++it) {
+    // FIXME:
+    std::cout << "    *it: id " << (*it)->get_id() << " | " << *(*it) << std::endl;
     if ((*it)->Backward_ != nullptr) {
+      // FIXME:
+      std::cout << "      Has Backward_" << std::endl;
       (*it)->Backward_();
     }
   }
 }
 
 void Value::TopologicalSort(const Value &value) {
+  // FIXME:
+  std::cout << "Toposort: id " << value.get_id() << " | " << value << std::endl;
   if (visited.find(value.get_id()) == visited.end()) {
     visited.insert(value.get_id());
     for (const auto &child : value.producers) {
+      std::cout << "  id=" << value.get_id() << " has producer: id " << child->get_id() << " | " << *child << std::endl;
       TopologicalSort(*child);
     }
     topology.push_back(value.get_shared_ptr());
