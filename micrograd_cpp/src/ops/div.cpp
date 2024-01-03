@@ -48,6 +48,10 @@ Value &Div::Forward() {
   tmpPtr->set_backward(std::bind(&Pow::Backward, pow_op));
   // FIXME:
   tmpPtr->AddProducer(rhs_);
+  std::stringstream ss;
+  ss << "tmp_" << tmpPtr->get_id();
+  tmpPtr->set_label(ss.str());
+
   auto mul_op = std::make_shared<Mul>(lhs_, tmpPtr);
   auto &out = mul_op->Forward();
   out.set_backward(std::bind(&Mul::Backward, mul_op));
@@ -65,5 +69,5 @@ void Div::Backward() {
   std::cout << "        Div BWD (crickets chirping)" << std::endl;
   // NOTE: The back-propagation is controlled by the the other backward passes
   // FIXME: Test:
-  //out_->Backward();
+  out_->Backward();
 }

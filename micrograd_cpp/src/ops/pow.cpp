@@ -29,6 +29,7 @@ void Pow::Backward() {
   std::cout << "        Pow BWD:" << std::endl;
   std::cout << "          base_: id " << base_->get_id() << " | " << *base_ << std::endl;
   std::cout << "          out_: id " << out_->get_id() << " | " << *out_ << std::endl;
+  std::cout << "          exponent_: " << exponent_ << std::endl;
   base_->UpdateGrad(exponent_ * std::pow(base_->get_data(), exponent_ - 1) *
                    out_->get_grad());
 }
