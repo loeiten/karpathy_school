@@ -9,16 +9,15 @@
 #include "../include/value.hpp"  // for Value, hash, equal_to, operator<<
 
 Value &Graph::CreateValue(const double &value) {
-  // FIXME: Call pImpl in ctor
   auto it_existing = values.emplace(std::make_shared<Value>(*this, value));
   auto value_shared_ptr = *(it_existing.first);
   value_shared_ptr->set_shared_ptr(value_shared_ptr);
   // FIXME: Check if this is ok
+  // In order to chain, we need to return references
   return *(value_shared_ptr.get());
 }
 
 Value &Graph::CreateValue(const double &value, const std::string &label) {
-  // FIXME: Call pImpl in ctor
   auto it_existing = values.emplace(std::make_shared<Value>(*this, value, label));
   auto value_shared_ptr = *(it_existing.first);
   value_shared_ptr->set_shared_ptr(value_shared_ptr);
@@ -26,7 +25,6 @@ Value &Graph::CreateValue(const double &value, const std::string &label) {
   return *(value_shared_ptr.get());
 }
 
-// FIXME: Fix these stray dogs
 void Graph::Trace(const Value &value,
                   std::set<const std::shared_ptr<Value>> *nodes,
                   std::set<std::pair<const std::shared_ptr<Value>,

@@ -13,13 +13,6 @@
 #include <vector>         // for vector
 #include <iostream>         // for vector
 
-// FIXME:
-// These issues needs to be addressed:
-// 1. One cannot move a function lambda, only the captured values
-// 2. Named return value optimization is optional, so one should not rely on
-// this (https://en.cppreference.com/w/cpp/language/copy_elision)
-// 3. Chaining
-
 // Forward declarations
 class Value;
 class Graph;
@@ -92,7 +85,6 @@ class Value {
 
  private:
   std::shared_ptr<Value> value_shared_ptr_;
-  // FIXME: Consider to use pImpl
   Graph &graph_;
   double data_;
   double grad_ = 0;
