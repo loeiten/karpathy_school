@@ -155,6 +155,7 @@ void TanhSpelledOut() {
   n.set_label("n");
   // Output
   auto &e = exp(2.0f * n);
+  e.set_label("e");
   auto &o = (e - 1.0f) / (e + 1.0f);
   o.set_label("o");
 

@@ -64,7 +64,7 @@ Value &operator-(const double &lhs, Value &rhs) {
   //       out.Backward_ is called
   auto sub_op = std::make_shared<Sub>(lhs, rhs.get_shared_ptr());
   auto &out = sub_op->Forward();
-  out.Backward_ = std::bind(&Sub::Backward, sub_op);
+  // NOTE: We are not binding out.Backward_ as this is done in the op
   return out;
 }
 
@@ -73,7 +73,7 @@ Value &operator-(Value &lhs, const double &rhs) {
   //       out.Backward_ is called
   auto sub_op = std::make_shared<Sub>(lhs.get_shared_ptr(), rhs);
   auto &out = sub_op->Forward();
-  out.Backward_ = std::bind(&Sub::Backward, sub_op);
+  // NOTE: We are not binding out.Backward_ as this is done in the op
   return out;
 }
 
@@ -154,11 +154,6 @@ Value::Value(Graph &graph, const double &data, const std::string &label)
   ++instance_count;
   id_ = instance_count;
 }
-
-// FIXME:
-Value::Value(Value& value): graph_(value.graph_), data_(value.data_), grad_(value.grad_), label_(value.label_){
-    std::cout << "Call to copy ctor" << std::endl;
-  }
 // =============================================================================
 
 // Member functions: Operator overloads
@@ -195,7 +190,7 @@ Value &Value::operator-() {
   //       out.Backward_ is called
   auto neg_op = std::make_shared<Neg>(get_shared_ptr());
   auto &out = neg_op->Forward();
-  out.Backward_ = std::bind(&Neg::Backward, neg_op);
+  // NOTE: We are not binding out.Backward_ as this is done in the op
   return out;
 }
 // =============================================================================
@@ -205,6 +200,8 @@ Value &Value::operator-() {
 const std::set<std::shared_ptr<Value>> &Value::get_producers() const {
   return producers;
 }
+
+const std::string &Value::get_label() const { return label_; }
 
 const std::string &Value::get_op() const { return op_; }
 

@@ -1,6 +1,7 @@
 #include "../../include/ops/exp.hpp"
 
 #include <memory>
+#include <sstream>
 
 #include "../../include/graph.hpp"
 #include "../../include/value.hpp"
@@ -12,7 +13,12 @@ Value &Exp::Forward() {
   out_ = out.get_shared_ptr();
   out.AddProducer(exponent_);
   out.set_op("exp");
+  std::stringstream ss;
+  ss << "tmp_exp_out_id_" << out.get_id();
+  out.set_label(ss.str());
   return out;
 }
 
-void Exp::Backward() { exponent_->UpdateGrad(out_->get_data() * out_->get_grad()); }
+void Exp::Backward() {
+  exponent_->UpdateGrad(out_->get_data() * out_->get_grad());
+}

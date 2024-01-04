@@ -61,8 +61,6 @@ class Value {
   // Constructors
   Value(Graph &graph, const double &data);
   Value(Graph &graph, const double &data, const std::string &label);
-  // FIXME:
-  Value(Value &value);
 
   // Notice that both the grad of this and rhs is being altered by this
   Value &operator+(Value &rhs);
@@ -74,6 +72,7 @@ class Value {
   // These returns a copy as we do not want anything other than the class to
   // modify the value of these
   const std::set<std::shared_ptr<Value>> &get_producers() const;
+  const std::string &get_label() const;
   const std::string &get_op() const;
   const double &get_data() const;
   const double &get_grad() const;

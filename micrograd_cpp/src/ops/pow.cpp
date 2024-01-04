@@ -17,10 +17,15 @@ Value &Pow::Forward() {
   std::stringstream ss;
   ss << "^(" << std::fixed << std::setprecision(2) << exponent_ << ")";
   out.set_op(ss.str());
+  // Reset the sstream
+  ss.str("");
+  ss.clear();
+  ss << "pow_out_id_" << out.get_id();
+  out.set_label(ss.str());
   return out;
 }
 
 void Pow::Backward() {
   base_->UpdateGrad(exponent_ * std::pow(base_->get_data(), exponent_ - 1) *
-                   out_->get_grad());
+                    out_->get_grad());
 }

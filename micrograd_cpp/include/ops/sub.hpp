@@ -18,6 +18,7 @@ public:
  private:
   std::shared_ptr<Value> rhs_;
   std::shared_ptr<Value> lhs_;
+  std::shared_ptr<Value> out_;
 };
 
 #endif  // MICROGRAD_CPP_INCLUDE_OPS_SUB_HPP_

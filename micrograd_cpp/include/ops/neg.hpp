@@ -13,6 +13,7 @@ class Neg: private Op{
     void Backward() final ;
   private:
     std::shared_ptr<Value> val_;
+    std::shared_ptr<Value> out_;
 };
 
 #endif  // MICROGRAD_CPP_INCLUDE_OPS_NEG_HPP_

@@ -2,7 +2,7 @@ digraph {
     graph [rankdir=LR]
     "1" [label="{a | data 4.00 | grad 0.50}" shape=record]
     "2" [label="{b | data 2.00 | grad -1.00}" shape=record]
-    "3" [label="{div_tmp_3 | data 0.50 | grad 4.00}" shape=record]
+    "3" [label="{div_tmp_id_3 | data 0.50 | grad 4.00}" shape=record]
     "3^(-1.00)" [label="^(-1.00)"]
     "3^(-1.00)" -> "3"
     "4" [label="{o | data 2.00 | grad 1.00}" shape=record]

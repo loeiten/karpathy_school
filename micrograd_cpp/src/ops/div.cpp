@@ -1,8 +1,8 @@
 #include "../../include/ops/div.hpp"
 
+#include <iomanip>  // for operator<<, setprecision
 #include <memory>
 #include <sstream>
-#include <iomanip>  // for operator<<, setprecision
 
 #include "../../include/graph.hpp"
 #include "../../include/ops/mul.hpp"
@@ -14,7 +14,7 @@ Div::Div(std::shared_ptr<Value> lhs, std::shared_ptr<Value> rhs)
 
 Div::Div(std::shared_ptr<Value> lhs, const double &rhs) : Op(lhs), lhs_(lhs) {
   // Create the rhs in the graph
-  auto& tmp = graph.CreateValue(rhs);
+  auto &tmp = graph.CreateValue(rhs);
   // Add a label to the tmp
   std::stringstream ss;
   ss << "literal " << std::fixed << std::setprecision(2) << rhs;
@@ -25,7 +25,7 @@ Div::Div(std::shared_ptr<Value> lhs, const double &rhs) : Op(lhs), lhs_(lhs) {
 
 Div::Div(const double &lhs, std::shared_ptr<Value> rhs) : Op(rhs), rhs_(rhs) {
   // Create the lhs in the graph
-  auto& tmp = graph.CreateValue(lhs);
+  auto &tmp = graph.CreateValue(lhs);
   // Add a label to the tmp
   std::stringstream ss;
   ss << "literal " << std::fixed << std::setprecision(2) << lhs;
@@ -43,7 +43,7 @@ Value &Div::Forward() {
   tmpPtr->set_backward(std::bind(&Pow::Backward, pow_op));
   tmpPtr->AddProducer(rhs_);
   std::stringstream ss;
-  ss << "div_tmp_" << tmpPtr->get_id();
+  ss << "div_tmp_id_" << tmpPtr->get_id();
   tmpPtr->set_label(ss.str());
 
   auto mul_op = std::make_shared<Mul>(lhs_, tmpPtr);
@@ -51,10 +51,13 @@ Value &Div::Forward() {
   out.set_backward(std::bind(&Mul::Backward, mul_op));
   out.AddProducer(lhs_);
   out.AddProducer(tmpPtr);
+  // Reset the sstream
+  ss.str("");
+  ss.clear();
+  ss << "tmp_div_out_id_" << out.get_id();
+  out.set_label(ss.str());
   out_ = out.get_shared_ptr();
   return out;
 }
 
-void Div::Backward() {
-  out_->Backward();
-}
+void Div::Backward() { out_->Backward(); }

@@ -38,6 +38,9 @@ Value& Add::Forward() {
   out.AddProducer(lhs_);
   out.AddProducer(rhs_);
   out.set_op("+");
+  std::stringstream ss;
+  ss << "add_out_id_" << out.get_id();
+  out.set_label(ss.str());
   return out;
 }
 

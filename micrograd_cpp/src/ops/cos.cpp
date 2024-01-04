@@ -1,6 +1,7 @@
 #include "../../include/ops/cos.hpp"
 
 #include <memory>
+#include <sstream>
 
 #include "../../include/graph.hpp"
 #include "../../include/value.hpp"
@@ -12,7 +13,12 @@ Value &Cos::Forward() {
   out_ = out.get_shared_ptr();
   out.AddProducer(arg_);
   out.set_op("cos");
+  std::stringstream ss;
+  ss << "cos_out_id_" << out.get_id();
+  out.set_label(ss.str());
   return out;
 }
 
-void Cos::Backward() { arg_->UpdateGrad(-std::sin(arg_->get_data()) * out_->get_grad()); }
+void Cos::Backward() {
+  arg_->UpdateGrad(-std::sin(arg_->get_data()) * out_->get_grad());
+}

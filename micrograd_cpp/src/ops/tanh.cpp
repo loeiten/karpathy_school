@@ -1,6 +1,7 @@
 #include "../../include/ops/tanh.hpp"
 
 #include <memory>
+#include <sstream>
 
 #include "../../include/graph.hpp"
 #include "../../include/value.hpp"
@@ -14,9 +15,12 @@ Value &Tanh::Forward() {
   out_ = out.get_shared_ptr();
   out.AddProducer(arg_);
   out.set_op("tanh");
+  std::stringstream ss;
+  ss << "tanh_out_id_" << out.get_id();
+  out.set_label(ss.str());
   return out;
 }
 
 void Tanh::Backward() {
-  arg_->UpdateGrad((1 - std::pow(t_, 2)) * out_->get_grad()); 
+  arg_->UpdateGrad((1 - std::pow(t_, 2)) * out_->get_grad());
 }
