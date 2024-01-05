@@ -25,6 +25,18 @@ Value &Graph::CreateValue(const double &value, const std::string &label) {
   return *(value_shared_ptr.get());
 }
 
+void Graph::TopologicalSort(const Value &value) {
+  if (visited.find(value.get_id()) == visited.end()) {
+    visited.insert(value.get_id());
+    for (const auto &producer : value.get_producers()) {
+      TopologicalSort(*producer);
+    }
+    topology.push_back(value.get_shared_ptr());
+  }
+}
+
+
+
 void Graph::Trace(const Value &value,
                   std::set<const std::shared_ptr<Value>> *nodes,
                   std::set<std::pair<const std::shared_ptr<Value>,

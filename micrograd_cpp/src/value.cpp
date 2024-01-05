@@ -1,4 +1,5 @@
 #include "../include/value.hpp"
+#include "../include/graph.hpp"
 
 #include <memory.h>
 
@@ -241,23 +242,14 @@ void Value::UpdateGrad(const double &grad) { grad_ += grad; }
 
 // FIXME: Move to graph?
 void Value::Backward() {
+  auto &graph = this->get_graph();
   // Build the topology
-  TopologicalSort(*this);
+  graph.TopologicalSort(*this);
   this->grad_ = 1.0;
 
-  for (auto it = topology.rbegin(); it != topology.rend(); ++it) {
+  for (auto it = graph.topology.rbegin(); it != graph.topology.rend(); ++it) {
     if ((*it)->Backward_ != nullptr) {
       (*it)->Backward_();
     }
-  }
-}
-
-void Value::TopologicalSort(const Value &value) {
-  if (visited.find(value.get_id()) == visited.end()) {
-    visited.insert(value.get_id());
-    for (const auto &child : value.producers) {
-      TopologicalSort(*child);
-    }
-    topology.push_back(value.get_shared_ptr());
   }
 }

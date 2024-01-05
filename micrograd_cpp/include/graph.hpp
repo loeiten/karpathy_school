@@ -41,6 +41,8 @@ class Graph {
   Value &CreateValue(const double &value);
   Value &CreateValue(const double &value, const std::string &label);
 
+  void TopologicalSort(const Value &value);
+
   // NOTE: We use set here as we want the printed result to be reproducible
   void Trace(const Value &value, std::set<const std::shared_ptr<Value>> *nodes,
              std::set<std::pair<const std::shared_ptr<Value>,
@@ -48,8 +50,11 @@ class Graph {
 
   std::string ReturnDot(const Value &root);
 
+  std::vector<const std::shared_ptr<Value>> topology;
+
  private:
   std::unordered_set<std::shared_ptr<Value>> values;
+  std::unordered_set<int> visited;
 };
 
 #endif  // MICROGRAD_CPP_INCLUDE_GRAPH_HPP_
