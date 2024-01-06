@@ -8,21 +8,20 @@
 
 #include "../include/value.hpp"  // for Value, operator<<
 
-Value &Graph::CreateValue(const double &value) {
+Value &Graph::CreateValue(const double value) {
   auto it_existing = values.emplace(std::make_shared<Value>(*this, value));
   auto value_shared_ptr = *(it_existing.first);
   value_shared_ptr->set_shared_ptr(value_shared_ptr);
-  // FIXME: Check if this is ok
   // In order to chain, we need to return references
   return *(value_shared_ptr.get());
 }
 
-Value &Graph::CreateValue(const double &value, const std::string &label) {
+Value &Graph::CreateValue(const double value, const std::string &label) {
   auto it_existing =
       values.emplace(std::make_shared<Value>(*this, value, label));
   auto value_shared_ptr = *(it_existing.first);
   value_shared_ptr->set_shared_ptr(value_shared_ptr);
-  // FIXME: Check if this is ok
+  // In order to chain, we need to return references
   return *(value_shared_ptr.get());
 }
 

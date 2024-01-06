@@ -5,5 +5,3 @@
 #include "../../include/value.hpp"
 
 Op::Op(std::shared_ptr<Value> val) : graph(val->get_graph()) {}
-// FIXME:
-// Op::~Op() {}

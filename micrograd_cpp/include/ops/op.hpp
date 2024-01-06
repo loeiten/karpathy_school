@@ -17,16 +17,11 @@ class Op {
 
  protected:
   Graph& graph;
-  Op(std::shared_ptr<Value> val);
-  // FIXME: This is to avoid destructor called on non-final 'Tanh' that has
-  // virtual functions but non-virtual destructor, but I'm not sure I understand
-  // it
+  explicit Op(std::shared_ptr<Value> val);
+  // If the base class does not have a virtual destructor, the destructor of the
+  // derived class will not be called, which can lead to memory leaks or
+  // undefined behavior
   virtual ~Op() = default;
-
-  /* FIXME:
-  // This is not needed, I just want to be explicit
-  ~Op();
-  */
 };
 
 #endif  // MICROGRAD_CPP_INCLUDE_OPS_OP_HPP_

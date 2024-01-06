@@ -26,11 +26,9 @@ std::ostream &operator<<(std::ostream &os, const Value &value) {
   return os;
 }
 
-Value &pow(Value &a, const double &n) {
+Value &pow(Value &a, const double &n) {  // NOLINT (pointer for non-const &)
   // NOTE: We need to dynamically allocate the op for it to be in scope when
   //       out.Backward_ is called
-  // FIXME: Can we make this a unique pointer instead? Are we copying it
-  // anywhere?
   auto pow_op = std::make_shared<Pow>(a.get_shared_ptr(), n);
   auto &out = pow_op->Forward();
   out.Backward_ = std::bind(&Pow::Backward, pow_op);
@@ -55,7 +53,6 @@ Value &operator+(Value &lhs, const double &rhs) {
   return out;
 }
 
-// FIXME: Are these const Value misleading?
 Value &operator-(const double &lhs, const Value &rhs) {
   // NOTE: We need to dynamically allocate the op for it to be in scope when
   //       out.Backward_ is called
@@ -74,7 +71,7 @@ Value &operator-(const Value &lhs, const double &rhs) {
   return out;
 }
 
-Value &operator*(const double &lhs, Value &rhs) {
+Value &operator*(const double &lhs, Value &rhs) {  // NOLINT (pointer for &)
   // NOTE: We need to dynamically allocate the op for it to be in scope when
   //       out.Backward_ is called
   auto mul_op = std::make_shared<Mul>(lhs, rhs.get_shared_ptr());
@@ -110,7 +107,7 @@ Value &operator/(const Value &lhs, const double &rhs) {
   return out;
 }
 
-Value &tanh(Value &value) {
+Value &tanh(Value &value) {  // NOLINT (pointer for non-const &)
   // NOTE: We need to dynamically allocate the op for it to be in scope when
   //       out.Backward_ is called
   auto tanh_op = std::make_shared<Tanh>(value.get_shared_ptr());
@@ -119,7 +116,7 @@ Value &tanh(Value &value) {
   return out;
 }
 
-Value &cos(Value &value) {
+Value &cos(Value &value) {  // NOLINT (pointer for non-const &)
   // NOTE: We need to dynamically allocate the op for it to be in scope when
   //       out.Backward_ is called
   auto cos_op = std::make_shared<Cos>(value.get_shared_ptr());
@@ -128,7 +125,7 @@ Value &cos(Value &value) {
   return out;
 }
 
-Value &exp(Value &value) {
+Value &exp(Value &value) {  // NOLINT (pointer for non-const &)
   // NOTE: We need to dynamically allocate the op for it to be in scope when
   //       out.Backward_ is called
   auto exp_op = std::make_shared<Exp>(value.get_shared_ptr());
@@ -155,7 +152,7 @@ Value::Value(Graph &graph, const double &data, const std::string &label)
 
 // Member functions: Operator overloads
 // =============================================================================
-Value &Value::operator+(Value &rhs) {
+Value &Value::operator+(Value &rhs) {  // NOLINT (pointer for non-const &)
   // NOTE: We need to dynamically allocate the op for it to be in scope when
   //       out.Backward_ is called
   auto add_op = std::make_shared<Add>(get_shared_ptr(), rhs.get_shared_ptr());
@@ -164,7 +161,7 @@ Value &Value::operator+(Value &rhs) {
   return out;
 }
 
-Value &Value::operator*(Value &rhs) {
+Value &Value::operator*(Value &rhs) {  // NOLINT (pointer for non-const &)
   // NOTE: We need to dynamically allocate the op for it to be in scope when
   //       out.Backward_ is called
   auto mul_op = std::make_shared<Mul>(get_shared_ptr(), rhs.get_shared_ptr());
@@ -238,7 +235,6 @@ void Value::AddProducer(std::shared_ptr<Value> producer) {
 void Value::UpdateGrad(const double &grad) { grad_ += grad; }
 // =============================================================================
 
-// FIXME: Move to graph?
 void Value::Backward() {
   auto &graph = this->get_graph();
   // Build the topology

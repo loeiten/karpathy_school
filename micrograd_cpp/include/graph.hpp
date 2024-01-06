@@ -39,8 +39,11 @@ class Graph {
   In order to achieve this the ownership of the t nodes should lay outside
   the Values. A good place to place them is in a graph.
   */
-  Value &CreateValue(const double &value);
-  Value &CreateValue(const double &value, const std::string &label);
+  // NOTE: We are not using references here in order to get references to
+  // dangling temporary. For details see:
+  // https://comp.lang.cpp.moderated.narkive.com/FScmAZiw/dangling-reference
+  Value &CreateValue(const double value);
+  Value &CreateValue(const double value, const std::string &label);
 
   void TopologicalSort(const Value &value);
 

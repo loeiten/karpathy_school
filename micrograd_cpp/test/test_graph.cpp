@@ -13,8 +13,6 @@ void SimpleGraph() {
   auto &b = graph.CreateValue(-3.0, "b");
   auto &c = graph.CreateValue(10.0, "c");
   auto &e = a * b;
-  // FIXME: Issues with using reference to dangling temporary
-  //        https://comp.lang.cpp.moderated.narkive.com/FScmAZiw/dangling-reference
   e.set_label("e");
   auto &d = e + c;
   d.set_label("d");
