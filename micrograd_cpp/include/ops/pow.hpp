@@ -1,9 +1,9 @@
 #ifndef MICROGRAD_CPP_INCLUDE_OPS_POW_HPP_
 #define MICROGRAD_CPP_INCLUDE_OPS_POW_HPP_
 
-#include <memory>
+#include <memory>  // for shared_ptr
 
-#include "op.hpp"
+#include "op.hpp"  // for Op
 
 class Value;
 

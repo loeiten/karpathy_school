@@ -1,9 +1,11 @@
 #include "../../include/ops/cos.hpp"
 
+#include <cmath>
 #include <memory>
 #include <sstream>
 
 #include "../../include/graph.hpp"
+#include "../../include/ops/op.hpp"
 #include "../../include/value.hpp"
 
 Cos::Cos(std::shared_ptr<Value> arg) : Op(arg), arg_(arg) {}

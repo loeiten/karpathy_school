@@ -1,11 +1,12 @@
 #ifndef MICROGRAD_CPP_INCLUDE_GRAPH_HPP_
 #define MICROGRAD_CPP_INCLUDE_GRAPH_HPP_
 
-#include <memory>
+#include <memory>         // for shared_ptr
 #include <set>            // for set
 #include <string>         // for string
-#include <unordered_set>  // for set
+#include <unordered_set>  // for unordered_set
 #include <utility>        // for pair
+#include <vector>         // for vector
 
 class Value;
 

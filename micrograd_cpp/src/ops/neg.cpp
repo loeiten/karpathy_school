@@ -1,10 +1,11 @@
 #include "../../include/ops/neg.hpp"
-#include "../../include/ops/mul.hpp"
 
 #include <memory>
 #include <sstream>
 
 #include "../../include/graph.hpp"
+#include "../../include/ops/mul.hpp"
+#include "../../include/ops/op.hpp"
 #include "../../include/value.hpp"
 
 Neg::Neg(std::shared_ptr<Value> val) : Op(val), val_(val) {}
@@ -21,6 +22,4 @@ Value &Neg::Forward() {
   return out;
 }
 
-void Neg::Backward() {
-  out_->Backward();
-}
+void Neg::Backward() { out_->Backward(); }

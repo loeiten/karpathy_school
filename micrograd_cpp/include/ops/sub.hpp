@@ -1,14 +1,14 @@
 #ifndef MICROGRAD_CPP_INCLUDE_OPS_SUB_HPP_
 #define MICROGRAD_CPP_INCLUDE_OPS_SUB_HPP_
 
-#include <memory>
+#include <memory>  // for shared_ptr
 
-#include "op.hpp"
+#include "op.hpp"  // for Op
 
 class Value;
 
 class Sub : private Op {
-public:
+ public:
   Sub(std::shared_ptr<Value> lhs, std::shared_ptr<Value> rhs);
   Sub(std::shared_ptr<Value> lhs, const double &rhs);
   Sub(const double &lhs, std::shared_ptr<Value> rhs);

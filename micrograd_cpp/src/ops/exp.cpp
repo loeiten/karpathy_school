@@ -1,9 +1,11 @@
 #include "../../include/ops/exp.hpp"
 
+#include <cmath>
 #include <memory>
 #include <sstream>
 
 #include "../../include/graph.hpp"
+#include "../../include/ops/op.hpp"
 #include "../../include/value.hpp"
 
 Exp::Exp(std::shared_ptr<Value> exponent) : Op(exponent), exponent_(exponent) {}

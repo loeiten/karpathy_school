@@ -1,5 +1,6 @@
 #include "../../include/ops/sub.hpp"
 
+#include <functional>
 #include <iomanip>  // for operator<<, setprecision
 #include <memory>
 #include <sstream>
@@ -7,6 +8,7 @@
 #include "../../include/graph.hpp"
 #include "../../include/ops/add.hpp"
 #include "../../include/ops/neg.hpp"
+#include "../../include/ops/op.hpp"
 #include "../../include/value.hpp"
 
 Sub::Sub(std::shared_ptr<Value> lhs, std::shared_ptr<Value> rhs)

@@ -1,10 +1,12 @@
 #include "../../include/ops/pow.hpp"
 
+#include <cmath>
 #include <iomanip>  // for operator<<, setprecision
 #include <memory>
 #include <sstream>
 
 #include "../../include/graph.hpp"
+#include "../../include/ops/op.hpp"
 #include "../../include/value.hpp"
 
 Pow::Pow(std::shared_ptr<Value> base, const double &exponent)

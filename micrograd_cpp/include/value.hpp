@@ -3,15 +3,11 @@
 
 #include <cstddef>     // for size_t
 #include <cstdint>     // for uint64_t
-#include <functional>  // for equal_to, hash, function
-#include <memory>
-#include <ostream>        // for ostream
-#include <set>            // for set
-#include <string>         // for string
-#include <unordered_set>  // for unordered_set
-#include <utility>        // for pair
-#include <vector>         // for vector
-#include <iostream>         // for vector
+#include <functional>  // for shared_ptr, function, hash, equal_to
+#include <ostream>     // for ostream
+#include <set>         // for set
+#include <string>      // for string
+#include <utility>     // for pair
 
 // Forward declarations
 class Value;
@@ -41,12 +37,12 @@ class Value {
   friend Value &pow(Value &a, const double &n);
   friend Value &operator+(const double &lhs, Value &rhs);
   friend Value &operator+(Value &lhs, const double &rhs);
-  friend Value &operator-(const double &lhs, Value &rhs);
-  friend Value &operator-(Value &lhs, const double &rhs);
+  friend Value &operator-(const double &lhs, const Value &rhs);
+  friend Value &operator-(const Value &lhs, const double &rhs);
   friend Value &operator*(const double &lhs, Value &rhs);
   friend Value &operator*(Value &lhs, const double &rhs);
-  friend Value &operator/(const double &lhs, Value &rhs);
-  friend Value &operator/(Value &lhs, const double &rhs);
+  friend Value &operator/(const double &lhs, const Value &rhs);
+  friend Value &operator/(const Value &lhs, const double &rhs);
   friend Value &tanh(Value &value);
   friend Value &exp(Value &value);
   friend Value &cos(Value &value);
@@ -58,7 +54,7 @@ class Value {
   // Notice that both the grad of this and rhs is being altered by this
   Value &operator+(Value &rhs);
   Value &operator*(Value &rhs);
-  Value &operator/(Value &rhs);
+  Value &operator/(const Value &rhs);
   Value &operator-();
 
   // Accessors and mutators (get and set functions) may be named like variables.

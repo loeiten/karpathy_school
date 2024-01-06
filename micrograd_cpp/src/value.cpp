@@ -1,25 +1,20 @@
 #include "../include/value.hpp"
-#include "../include/graph.hpp"
 
-#include <memory.h>
+#include <functional>  // for __bind, shared_ptr, make_shared
+#include <iomanip>     // for operator<<, setprecision
+#include <string>      // for char_traits, string
+#include <vector>      // for vector
 
-#include <cmath>
-#include <functional>
-#include <iomanip>  // for operator<<, setprecision
-#include <iostream>
-#include <memory>
-#include <string>
-#include <unordered_set>  // for unordered_set
-
-#include "../include/ops/add.hpp"
-#include "../include/ops/cos.hpp"
-#include "../include/ops/div.hpp"
-#include "../include/ops/exp.hpp"
-#include "../include/ops/mul.hpp"
-#include "../include/ops/neg.hpp"
-#include "../include/ops/pow.hpp"
-#include "../include/ops/sub.hpp"
-#include "../include/ops/tanh.hpp"
+#include "../include/graph.hpp"     // for Graph
+#include "../include/ops/add.hpp"   // for Add
+#include "../include/ops/cos.hpp"   // for Cos
+#include "../include/ops/div.hpp"   // for Div
+#include "../include/ops/exp.hpp"   // for Exp
+#include "../include/ops/mul.hpp"   // for Mul
+#include "../include/ops/neg.hpp"   // for Neg
+#include "../include/ops/pow.hpp"   // for Pow
+#include "../include/ops/sub.hpp"   // for Sub
+#include "../include/ops/tanh.hpp"  // for Tanh
 
 int Value::instance_count = 0;
 
@@ -60,7 +55,8 @@ Value &operator+(Value &lhs, const double &rhs) {
   return out;
 }
 
-Value &operator-(const double &lhs, Value &rhs) {
+// FIXME: Are these const Value misleading?
+Value &operator-(const double &lhs, const Value &rhs) {
   // NOTE: We need to dynamically allocate the op for it to be in scope when
   //       out.Backward_ is called
   auto sub_op = std::make_shared<Sub>(lhs, rhs.get_shared_ptr());
@@ -69,7 +65,7 @@ Value &operator-(const double &lhs, Value &rhs) {
   return out;
 }
 
-Value &operator-(Value &lhs, const double &rhs) {
+Value &operator-(const Value &lhs, const double &rhs) {
   // NOTE: We need to dynamically allocate the op for it to be in scope when
   //       out.Backward_ is called
   auto sub_op = std::make_shared<Sub>(lhs.get_shared_ptr(), rhs);
@@ -96,7 +92,7 @@ Value &operator*(Value &lhs, const double &rhs) {
   return out;
 }
 
-Value &operator/(const double &lhs, Value &rhs) {
+Value &operator/(const double &lhs, const Value &rhs) {
   // NOTE: We need to dynamically allocate the op for it to be in scope when
   //       out.Backward_ is called
   auto div_op = std::make_shared<Div>(lhs, rhs.get_shared_ptr());
@@ -105,7 +101,7 @@ Value &operator/(const double &lhs, Value &rhs) {
   return out;
 }
 
-Value &operator/(Value &lhs, const double &rhs) {
+Value &operator/(const Value &lhs, const double &rhs) {
   // NOTE: We need to dynamically allocate the op for it to be in scope when
   //       out.Backward_ is called
   auto div_op = std::make_shared<Div>(lhs.get_shared_ptr(), rhs);
@@ -177,7 +173,7 @@ Value &Value::operator*(Value &rhs) {
   return out;
 }
 
-Value &Value::operator/(Value &rhs) {
+Value &Value::operator/(const Value &rhs) {
   // NOTE: We need to dynamically allocate the op for it to be in scope when
   //       out.Backward_ is called
   auto div_op = std::make_shared<Div>(get_shared_ptr(), rhs.get_shared_ptr());
@@ -228,7 +224,9 @@ void Value::set_grad(const double &grad) { grad_ = grad; }
 
 void Value::set_op(const std::string &op) { op_ = op; }
 
-void Value::set_backward(const std::function<void()> &func){Backward_ = func;}
+void Value::set_backward(const std::function<void()> &func) {
+  Backward_ = func;
+}
 // =============================================================================
 
 // Member functions: Other

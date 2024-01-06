@@ -1,16 +1,19 @@
 #include "../../include/ops/tanh.hpp"
 
+#include <cmath>
 #include <memory>
 #include <sstream>
 
 #include "../../include/graph.hpp"
+#include "../../include/ops/op.hpp"
 #include "../../include/value.hpp"
 
 Tanh::Tanh(std::shared_ptr<Value> arg) : Op(arg), arg_(arg) {}
 
 Value &Tanh::Forward() {
   const double &x = arg_->get_data();
-  t_ = (std::exp(2 * x) - 1) / (std::exp(2 * x) + 1);
+  // NOTE: We use expm1(x) instead of exp(x-1) to avoid loss of precision
+  t_ = std::expm1(2 * x) / (std::exp(2 * x) + 1);
   auto &out = graph.CreateValue(t_);
   out_ = out.get_shared_ptr();
   out.AddProducer(arg_);

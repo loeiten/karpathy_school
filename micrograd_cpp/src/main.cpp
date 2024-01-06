@@ -1,7 +1,7 @@
-#include <iostream>  // for char_traits, operator<<, basic...
+#include <iostream>  // for char_traits, operator<<, basic_ostream
 
-#include "../include/graph.hpp"  // for ReturnDot
-#include "../include/value.hpp"        // for Value
+#include "../include/graph.hpp"  // for Graph
+#include "../include/value.hpp"  // for Value, exp, operator*
 
 int main() {
   auto graph = Graph();

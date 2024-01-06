@@ -1,12 +1,12 @@
 #include "../include/graph.hpp"  // for Value, hash, equal_to, operator<<
 
-#include <memory>
-#include <set>      // for unordered_set, operator!=, __hash_co...
+#include <memory>   // for shared_ptr, make_shared
+#include <set>      // for set
 #include <sstream>  // for operator<<, basic_ostream, stringstream
 #include <string>   // for char_traits, string, operator!=
 #include <utility>  // for pair, make_pair
 
-#include "../include/value.hpp"  // for Value, hash, equal_to, operator<<
+#include "../include/value.hpp"  // for Value, operator<<
 
 Value &Graph::CreateValue(const double &value) {
   auto it_existing = values.emplace(std::make_shared<Value>(*this, value));
@@ -18,7 +18,8 @@ Value &Graph::CreateValue(const double &value) {
 }
 
 Value &Graph::CreateValue(const double &value, const std::string &label) {
-  auto it_existing = values.emplace(std::make_shared<Value>(*this, value, label));
+  auto it_existing =
+      values.emplace(std::make_shared<Value>(*this, value, label));
   auto value_shared_ptr = *(it_existing.first);
   value_shared_ptr->set_shared_ptr(value_shared_ptr);
   // FIXME: Check if this is ok
@@ -34,8 +35,6 @@ void Graph::TopologicalSort(const Value &value) {
     topology.push_back(value.get_shared_ptr());
   }
 }
-
-
 
 void Graph::Trace(const Value &value,
                   std::set<const std::shared_ptr<Value>> *nodes,

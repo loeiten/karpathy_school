@@ -1,11 +1,13 @@
 #include "../../include/ops/div.hpp"
 
+#include <functional>
 #include <iomanip>  // for operator<<, setprecision
 #include <memory>
 #include <sstream>
 
 #include "../../include/graph.hpp"
 #include "../../include/ops/mul.hpp"
+#include "../../include/ops/op.hpp"
 #include "../../include/ops/pow.hpp"
 #include "../../include/value.hpp"
 

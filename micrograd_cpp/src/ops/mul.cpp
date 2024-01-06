@@ -5,6 +5,7 @@
 #include <sstream>
 
 #include "../../include/graph.hpp"
+#include "../../include/ops/op.hpp"
 #include "../../include/value.hpp"
 
 Mul::Mul(std::shared_ptr<Value> lhs, std::shared_ptr<Value> rhs)

@@ -1,14 +1,14 @@
 #ifndef MICROGRAD_CPP_INCLUDE_OPS_MUL_HPP_
 #define MICROGRAD_CPP_INCLUDE_OPS_MUL_HPP_
 
-#include <memory>
+#include <memory>  // for shared_ptr
 
-#include "op.hpp"
+#include "op.hpp"  // for Op
 
 class Value;
 
 class Mul : private Op {
-public:
+ public:
   Mul(std::shared_ptr<Value> lhs, std::shared_ptr<Value> rhs);
   Mul(std::shared_ptr<Value> lhs, const double &rhs);
   Mul(const double &lhs, std::shared_ptr<Value> rhs);

@@ -1,10 +1,10 @@
 #include <cstdlib>     // for EXIT_FAILURE, EXIT_SUCCESS
 #include <filesystem>  // for path
-#include <iostream>    // for operator<<, basic_ostream, endl
+#include <iostream>    // for operator<<, basic_ostream, endl, cha...
 #include <string>      // for char_traits, string
 
-#include "../include/graph.hpp"  // for ReturnDot
-#include "../include/value.hpp"  // for Value
+#include "../include/graph.hpp"  // for Graph
+#include "../include/value.hpp"  // for Value, cos, exp, operator*, operator+
 
 void SimpleGraph() {
   // Create graph where Values reside
@@ -13,6 +13,8 @@ void SimpleGraph() {
   auto &b = graph.CreateValue(-3.0, "b");
   auto &c = graph.CreateValue(10.0, "c");
   auto &e = a * b;
+  // FIXME: Issues with using reference to dangling temporary
+  //        https://comp.lang.cpp.moderated.narkive.com/FScmAZiw/dangling-reference
   e.set_label("e");
   auto &d = e + c;
   d.set_label("d");
@@ -80,7 +82,7 @@ void ReuseVariable() {
   std::cout << graph.ReturnDot(f) << std::endl;
 }
 
-void CompoundOps(){
+void CompoundOps() {
   // Create graph where Values reside
   auto graph = Graph();
   auto &a = graph.CreateValue(4.0, "a");
@@ -124,7 +126,7 @@ void TanhSpelledOut() {
   std::cout << graph.ReturnDot(o) << std::endl;
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
   std::string filename = std::filesystem::path(argv[0]).filename();
   if (argc < 2) {
     std::cout << "Usage: ./" << filename << " test args" << std::endl;
