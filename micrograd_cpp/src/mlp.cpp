@@ -70,7 +70,7 @@ Value& MLP::Loss(
   for (size_t i = 0; i < ground_truth.size(); ++i) {
     auto lhs_ptr = outputs.at(i).at(0);
     auto rhs_ptr = ground_truth.at(i);
-    auto sub_ptr = ((*lhs_ptr) + (-(*rhs_ptr))).get_shared_ptr();
+    auto sub_ptr = ((*lhs_ptr) - (*rhs_ptr)).get_shared_ptr();
     loss_ptr = ((*loss_ptr) + pow((*sub_ptr), 2.0)).get_shared_ptr();
   }
 

@@ -56,6 +56,7 @@ class Value {
   Value &operator+(const Value &rhs);
   Value &operator*(const Value &rhs);
   Value &operator/(const Value &rhs);
+  Value &operator-(const Value &rhs);
   Value &operator-();
 
   // Accessors and mutators (get and set functions) may be named like variables.

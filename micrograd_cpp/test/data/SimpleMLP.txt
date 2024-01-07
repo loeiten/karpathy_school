@@ -251,10 +251,10 @@ digraph {
     "99tanh" -> "99"
     "100" [label="{loss | data 0.00 | grad 0.00}" shape=record]
     "101" [label="{literal -1.00 | data -1.00 | grad 0.00}" shape=record]
-    "102" [label="{neg_out_id_7 | data -1.00 | grad 0.00}" shape=record]
+    "102" [label="{neg_tmp_id_102 | data -1.00 | grad 0.00}" shape=record]
     "102*" [label="*"]
     "102*" -> "102"
-    "103" [label="{add_out_id_103 | data -1.01 | grad 0.00}" shape=record]
+    "103" [label="{sub_out_id_103 | data -1.01 | grad 0.00}" shape=record]
     "103+" [label="+"]
     "103+" -> "103"
     "104" [label="{pow_out_id_104 | data 1.01 | grad 0.00}" shape=record]
@@ -264,10 +264,10 @@ digraph {
     "105+" [label="+"]
     "105+" -> "105"
     "106" [label="{literal -1.00 | data -1.00 | grad 0.00}" shape=record]
-    "107" [label="{neg_out_id_8 | data 1.00 | grad 0.00}" shape=record]
+    "107" [label="{neg_tmp_id_107 | data 1.00 | grad 0.00}" shape=record]
     "107*" [label="*"]
     "107*" -> "107"
-    "108" [label="{add_out_id_108 | data 1.01 | grad 0.00}" shape=record]
+    "108" [label="{sub_out_id_108 | data 1.01 | grad 0.00}" shape=record]
     "108+" [label="+"]
     "108+" -> "108"
     "109" [label="{pow_out_id_109 | data 1.03 | grad 0.00}" shape=record]
@@ -277,10 +277,10 @@ digraph {
     "110+" [label="+"]
     "110+" -> "110"
     "111" [label="{literal -1.00 | data -1.00 | grad 0.00}" shape=record]
-    "112" [label="{neg_out_id_9 | data 1.00 | grad 0.00}" shape=record]
+    "112" [label="{neg_tmp_id_112 | data 1.00 | grad 0.00}" shape=record]
     "112*" [label="*"]
     "112*" -> "112"
-    "113" [label="{add_out_id_113 | data 1.06 | grad 0.00}" shape=record]
+    "113" [label="{sub_out_id_113 | data 1.06 | grad 0.00}" shape=record]
     "113+" [label="+"]
     "113+" -> "113"
     "114" [label="{pow_out_id_114 | data 1.11 | grad 0.00}" shape=record]
