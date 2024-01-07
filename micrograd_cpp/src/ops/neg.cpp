@@ -1,12 +1,12 @@
 #include "../../include/ops/neg.hpp"
 
-#include <memory>
-#include <sstream>
+#include <functional>  // for __bind, bind
+#include <memory>      // for shared_ptr, make_shared
+#include <sstream>     // for char_traits, basic_ostream, ope...
 
-#include "../../include/graph.hpp"
-#include "../../include/ops/mul.hpp"
-#include "../../include/ops/op.hpp"
-#include "../../include/value.hpp"
+#include "../../include/ops/mul.hpp"  // for Mul
+#include "../../include/ops/op.hpp"   // for Op
+#include "../../include/value.hpp"    // for Value
 
 Neg::Neg(std::shared_ptr<Value> val) : Op(val), val_(val) {}
 

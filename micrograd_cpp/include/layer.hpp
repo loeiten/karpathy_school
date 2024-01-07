@@ -34,7 +34,8 @@ class Layer : public Neuron {
   //   x1 - w21   \    \
   //   x2 - w22   -       o2
   //   x3 - w23   /
-  std::vector<std::shared_ptr<Value>> operator()(
+  std::vector<std::shared_ptr<Value>>
+  operator()(  // cppcheck-suppress duplInheritedMember
       const std::vector<std::shared_ptr<Value>>& x);
 
  protected:

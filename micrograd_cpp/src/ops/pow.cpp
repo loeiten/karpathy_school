@@ -1,13 +1,13 @@
 #include "../../include/ops/pow.hpp"
 
-#include <cmath>
+#include <cmath>    // for pow
 #include <iomanip>  // for operator<<, setprecision
-#include <memory>
-#include <sstream>
+#include <memory>   // for allocator, shared_ptr
+#include <sstream>  // for char_traits, basic_ostream, oper...
 
-#include "../../include/graph.hpp"
-#include "../../include/ops/op.hpp"
-#include "../../include/value.hpp"
+#include "../../include/graph.hpp"   // for Graph
+#include "../../include/ops/op.hpp"  // for Op
+#include "../../include/value.hpp"   // for Value
 
 Pow::Pow(std::shared_ptr<Value> base, const double &exponent)
     : Op(base), base_(base), exponent_(exponent) {}

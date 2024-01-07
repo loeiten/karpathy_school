@@ -1,11 +1,10 @@
 #ifndef MICROGRAD_CPP_INCLUDE_MODULE_HPP_
 #define MICROGRAD_CPP_INCLUDE_MODULE_HPP_
 
-#include <memory>
-#include <vector>
+#include <memory>  // for shared_ptr
+#include <vector>  // for vector
 
 class Value;
-class Graph;
 class Graph;
 
 class Module {

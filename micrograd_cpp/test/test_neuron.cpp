@@ -2,7 +2,6 @@
 #include <filesystem>  // for path
 #include <iostream>    // for operator<<, basic_ostream, endl
 #include <memory>      // for shared_ptr
-#include <sstream>     // for stringstream
 #include <string>      // for char_traits, string
 #include <vector>      // for vector
 

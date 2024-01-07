@@ -18,7 +18,7 @@ namespace std {
 // We need a hash function in order to use unordered_set
 template <>  // template<> is used to specialize a template for a specific type
 struct hash<const std::shared_ptr<Value>> {
-  size_t operator()(const std::shared_ptr<Value> value) const;
+  std::size_t operator()(const std::shared_ptr<Value> value) const;
 };
 // We need equal_to in order to use .find() on the unordered_set
 template <>
@@ -113,8 +113,8 @@ namespace std {
 // We need a hash to use the pair of Values in an unordered_set
 template <>
 struct hash<pair<const std::shared_ptr<Value>, const std::shared_ptr<Value>>> {
-  size_t operator()(const pair<const std::shared_ptr<Value>,
-                               const std::shared_ptr<Value>> &p) const {
+  std::size_t operator()(const pair<const std::shared_ptr<Value>,
+                                    const std::shared_ptr<Value>> &p) const {
     // Compute a hash value for the pair using FNV-1a
     // Note that SipHash is more sophisticated and has replaced this method in
     // python

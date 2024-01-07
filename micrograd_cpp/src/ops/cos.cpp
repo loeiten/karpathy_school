@@ -1,12 +1,12 @@
 #include "../../include/ops/cos.hpp"
 
-#include <cmath>
-#include <memory>
-#include <sstream>
+#include <cmath>    // for cos, sin
+#include <memory>   // for shared_ptr
+#include <sstream>  // for char_traits, basic_ostream, oper...
 
-#include "../../include/graph.hpp"
-#include "../../include/ops/op.hpp"
-#include "../../include/value.hpp"
+#include "../../include/graph.hpp"   // for Graph
+#include "../../include/ops/op.hpp"  // for Op
+#include "../../include/value.hpp"   // for Value
 
 Cos::Cos(std::shared_ptr<Value> arg) : Op(arg), arg_(arg) {}
 

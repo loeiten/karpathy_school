@@ -1,13 +1,14 @@
 #include "../include/neuron.hpp"
 
-#include <exception>
-#include <memory>
-#include <random>
-#include <sstream>
+#include <memory>     // for shared_ptr
+#include <random>     // for random_device, mt19937, uniform_real_distribution
+#include <sstream>    // for stringstream
+#include <stdexcept>  // for length_error
 
-#include "../include/graph.hpp"
-#include "../include/ops/tanh.hpp"
-#include "../include/value.hpp"
+#include "../include/graph.hpp"     // for Graph
+#include "../include/module.hpp"    // for module
+#include "../include/ops/tanh.hpp"  // for Tanh
+#include "../include/value.hpp"     // for Value
 
 Neuron::Neuron(Graph& graph) : Module(graph), non_linear_(true) {}
 

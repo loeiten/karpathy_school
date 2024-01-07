@@ -1,12 +1,12 @@
 #include "../../include/ops/exp.hpp"
 
-#include <cmath>
-#include <memory>
-#include <sstream>
+#include <cmath>    // for exp
+#include <memory>   // for shared_ptr
+#include <sstream>  // for char_traits, basic_ostream, oper...
 
-#include "../../include/graph.hpp"
-#include "../../include/ops/op.hpp"
-#include "../../include/value.hpp"
+#include "../../include/graph.hpp"   // for Graph
+#include "../../include/ops/op.hpp"  // for Op
+#include "../../include/value.hpp"   // for Value
 
 Exp::Exp(std::shared_ptr<Value> exponent) : Op(exponent), exponent_(exponent) {}
 

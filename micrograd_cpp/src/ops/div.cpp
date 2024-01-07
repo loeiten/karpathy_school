@@ -1,15 +1,15 @@
 #include "../../include/ops/div.hpp"
 
-#include <functional>
-#include <iomanip>  // for operator<<, setprecision
-#include <memory>
-#include <sstream>
+#include <functional>  // for __bind, bind
+#include <iomanip>     // for operator<<, setprecision
+#include <memory>      // for shared_ptr, allocator, make_shared
+#include <sstream>     // for char_traits, basic_ostream, ope...
 
-#include "../../include/graph.hpp"
-#include "../../include/ops/mul.hpp"
-#include "../../include/ops/op.hpp"
-#include "../../include/ops/pow.hpp"
-#include "../../include/value.hpp"
+#include "../../include/graph.hpp"    // for Graph
+#include "../../include/ops/mul.hpp"  // for Mul
+#include "../../include/ops/op.hpp"   // for Op
+#include "../../include/ops/pow.hpp"  // for Pow
+#include "../../include/value.hpp"    // for Value
 
 Div::Div(std::shared_ptr<Value> lhs, std::shared_ptr<Value> rhs)
     : Op(rhs), rhs_(rhs), lhs_(lhs) {}

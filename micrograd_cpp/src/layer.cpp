@@ -1,7 +1,9 @@
 #include "../include/layer.hpp"
 
-#include <memory>
+#include <cstddef>  // for size_t
+#include <memory>   // for shared_ptr
 
+#include "../include/neuron.hpp"
 #include "../include/value.hpp"
 
 Layer::Layer(Graph& graph) : Neuron(graph) {}
@@ -14,10 +16,11 @@ Layer::Layer(Graph& graph, const int& n_in, const int& n_out,
   }
 }
 
-std::vector<std::shared_ptr<Value>> Layer::operator()(
+std::vector<std::shared_ptr<Value>>
+Layer::operator()(  // cppcheck-suppress duplInheritedMember
     const std::vector<std::shared_ptr<Value>>& x) {
   std::vector<std::shared_ptr<Value>> out_values;
-  for (size_t i = 0; i < in_nodes.size(); ++i) {
+  for (std::size_t i = 0; i < in_nodes.size(); ++i) {
     // NOTE: This creates new Values
     out_values.emplace_back(((*in_nodes.at(i))(x)).get_shared_ptr());
   }

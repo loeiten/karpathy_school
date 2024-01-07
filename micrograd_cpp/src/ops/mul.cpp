@@ -1,13 +1,12 @@
 #include "../../include/ops/mul.hpp"
 
 #include <iomanip>  // for operator<<, setprecision
-#include <memory>
-#include <sstream>
-#include <iostream>
+#include <memory>   // for shared_ptr
+#include <sstream>  // for char_traits, basic_ostream, oper...
 
-#include "../../include/graph.hpp"
-#include "../../include/ops/op.hpp"
-#include "../../include/value.hpp"
+#include "../../include/graph.hpp"   // for Graph
+#include "../../include/ops/op.hpp"  // for Op
+#include "../../include/value.hpp"   // for Value
 
 Mul::Mul(std::shared_ptr<Value> lhs, std::shared_ptr<Value> rhs)
     : Op(rhs), rhs_(rhs), lhs_(lhs) {}

@@ -1,24 +1,24 @@
 #include "../include/mlp.hpp"
 
-#include <stddef.h>
+#include <cstddef>    // for size_t
+#include <iomanip>    // for operator<<, setprecision
+#include <iostream>   // for basic_ostream, char_traits, operator<<
+#include <memory>     // for shared_ptr, make_shared
+#include <sstream>    // for stringstream
+#include <stdexcept>  // for length_error
+#include <vector>     // for vector
 
-#include <iomanip>
-#include <iostream>
-#include <memory>
-#include <sstream>
-#include <vector>
-
-#include "../include/graph.hpp"
-#include "../include/ops/pow.hpp"
-#include "../include/value.hpp"
-#include "../include/layer.hpp"
+#include "../include/graph.hpp"    // for Graph
+#include "../include/layer.hpp"    // for Layer
+#include "../include/ops/pow.hpp"  // for Pow
+#include "../include/value.hpp"    // for Value, pow
 
 MLP::MLP(Graph& graph, const int& n_in, const std::vector<int>& n_outs)
     : Layer(graph), n_out(n_outs.back()) {
   std::vector<int> sizes(n_outs);
   sizes.insert(sizes.begin(), n_in);
   bool non_linear = true;
-  for (size_t i = 0; i < n_outs.size(); ++i) {
+  for (std::size_t i = 0; i < n_outs.size(); ++i) {
     layers.emplace_back(std::make_shared<Layer>(graph, sizes.at(i),
                                                 sizes.at(i + 1), non_linear));
     // The last layer will have no non-linearities
@@ -28,7 +28,8 @@ MLP::MLP(Graph& graph, const int& n_in, const std::vector<int>& n_outs)
   }
 }
 
-std::vector<std::shared_ptr<Value>> MLP::operator()(
+std::vector<std::shared_ptr<Value>>
+MLP::operator()(  // cppcheck-suppress duplInheritedMember
     const std::vector<std::shared_ptr<Value>>& input) {
   auto x{input};
   for (const auto& layer : layers) {
@@ -67,7 +68,7 @@ Value& MLP::Loss(
   auto outputs = Inference(examples);
   auto loss_ptr = graph_.CreateValue(0.0, "loss").get_shared_ptr();
 
-  for (size_t i = 0; i < ground_truth.size(); ++i) {
+  for (std::size_t i = 0; i < ground_truth.size(); ++i) {
     auto lhs_ptr = outputs.at(i).at(0);
     auto rhs_ptr = ground_truth.at(i);
     auto sub_ptr = ((*lhs_ptr) - (*rhs_ptr)).get_shared_ptr();

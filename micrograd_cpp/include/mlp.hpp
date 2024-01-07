@@ -16,7 +16,8 @@ class MLP : public Layer {
   MLP(Graph& graph, const int& n_in,  // NOLINT
       const std::vector<int>& n_outs);
 
-  std::vector<std::shared_ptr<Value>> operator()(
+  std::vector<std::shared_ptr<Value>>
+  operator()(  // cppcheck-suppress duplInheritedMember
       const std::vector<std::shared_ptr<Value>>& x);
 
   std::vector<std::vector<std::shared_ptr<Value>>> Inference(

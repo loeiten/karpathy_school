@@ -1,17 +1,17 @@
 #include "../../include/ops/add.hpp"
 
 #include <iomanip>  // for operator<<, setprecision
-#include <memory>
-#include <sstream>
+#include <memory>   // for shared_ptr
+#include <sstream>  // for char_traits, basic_ostream, oper...
 
-#include "../../include/graph.hpp"
-#include "../../include/ops/op.hpp"
-#include "../../include/value.hpp"
+#include "../../include/graph.hpp"   // for Graph
+#include "../../include/ops/op.hpp"  // for Op
+#include "../../include/value.hpp"   // for Value
 
 Add::Add(std::shared_ptr<Value> lhs, std::shared_ptr<Value> rhs)
     : Op(rhs), rhs_(rhs), lhs_(lhs) {}
 
-Add::Add(const double& rhs, std::shared_ptr<Value> lhs) : Op(lhs), lhs_(lhs) {
+Add::Add(std::shared_ptr<Value> lhs, const double& rhs) : Op(lhs), lhs_(lhs) {
   // Create the rhs in the graph
   auto& tmp = graph.CreateValue(rhs);
   // Add a label to the tmp
@@ -22,7 +22,7 @@ Add::Add(const double& rhs, std::shared_ptr<Value> lhs) : Op(lhs), lhs_(lhs) {
   rhs_ = tmp.get_shared_ptr();
 }
 
-Add::Add(std::shared_ptr<Value> rhs, const double& lhs) : Op(rhs), rhs_(rhs) {
+Add::Add(const double& lhs, std::shared_ptr<Value> rhs) : Op(rhs), rhs_(rhs) {
   // Create the lhs in the graph
   auto& tmp = graph.CreateValue(lhs);
   // Add a label to the tmp

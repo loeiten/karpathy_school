@@ -1,3 +1,4 @@
+#include <cstddef>     // for size_t
 #include <cstdlib>     // for EXIT_FAILURE, EXIT_SUCCESS
 #include <filesystem>  // for path
 #include <iostream>    // for operator<<, basic_ostream, endl, cha...
@@ -6,7 +7,7 @@
 #include <vector>      // for vector
 
 #include "../include/graph.hpp"  // for Graph
-#include "../include/mlp.hpp"    // for Layer
+#include "../include/mlp.hpp"    // for MLP
 #include "../include/value.hpp"  // for Value
 
 void SimpleMLP() {
@@ -43,12 +44,12 @@ void SimpleMLP() {
 
   // Manually change the values to get reproducibility
   auto &parameters = mlp.get_parameters();
-  for (size_t i = 0; i < parameters.size(); ++i) {
+  for (std::size_t i = 0; i < parameters.size(); ++i) {
     double val = -1.0 + (static_cast<double>(i) / parameters.size()) * 2.0;
     parameters.at(i)->set_data(val);
   }
 
-  auto &loss = mlp.Loss(x, ys);
+  const auto &loss = mlp.Loss(x, ys);
 
   std::cout << graph.ReturnDot(loss) << std::endl;
 }
@@ -87,7 +88,7 @@ void TrainMLP() {
 
   // Manually change the values to get reproducibility
   auto &parameters = mlp.get_parameters();
-  for (size_t i = 0; i < parameters.size(); ++i) {
+  for (std::size_t i = 0; i < parameters.size(); ++i) {
     double val = -1.0 + (static_cast<double>(i) / parameters.size()) * 2.0;
     parameters.at(i)->set_data(val);
   }
