@@ -3,7 +3,8 @@
 
 #include <cstddef>     // for size_t
 #include <cstdint>     // for uint64_t
-#include <functional>  // for shared_ptr, function, hash, equal_to
+#include <functional>  // for function, hash, equal_to
+#include <memory>      // for shared_ptr
 #include <ostream>     // for ostream
 #include <set>         // for set
 #include <string>      // for string
@@ -34,26 +35,26 @@ class Value {
   // Overloads for the streaming output operators (<<) cannot be class members,
   // because the ostream& must be on the left in use and declaration.
   friend std::ostream &operator<<(std::ostream &os, const Value &value);
-  friend Value &pow(Value &a, const double &n);
+  friend Value &pow(const Value &a, const double &n);
   friend Value &operator+(const double &lhs, Value &rhs);
-  friend Value &operator+(Value &lhs, const double &rhs);
+  friend Value &operator+(const Value &lhs, const double &rhs);
   friend Value &operator-(const double &lhs, const Value &rhs);
   friend Value &operator-(const Value &lhs, const double &rhs);
-  friend Value &operator*(const double &lhs, Value &rhs);
-  friend Value &operator*(Value &lhs, const double &rhs);
+  friend Value &operator*(const double &lhs, const Value &rhs);
+  friend Value &operator*(const Value &lhs, const double &rhs);
   friend Value &operator/(const double &lhs, const Value &rhs);
   friend Value &operator/(const Value &lhs, const double &rhs);
-  friend Value &tanh(Value &value);
-  friend Value &exp(Value &value);
-  friend Value &cos(Value &value);
+  friend Value &tanh(const Value &value);
+  friend Value &exp(const Value &value);
+  friend Value &cos(const Value &value);
 
   // Constructors
-  Value(Graph &graph, const double &data);
-  Value(Graph &graph, const double &data, const std::string &label);
+  Value(Graph &graph, const double &data);  // NOLINT (const ref)
+  Value(Graph &graph, const double &data, const std::string &label);  // NOLINT
 
   // Notice that both the grad of this and rhs is being altered by this
-  Value &operator+(Value &rhs);
-  Value &operator*(Value &rhs);
+  Value &operator+(const Value &rhs);
+  Value &operator*(const Value &rhs);
   Value &operator/(const Value &rhs);
   Value &operator-();
 
@@ -70,6 +71,7 @@ class Value {
   std::shared_ptr<Value> get_shared_ptr() const;
   void set_shared_ptr(const std::shared_ptr<Value> &value_shared_ptr);
   void set_label(const std::string &label);
+  void set_data(const double &data);
   void set_grad(const double &grad);
   void set_op(const std::string &op);
   void set_backward(const std::function<void()> &func);

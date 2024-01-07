@@ -18,9 +18,11 @@ class Op {
  protected:
   Graph& graph;
   explicit Op(std::shared_ptr<Value> val);
-  // If the base class does not have a virtual destructor, the destructor of the
+  // When an object of a derived class is deleted through a pointer to the base
+  // class, the destructor of the derived class needs to be called. However, if
+  // the base class does not have a virtual destructor, the destructor of the
   // derived class will not be called, which can lead to memory leaks or
-  // undefined behavior
+  // undefined behavior.
   virtual ~Op() = default;
 };
 

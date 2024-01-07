@@ -1,0 +1,28 @@
+digraph {
+    graph [rankdir=LR]
+    "1" [label="{b_1 | data 0.00 | grad 1.00}" shape=record]
+    "2" [label="{w_2 | data 0.24 | grad 1.00}" shape=record]
+    "3" [label="{w_3 | data 0.07 | grad -2.00}" shape=record]
+    "4" [label="{x1 | data 1.00 | grad 0.24}" shape=record]
+    "5" [label="{x2 | data -2.00 | grad 0.07}" shape=record]
+    "6" [label="{mul_out_id_6 | data 0.24 | grad 1.00}" shape=record]
+    "6*" [label="*"]
+    "6*" -> "6"
+    "7" [label="{add_out_id_7 | data 0.24 | grad 1.00}" shape=record]
+    "7+" [label="+"]
+    "7+" -> "7"
+    "8" [label="{mul_out_id_8 | data -0.13 | grad 1.00}" shape=record]
+    "8*" [label="*"]
+    "8*" -> "8"
+    "9" [label="{activation_9 | data 0.10 | grad 1.00}" shape=record]
+    "9+" [label="+"]
+    "9+" -> "9"
+    "1" -> "7+"
+    "2" -> "6*"
+    "3" -> "8*"
+    "4" -> "6*"
+    "5" -> "8*"
+    "6" -> "7+"
+    "7" -> "9+"
+    "8" -> "9+"
+}

@@ -3,7 +3,7 @@
 
 #include <memory>  // for shared_ptr
 
-#include "op.hpp"  // for Op
+#include "../../include/ops/op.hpp"  // for Op
 
 class Value;
 

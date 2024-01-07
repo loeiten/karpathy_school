@@ -6,11 +6,14 @@ file(GLOB OP_FILES src/ops/*.cpp)
 set(MAIN_CLASSES
     src/graph.cpp
     src/value.cpp
+    src/module.cpp
+    src/neuron.cpp
 )
 
 add_executable(main src/main.cpp ${OP_FILES} ${MAIN_CLASSES})
 
 # Test
+# Graph
 add_executable(test_graph test/test_graph.cpp ${OP_FILES} ${MAIN_CLASSES})
 do_test(NAME test_graph NO 1 ARGS "SimpleGraph")
 do_test(NAME test_graph NO 2 ARGS "BackProp")
@@ -18,3 +21,8 @@ do_test(NAME test_graph NO 3 ARGS "GraphWithTemporaries")
 do_test(NAME test_graph NO 4 ARGS "ReuseVariable")
 do_test(NAME test_graph NO 5 ARGS "CompoundOps")
 do_test(NAME test_graph NO 6 ARGS "TanhSpelledOut")
+
+# Neuron
+add_executable(test_neuron test/test_neuron.cpp ${OP_FILES} ${MAIN_CLASSES})
+do_test(NAME test_neuron NO 1 ARGS "LinearNeuron")
+do_test(NAME test_neuron NO 2 ARGS "NonLinearNeuron")
