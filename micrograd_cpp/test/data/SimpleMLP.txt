@@ -1,0 +1,448 @@
+digraph {
+    graph [rankdir=LR]
+    "1" [label="{x11 | data 2.00 | grad 0.00}" shape=record]
+    "2" [label="{x12 | data 3.00 | grad 0.00}" shape=record]
+    "3" [label="{x21 | data 3.00 | grad 0.00}" shape=record]
+    "4" [label="{x22 | data -1.00 | grad 0.00}" shape=record]
+    "5" [label="{x31 | data 0.50 | grad 0.00}" shape=record]
+    "6" [label="{x32 | data 1.00 | grad 0.00}" shape=record]
+    "7" [label="{gt1 | data 1.00 | grad 0.00}" shape=record]
+    "8" [label="{gt2 | data -1.00 | grad 0.00}" shape=record]
+    "9" [label="{gt3 | data -1.00 | grad 0.00}" shape=record]
+    "10" [label="{b_10 | data -1.00 | grad 0.00}" shape=record]
+    "11" [label="{w_11 | data -0.87 | grad 0.00}" shape=record]
+    "12" [label="{w_12 | data -0.73 | grad 0.00}" shape=record]
+    "13" [label="{b_13 | data -0.60 | grad 0.00}" shape=record]
+    "14" [label="{w_14 | data -0.47 | grad 0.00}" shape=record]
+    "15" [label="{w_15 | data -0.33 | grad 0.00}" shape=record]
+    "16" [label="{b_16 | data -0.20 | grad 0.00}" shape=record]
+    "17" [label="{w_17 | data -0.07 | grad 0.00}" shape=record]
+    "18" [label="{w_18 | data 0.07 | grad 0.00}" shape=record]
+    "19" [label="{b_19 | data 0.20 | grad 0.00}" shape=record]
+    "20" [label="{w_20 | data 0.33 | grad 0.00}" shape=record]
+    "21" [label="{w_21 | data 0.47 | grad 0.00}" shape=record]
+    "22" [label="{b_22 | data 0.60 | grad 0.00}" shape=record]
+    "23" [label="{w_23 | data 0.73 | grad 0.00}" shape=record]
+    "24" [label="{w_24 | data 0.87 | grad 0.00}" shape=record]
+    "25" [label="{mul_out_id_25 | data -1.73 | grad 0.00}" shape=record]
+    "25*" [label="*"]
+    "25*" -> "25"
+    "26" [label="{add_out_id_26 | data -2.73 | grad 0.00}" shape=record]
+    "26+" [label="+"]
+    "26+" -> "26"
+    "27" [label="{mul_out_id_27 | data -2.20 | grad 0.00}" shape=record]
+    "27*" [label="*"]
+    "27*" -> "27"
+    "28" [label="{activation_28 | data -4.93 | grad 0.00}" shape=record]
+    "28+" [label="+"]
+    "28+" -> "28"
+    "29" [label="{tanh_out_id_29 | data -1.00 | grad 0.00}" shape=record]
+    "29tanh" [label="tanh"]
+    "29tanh" -> "29"
+    "30" [label="{mul_out_id_30 | data -0.93 | grad 0.00}" shape=record]
+    "30*" [label="*"]
+    "30*" -> "30"
+    "31" [label="{add_out_id_31 | data -1.53 | grad 0.00}" shape=record]
+    "31+" [label="+"]
+    "31+" -> "31"
+    "32" [label="{mul_out_id_32 | data -1.00 | grad 0.00}" shape=record]
+    "32*" [label="*"]
+    "32*" -> "32"
+    "33" [label="{activation_33 | data -2.53 | grad 0.00}" shape=record]
+    "33+" [label="+"]
+    "33+" -> "33"
+    "34" [label="{tanh_out_id_34 | data -0.99 | grad 0.00}" shape=record]
+    "34tanh" [label="tanh"]
+    "34tanh" -> "34"
+    "35" [label="{mul_out_id_35 | data 0.07 | grad 0.00}" shape=record]
+    "35*" [label="*"]
+    "35*" -> "35"
+    "36" [label="{add_out_id_36 | data -0.13 | grad 0.00}" shape=record]
+    "36+" [label="+"]
+    "36+" -> "36"
+    "37" [label="{mul_out_id_37 | data -0.07 | grad 0.00}" shape=record]
+    "37*" [label="*"]
+    "37*" -> "37"
+    "38" [label="{activation_38 | data -0.20 | grad 0.00}" shape=record]
+    "38+" [label="+"]
+    "38+" -> "38"
+    "39" [label="{tanh_out_id_39 | data -0.20 | grad 0.00}" shape=record]
+    "39tanh" [label="tanh"]
+    "39tanh" -> "39"
+    "40" [label="{mul_out_id_40 | data -0.33 | grad 0.00}" shape=record]
+    "40*" [label="*"]
+    "40*" -> "40"
+    "41" [label="{add_out_id_41 | data -0.13 | grad 0.00}" shape=record]
+    "41+" [label="+"]
+    "41+" -> "41"
+    "42" [label="{mul_out_id_42 | data -0.46 | grad 0.00}" shape=record]
+    "42*" [label="*"]
+    "42*" -> "42"
+    "43" [label="{activation_43 | data -0.59 | grad 0.00}" shape=record]
+    "43+" [label="+"]
+    "43+" -> "43"
+    "44" [label="{tanh_out_id_44 | data -0.53 | grad 0.00}" shape=record]
+    "44tanh" [label="tanh"]
+    "44tanh" -> "44"
+    "45" [label="{mul_out_id_45 | data -0.14 | grad 0.00}" shape=record]
+    "45*" [label="*"]
+    "45*" -> "45"
+    "46" [label="{add_out_id_46 | data 0.46 | grad 0.00}" shape=record]
+    "46+" [label="+"]
+    "46+" -> "46"
+    "47" [label="{mul_out_id_47 | data -0.46 | grad 0.00}" shape=record]
+    "47*" [label="*"]
+    "47*" -> "47"
+    "48" [label="{activation_48 | data -0.01 | grad 0.00}" shape=record]
+    "48+" [label="+"]
+    "48+" -> "48"
+    "49" [label="{tanh_out_id_49 | data -0.01 | grad 0.00}" shape=record]
+    "49tanh" [label="tanh"]
+    "49tanh" -> "49"
+    "50" [label="{mul_out_id_50 | data -2.60 | grad 0.00}" shape=record]
+    "50*" [label="*"]
+    "50*" -> "50"
+    "51" [label="{add_out_id_51 | data -3.60 | grad 0.00}" shape=record]
+    "51+" [label="+"]
+    "51+" -> "51"
+    "52" [label="{mul_out_id_52 | data 0.73 | grad 0.00}" shape=record]
+    "52*" [label="*"]
+    "52*" -> "52"
+    "53" [label="{activation_53 | data -2.87 | grad 0.00}" shape=record]
+    "53+" [label="+"]
+    "53+" -> "53"
+    "54" [label="{tanh_out_id_54 | data -0.99 | grad 0.00}" shape=record]
+    "54tanh" [label="tanh"]
+    "54tanh" -> "54"
+    "55" [label="{mul_out_id_55 | data -1.40 | grad 0.00}" shape=record]
+    "55*" [label="*"]
+    "55*" -> "55"
+    "56" [label="{add_out_id_56 | data -2.00 | grad 0.00}" shape=record]
+    "56+" [label="+"]
+    "56+" -> "56"
+    "57" [label="{mul_out_id_57 | data 0.33 | grad 0.00}" shape=record]
+    "57*" [label="*"]
+    "57*" -> "57"
+    "58" [label="{activation_58 | data -1.67 | grad 0.00}" shape=record]
+    "58+" [label="+"]
+    "58+" -> "58"
+    "59" [label="{tanh_out_id_59 | data -0.93 | grad 0.00}" shape=record]
+    "59tanh" [label="tanh"]
+    "59tanh" -> "59"
+    "60" [label="{mul_out_id_60 | data 0.07 | grad 0.00}" shape=record]
+    "60*" [label="*"]
+    "60*" -> "60"
+    "61" [label="{add_out_id_61 | data -0.13 | grad 0.00}" shape=record]
+    "61+" [label="+"]
+    "61+" -> "61"
+    "62" [label="{mul_out_id_62 | data -0.06 | grad 0.00}" shape=record]
+    "62*" [label="*"]
+    "62*" -> "62"
+    "63" [label="{activation_63 | data -0.20 | grad 0.00}" shape=record]
+    "63+" [label="+"]
+    "63+" -> "63"
+    "64" [label="{tanh_out_id_64 | data -0.19 | grad 0.00}" shape=record]
+    "64tanh" [label="tanh"]
+    "64tanh" -> "64"
+    "65" [label="{mul_out_id_65 | data -0.33 | grad 0.00}" shape=record]
+    "65*" [label="*"]
+    "65*" -> "65"
+    "66" [label="{add_out_id_66 | data -0.13 | grad 0.00}" shape=record]
+    "66+" [label="+"]
+    "66+" -> "66"
+    "67" [label="{mul_out_id_67 | data -0.43 | grad 0.00}" shape=record]
+    "67*" [label="*"]
+    "67*" -> "67"
+    "68" [label="{activation_68 | data -0.57 | grad 0.00}" shape=record]
+    "68+" [label="+"]
+    "68+" -> "68"
+    "69" [label="{tanh_out_id_69 | data -0.51 | grad 0.00}" shape=record]
+    "69tanh" [label="tanh"]
+    "69tanh" -> "69"
+    "70" [label="{mul_out_id_70 | data -0.14 | grad 0.00}" shape=record]
+    "70*" [label="*"]
+    "70*" -> "70"
+    "71" [label="{add_out_id_71 | data 0.46 | grad 0.00}" shape=record]
+    "71+" [label="+"]
+    "71+" -> "71"
+    "72" [label="{mul_out_id_72 | data -0.44 | grad 0.00}" shape=record]
+    "72*" [label="*"]
+    "72*" -> "72"
+    "73" [label="{activation_73 | data 0.01 | grad 0.00}" shape=record]
+    "73+" [label="+"]
+    "73+" -> "73"
+    "74" [label="{tanh_out_id_74 | data 0.01 | grad 0.00}" shape=record]
+    "74tanh" [label="tanh"]
+    "74tanh" -> "74"
+    "75" [label="{mul_out_id_75 | data -0.43 | grad 0.00}" shape=record]
+    "75*" [label="*"]
+    "75*" -> "75"
+    "76" [label="{add_out_id_76 | data -1.43 | grad 0.00}" shape=record]
+    "76+" [label="+"]
+    "76+" -> "76"
+    "77" [label="{mul_out_id_77 | data -0.73 | grad 0.00}" shape=record]
+    "77*" [label="*"]
+    "77*" -> "77"
+    "78" [label="{activation_78 | data -2.17 | grad 0.00}" shape=record]
+    "78+" [label="+"]
+    "78+" -> "78"
+    "79" [label="{tanh_out_id_79 | data -0.97 | grad 0.00}" shape=record]
+    "79tanh" [label="tanh"]
+    "79tanh" -> "79"
+    "80" [label="{mul_out_id_80 | data -0.23 | grad 0.00}" shape=record]
+    "80*" [label="*"]
+    "80*" -> "80"
+    "81" [label="{add_out_id_81 | data -0.83 | grad 0.00}" shape=record]
+    "81+" [label="+"]
+    "81+" -> "81"
+    "82" [label="{mul_out_id_82 | data -0.33 | grad 0.00}" shape=record]
+    "82*" [label="*"]
+    "82*" -> "82"
+    "83" [label="{activation_83 | data -1.17 | grad 0.00}" shape=record]
+    "83+" [label="+"]
+    "83+" -> "83"
+    "84" [label="{tanh_out_id_84 | data -0.82 | grad 0.00}" shape=record]
+    "84tanh" [label="tanh"]
+    "84tanh" -> "84"
+    "85" [label="{mul_out_id_85 | data 0.06 | grad 0.00}" shape=record]
+    "85*" [label="*"]
+    "85*" -> "85"
+    "86" [label="{add_out_id_86 | data -0.14 | grad 0.00}" shape=record]
+    "86+" [label="+"]
+    "86+" -> "86"
+    "87" [label="{mul_out_id_87 | data -0.05 | grad 0.00}" shape=record]
+    "87*" [label="*"]
+    "87*" -> "87"
+    "88" [label="{activation_88 | data -0.19 | grad 0.00}" shape=record]
+    "88+" [label="+"]
+    "88+" -> "88"
+    "89" [label="{tanh_out_id_89 | data -0.19 | grad 0.00}" shape=record]
+    "89tanh" [label="tanh"]
+    "89tanh" -> "89"
+    "90" [label="{mul_out_id_90 | data -0.32 | grad 0.00}" shape=record]
+    "90*" [label="*"]
+    "90*" -> "90"
+    "91" [label="{add_out_id_91 | data -0.12 | grad 0.00}" shape=record]
+    "91+" [label="+"]
+    "91+" -> "91"
+    "92" [label="{mul_out_id_92 | data -0.38 | grad 0.00}" shape=record]
+    "92*" [label="*"]
+    "92*" -> "92"
+    "93" [label="{activation_93 | data -0.51 | grad 0.00}" shape=record]
+    "93+" [label="+"]
+    "93+" -> "93"
+    "94" [label="{tanh_out_id_94 | data -0.47 | grad 0.00}" shape=record]
+    "94tanh" [label="tanh"]
+    "94tanh" -> "94"
+    "95" [label="{mul_out_id_95 | data -0.14 | grad 0.00}" shape=record]
+    "95*" [label="*"]
+    "95*" -> "95"
+    "96" [label="{add_out_id_96 | data 0.46 | grad 0.00}" shape=record]
+    "96+" [label="+"]
+    "96+" -> "96"
+    "97" [label="{mul_out_id_97 | data -0.41 | grad 0.00}" shape=record]
+    "97*" [label="*"]
+    "97*" -> "97"
+    "98" [label="{activation_98 | data 0.06 | grad 0.00}" shape=record]
+    "98+" [label="+"]
+    "98+" -> "98"
+    "99" [label="{tanh_out_id_99 | data 0.06 | grad 0.00}" shape=record]
+    "99tanh" [label="tanh"]
+    "99tanh" -> "99"
+    "100" [label="{loss | data 0.00 | grad 0.00}" shape=record]
+    "101" [label="{literal -1.00 | data -1.00 | grad 0.00}" shape=record]
+    "102" [label="{neg_out_id_7 | data -1.00 | grad 0.00}" shape=record]
+    "102*" [label="*"]
+    "102*" -> "102"
+    "103" [label="{add_out_id_103 | data -1.01 | grad 0.00}" shape=record]
+    "103+" [label="+"]
+    "103+" -> "103"
+    "104" [label="{pow_out_id_104 | data 1.01 | grad 0.00}" shape=record]
+    "104^(2.00)" [label="^(2.00)"]
+    "104^(2.00)" -> "104"
+    "105" [label="{add_out_id_105 | data 1.01 | grad 0.00}" shape=record]
+    "105+" [label="+"]
+    "105+" -> "105"
+    "106" [label="{literal -1.00 | data -1.00 | grad 0.00}" shape=record]
+    "107" [label="{neg_out_id_8 | data 1.00 | grad 0.00}" shape=record]
+    "107*" [label="*"]
+    "107*" -> "107"
+    "108" [label="{add_out_id_108 | data 1.01 | grad 0.00}" shape=record]
+    "108+" [label="+"]
+    "108+" -> "108"
+    "109" [label="{pow_out_id_109 | data 1.03 | grad 0.00}" shape=record]
+    "109^(2.00)" [label="^(2.00)"]
+    "109^(2.00)" -> "109"
+    "110" [label="{add_out_id_110 | data 2.04 | grad 0.00}" shape=record]
+    "110+" [label="+"]
+    "110+" -> "110"
+    "111" [label="{literal -1.00 | data -1.00 | grad 0.00}" shape=record]
+    "112" [label="{neg_out_id_9 | data 1.00 | grad 0.00}" shape=record]
+    "112*" [label="*"]
+    "112*" -> "112"
+    "113" [label="{add_out_id_113 | data 1.06 | grad 0.00}" shape=record]
+    "113+" [label="+"]
+    "113+" -> "113"
+    "114" [label="{pow_out_id_114 | data 1.11 | grad 0.00}" shape=record]
+    "114^(2.00)" [label="^(2.00)"]
+    "114^(2.00)" -> "114"
+    "115" [label="{add_out_id_115 | data 3.16 | grad 0.00}" shape=record]
+    "115+" [label="+"]
+    "115+" -> "115"
+    "1" -> "25*"
+    "1" -> "30*"
+    "2" -> "27*"
+    "2" -> "32*"
+    "3" -> "50*"
+    "3" -> "55*"
+    "4" -> "52*"
+    "4" -> "57*"
+    "5" -> "75*"
+    "5" -> "80*"
+    "6" -> "77*"
+    "6" -> "82*"
+    "7" -> "102*"
+    "8" -> "107*"
+    "9" -> "112*"
+    "10" -> "26+"
+    "10" -> "51+"
+    "10" -> "76+"
+    "11" -> "25*"
+    "11" -> "50*"
+    "11" -> "75*"
+    "12" -> "27*"
+    "12" -> "52*"
+    "12" -> "77*"
+    "13" -> "31+"
+    "13" -> "56+"
+    "13" -> "81+"
+    "14" -> "30*"
+    "14" -> "55*"
+    "14" -> "80*"
+    "15" -> "32*"
+    "15" -> "57*"
+    "15" -> "82*"
+    "16" -> "36+"
+    "16" -> "61+"
+    "16" -> "86+"
+    "17" -> "35*"
+    "17" -> "60*"
+    "17" -> "85*"
+    "18" -> "37*"
+    "18" -> "62*"
+    "18" -> "87*"
+    "19" -> "41+"
+    "19" -> "66+"
+    "19" -> "91+"
+    "20" -> "40*"
+    "20" -> "65*"
+    "20" -> "90*"
+    "21" -> "42*"
+    "21" -> "67*"
+    "21" -> "92*"
+    "22" -> "46+"
+    "22" -> "71+"
+    "22" -> "96+"
+    "23" -> "45*"
+    "23" -> "70*"
+    "23" -> "95*"
+    "24" -> "47*"
+    "24" -> "72*"
+    "24" -> "97*"
+    "25" -> "26+"
+    "26" -> "28+"
+    "27" -> "28+"
+    "28" -> "29tanh"
+    "29" -> "35*"
+    "29" -> "40*"
+    "30" -> "31+"
+    "31" -> "33+"
+    "32" -> "33+"
+    "33" -> "34tanh"
+    "34" -> "37*"
+    "34" -> "42*"
+    "35" -> "36+"
+    "36" -> "38+"
+    "37" -> "38+"
+    "38" -> "39tanh"
+    "39" -> "45*"
+    "40" -> "41+"
+    "41" -> "43+"
+    "42" -> "43+"
+    "43" -> "44tanh"
+    "44" -> "47*"
+    "45" -> "46+"
+    "46" -> "48+"
+    "47" -> "48+"
+    "48" -> "49tanh"
+    "49" -> "103+"
+    "50" -> "51+"
+    "51" -> "53+"
+    "52" -> "53+"
+    "53" -> "54tanh"
+    "54" -> "60*"
+    "54" -> "65*"
+    "55" -> "56+"
+    "56" -> "58+"
+    "57" -> "58+"
+    "58" -> "59tanh"
+    "59" -> "62*"
+    "59" -> "67*"
+    "60" -> "61+"
+    "61" -> "63+"
+    "62" -> "63+"
+    "63" -> "64tanh"
+    "64" -> "70*"
+    "65" -> "66+"
+    "66" -> "68+"
+    "67" -> "68+"
+    "68" -> "69tanh"
+    "69" -> "72*"
+    "70" -> "71+"
+    "71" -> "73+"
+    "72" -> "73+"
+    "73" -> "74tanh"
+    "74" -> "108+"
+    "75" -> "76+"
+    "76" -> "78+"
+    "77" -> "78+"
+    "78" -> "79tanh"
+    "79" -> "85*"
+    "79" -> "90*"
+    "80" -> "81+"
+    "81" -> "83+"
+    "82" -> "83+"
+    "83" -> "84tanh"
+    "84" -> "87*"
+    "84" -> "92*"
+    "85" -> "86+"
+    "86" -> "88+"
+    "87" -> "88+"
+    "88" -> "89tanh"
+    "89" -> "95*"
+    "90" -> "91+"
+    "91" -> "93+"
+    "92" -> "93+"
+    "93" -> "94tanh"
+    "94" -> "97*"
+    "95" -> "96+"
+    "96" -> "98+"
+    "97" -> "98+"
+    "98" -> "99tanh"
+    "99" -> "113+"
+    "100" -> "105+"
+    "101" -> "102*"
+    "102" -> "103+"
+    "103" -> "104^(2.00)"
+    "104" -> "105+"
+    "105" -> "110+"
+    "106" -> "107*"
+    "107" -> "108+"
+    "108" -> "109^(2.00)"
+    "109" -> "110+"
+    "110" -> "115+"
+    "111" -> "112*"
+    "112" -> "113+"
+    "113" -> "114^(2.00)"
+    "114" -> "115+"
+}

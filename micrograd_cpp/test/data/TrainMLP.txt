@@ -1,0 +1,3 @@
+Epoch: 0 loss: 3.15544e+00
+Epoch: 1 loss: 2.76520e+00
+Epoch: 2 loss: 2.75928e+00

@@ -11,17 +11,18 @@
 #include "../include/graph.hpp"
 #include "../include/ops/pow.hpp"
 #include "../include/value.hpp"
+#include "../include/layer.hpp"
 
 MLP::MLP(Graph& graph, const int& n_in, const std::vector<int>& n_outs)
     : Layer(graph), n_out(n_outs.back()) {
   std::vector<int> sizes(n_outs);
   sizes.insert(sizes.begin(), n_in);
   bool non_linear = true;
-  for (int i = 0; i < n_out; ++i) {
+  for (size_t i = 0; i < n_outs.size(); ++i) {
     layers.emplace_back(std::make_shared<Layer>(graph, sizes.at(i),
                                                 sizes.at(i + 1), non_linear));
     // The last layer will have no non-linearities
-    if (i == (n_out - 1)) {
+    if (i == (n_outs.size() - 1)) {
       non_linear = false;
     }
   }

@@ -14,7 +14,7 @@ set(MAIN_CLASSES
 
 add_executable(main src/main.cpp ${OP_FILES} ${MAIN_CLASSES})
 
-# Test
+# Test (NOTE: Not all the classes are needed for all the tests)
 # Graph
 add_executable(test_graph test/test_graph.cpp ${OP_FILES} ${MAIN_CLASSES})
 do_test(NAME test_graph NO 1 ARGS "SimpleGraph")
@@ -33,3 +33,8 @@ do_test(NAME test_neuron NO 2 ARGS "NonLinearNeuron")
 add_executable(test_layer test/test_layer.cpp ${OP_FILES} ${MAIN_CLASSES})
 do_test(NAME test_layer NO 1 ARGS "LinearLayer")
 do_test(NAME test_layer NO 2 ARGS "NonLinearLayer")
+
+# MLP
+add_executable(test_mlp test/test_mlp.cpp ${OP_FILES} ${MAIN_CLASSES})
+do_test(NAME test_mlp NO 1 ARGS "SimpleMLP")
+do_test(NAME test_mlp NO 2 ARGS "TrainMLP")

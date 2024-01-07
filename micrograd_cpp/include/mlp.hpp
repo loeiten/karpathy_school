@@ -7,6 +7,7 @@
 #include "../include/layer.hpp"  // for Layer
 
 class Graph;
+class Value;
 
 // We have public inheritance as we want get_parameters to be publicly
 // accessible in the children
