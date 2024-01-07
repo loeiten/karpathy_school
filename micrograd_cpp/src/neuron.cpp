@@ -11,7 +11,7 @@
 
 Neuron::Neuron(Graph& graph) : Module(graph), non_linear_(true) {}
 
-Neuron::Neuron(Graph& graph, const int& nin, const bool non_linear)
+Neuron::Neuron(Graph& graph, const int& n_in, const bool non_linear)
     : Module(graph), non_linear_(non_linear) {
   auto& parameter_singleton = ParametersSingleton::get_instance();
 
@@ -30,7 +30,7 @@ Neuron::Neuron(Graph& graph, const int& nin, const bool non_linear)
   ss.clear();
 
   // Create the weights
-  for (int _ = 0; _ < nin; ++_) {
+  for (int _ = 0; _ < n_in; ++_) {
     w.push_back(graph.CreateValue(dis(gen)).get_shared_ptr());
     auto w_ptr = w.back();
     parameter_singleton.add_parameter(w_ptr);

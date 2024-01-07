@@ -18,8 +18,9 @@ class Neuron : public Module {
   // do it explicitly) since Module doesn't have a default ctor
   // Module doesn't have a default ctor as it takes in graph by reference
   Neuron() = delete;
-  explicit Neuron(Graph& graph);                                       // NOLINT
-  Neuron(Graph& graph, const int& nin, const bool non_linear = true);  // NOLINT
+  explicit Neuron(Graph& graph);         // NOLINT
+  Neuron(Graph& graph, const int& n_in,  // NOLINT
+         const bool non_linear = true);
   virtual ~Neuron() = default;
   // Input Weight   Bias Activation
   //                 b

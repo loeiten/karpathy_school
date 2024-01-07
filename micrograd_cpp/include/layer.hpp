@@ -13,7 +13,9 @@ class Graph;
 // accessible in the children
 class Layer : public Neuron {
  public:
-  Layer(Graph& graph, const int& nin, const int& nout,  // NOLINT
+  // See neuron.hpp on why we need this
+  explicit Layer(Graph& graph);                           // NOLINT
+  Layer(Graph& graph, const int& n_in, const int& n_out,  // NOLINT
         const bool non_linear = true);
   virtual ~Layer() = default;
 
@@ -35,7 +37,7 @@ class Layer : public Neuron {
       const std::vector<std::shared_ptr<Value>>& x);
 
  protected:
-  int nout_;
+  int n_out_;
   // We use vector as the order matter
   std::vector<std::shared_ptr<Neuron>> in_nodes;
   std::vector<std::shared_ptr<Value>> out_values;

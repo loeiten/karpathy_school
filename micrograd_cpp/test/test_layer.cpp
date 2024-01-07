@@ -12,16 +12,16 @@
 void SimpleLayer(const bool non_linear) {
   // Create graph where Values reside
   auto graph = Graph();
-  int nin = 2;
-  int nout = 2;
-  Layer layer{graph, nin, nout, non_linear};
+  int n_in = 2;
+  int n_out = 2;
+  Layer layer{graph, n_in, n_out, non_linear};
 
   // Manually change the values to get reproducibility
   auto &parameters = layer.get_parameters();
   // b1, w12, w12, b2, w22, w22
   std::vector<double> own_params{0.0, 0.2355, 0.0655, 0.0, 0.04, -0.3};
   // +1 due to the bias
-  for (int i = 0; i < (nin + 1) * nout; ++i) {
+  for (int i = 0; i < (n_in + 1) * n_out; ++i) {
     parameters.at(i)->set_data(own_params.at(i));
   }
 

@@ -9,6 +9,7 @@ set(MAIN_CLASSES
     src/module.cpp
     src/neuron.cpp
     src/layer.cpp
+    src/mlp.cpp
 )
 
 add_executable(main src/main.cpp ${OP_FILES} ${MAIN_CLASSES})

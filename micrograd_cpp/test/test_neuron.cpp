@@ -1,29 +1,27 @@
 #include <cstdlib>     // for EXIT_FAILURE, EXIT_SUCCESS
 #include <filesystem>  // for path
-#include <ios>
-#include <iostream>  // for operator<<, basic_ostream, endl, cha...
-#include <memory>
-#include <sstream>
-#include <string>  // for char_traits, string
-#include <vector>
+#include <iostream>    // for operator<<, basic_ostream, endl
+#include <memory>      // for shared_ptr
+#include <sstream>     // for stringstream
+#include <string>      // for char_traits, string
+#include <vector>      // for vector
 
 #include "../include/graph.hpp"   // for Graph
-#include "../include/neuron.hpp"  // for Value, cos, exp, operator*, operator+
-#include "../include/value.hpp"   // for Value, cos, exp, operator*, operator+
+#include "../include/neuron.hpp"  // for Neuron
+#include "../include/value.hpp"   // for Value
 
 void SimpleNeuron(const bool non_linear) {
   // Create graph where Values reside
   auto graph = Graph();
-  int nin = 2;
-  Neuron neuron{graph, nin, non_linear};
+  int n_in = 2;
+  Neuron neuron{graph, n_in, non_linear};
 
   // Manually change the values to get reproducibility
   auto &parameters = neuron.get_parameters();
   // b, w1, w2
   std::vector<double> own_params{0.0, 0.2355, 0.0655};
-  std::stringstream ss;
   // +1 due to the bias
-  for (int i = 0; i < (nin + 1); ++i) {
+  for (int i = 0; i < (n_in + 1); ++i) {
     parameters.at(i)->set_data(own_params.at(i));
   }
 
