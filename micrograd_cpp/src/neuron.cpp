@@ -9,8 +9,12 @@
 #include "../include/ops/tanh.hpp"
 #include "../include/value.hpp"
 
+Neuron::Neuron(Graph& graph) : Module(graph), non_linear_(true) {}
+
 Neuron::Neuron(Graph& graph, const int& nin, const bool non_linear)
     : Module(graph), non_linear_(non_linear) {
+  auto& parameter_singleton = ParametersSingleton::get_instance();
+
   // Start the random generator
   std::random_device rd;   // Generates an integer
   std::mt19937 gen(rd());  // Standard mersenne_twister_engine
@@ -18,7 +22,7 @@ Neuron::Neuron(Graph& graph, const int& nin, const bool non_linear)
 
   // Create the bias
   b = graph.CreateValue(0).get_shared_ptr();
-  parameters.push_back(b);
+  parameter_singleton.add_parameter(b);
   std::stringstream ss;
   ss << "b_" << b->get_id();
   b->set_label(ss.str());
@@ -29,7 +33,7 @@ Neuron::Neuron(Graph& graph, const int& nin, const bool non_linear)
   for (int _ = 0; _ < nin; ++_) {
     w.push_back(graph.CreateValue(dis(gen)).get_shared_ptr());
     auto w_ptr = w.back();
-    parameters.push_back(w_ptr);
+    parameter_singleton.add_parameter(w_ptr);
     ss << "w_" << w_ptr->get_id();
     w_ptr->set_label(ss.str());
     ss.str("");
@@ -56,8 +60,8 @@ Value& Neuron::operator()(const std::vector<std::shared_ptr<Value>>& x) {
   activation_ptr->set_label(ss.str());
 
   if (non_linear_) {
-    activation_ptr = tanh(*(activation_ptr.get())).get_shared_ptr();
+    activation_ptr = tanh(*(activation_ptr)).get_shared_ptr();
   }
 
-  return *(activation_ptr.get());
+  return *(activation_ptr);
 }

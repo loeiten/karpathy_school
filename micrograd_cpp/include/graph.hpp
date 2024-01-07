@@ -53,12 +53,18 @@ class Graph {
                                 const std::shared_ptr<Value>>> *edges);
 
   std::string ReturnDot(const Value &root);
+  std::string ReturnDot(const std::vector<std::shared_ptr<Value>> &x);
 
   std::vector<const std::shared_ptr<Value>> topology;
 
  private:
   std::unordered_set<std::shared_ptr<Value>> values;
   std::unordered_set<int> visited;
+
+  std::string CreateDotString(
+      const std::set<const std::shared_ptr<Value>> &nodes,
+      const std::set<std::pair<const std::shared_ptr<Value>,
+                               const std::shared_ptr<Value>>> &edges);
 };
 
 #endif  // MICROGRAD_CPP_INCLUDE_GRAPH_HPP_

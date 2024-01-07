@@ -22,7 +22,8 @@ void SimpleNeuron(const bool non_linear) {
   // b, w1, w2
   std::vector<double> own_params{0.0, 0.2355, 0.0655};
   std::stringstream ss;
-  for (int i = 0; i <= nin; ++i) {
+  // +1 due to the bias
+  for (int i = 0; i < (nin + 1); ++i) {
     parameters.at(i)->set_data(own_params.at(i));
   }
 

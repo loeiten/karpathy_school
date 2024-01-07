@@ -8,6 +8,7 @@ set(MAIN_CLASSES
     src/value.cpp
     src/module.cpp
     src/neuron.cpp
+    src/layer.cpp
 )
 
 add_executable(main src/main.cpp ${OP_FILES} ${MAIN_CLASSES})
@@ -26,3 +27,8 @@ do_test(NAME test_graph NO 6 ARGS "TanhSpelledOut")
 add_executable(test_neuron test/test_neuron.cpp ${OP_FILES} ${MAIN_CLASSES})
 do_test(NAME test_neuron NO 1 ARGS "LinearNeuron")
 do_test(NAME test_neuron NO 2 ARGS "NonLinearNeuron")
+
+# Layer
+add_executable(test_layer test/test_layer.cpp ${OP_FILES} ${MAIN_CLASSES})
+do_test(NAME test_layer NO 1 ARGS "LinearLayer")
+do_test(NAME test_layer NO 2 ARGS "NonLinearLayer")

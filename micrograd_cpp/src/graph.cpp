@@ -5,6 +5,7 @@
 #include <sstream>  // for operator<<, basic_ostream, stringstream
 #include <string>   // for char_traits, string, operator!=
 #include <utility>  // for pair, make_pair
+#include <vector>   // for vector
 
 #include "../include/value.hpp"  // for Value, operator<<
 
@@ -13,7 +14,7 @@ Value &Graph::CreateValue(const double value) {
   auto value_shared_ptr = *(it_existing.first);
   value_shared_ptr->set_shared_ptr(value_shared_ptr);
   // In order to chain, we need to return references
-  return *(value_shared_ptr.get());
+  return *(value_shared_ptr);
 }
 
 Value &Graph::CreateValue(const double value, const std::string &label) {
@@ -22,7 +23,7 @@ Value &Graph::CreateValue(const double value, const std::string &label) {
   auto value_shared_ptr = *(it_existing.first);
   value_shared_ptr->set_shared_ptr(value_shared_ptr);
   // In order to chain, we need to return references
-  return *(value_shared_ptr.get());
+  return *(value_shared_ptr);
 }
 
 void Graph::TopologicalSort(const Value &value) {
@@ -43,21 +44,38 @@ void Graph::Trace(const Value &value,
   // If the emplace succeeds (an insert happened), then the return returns true
   // which means that the element didn't existed in the past
   if (iterator_not_exist.second == true) {
-    for (const auto &child : value.get_producers()) {
-      edges->insert(std::make_pair(child, value.get_shared_ptr()));
-      Trace(*child, nodes, edges);
+    for (const auto &producer : value.get_producers()) {
+      edges->insert(std::make_pair(producer, value.get_shared_ptr()));
+      Trace(*producer, nodes, edges);
     }
   }
 }
 
 std::string Graph::ReturnDot(const Value &root) {
-  const int indent = 4;
   std::set<const std::shared_ptr<Value>> nodes;
   std::set<
       std::pair<const std::shared_ptr<Value>, const std::shared_ptr<Value>>>
       edges;
   Trace(root, &nodes, &edges);
+  return CreateDotString(nodes, edges);
+}
 
+std::string Graph::ReturnDot(const std::vector<std::shared_ptr<Value>> &x) {
+  std::set<const std::shared_ptr<Value>> nodes;
+  std::set<
+      std::pair<const std::shared_ptr<Value>, const std::shared_ptr<Value>>>
+      edges;
+  for (const auto &root : x) {
+    Trace(*(root->get_shared_ptr()), &nodes, &edges);
+  }
+  return CreateDotString(nodes, edges);
+}
+
+std::string Graph::CreateDotString(
+    const std::set<const std::shared_ptr<Value>> &nodes,
+    const std::set<std::pair<const std::shared_ptr<Value>,
+                             const std::shared_ptr<Value>>> &edges) {
+  const int indent = 4;
   std::stringstream dot_stream;
   dot_stream << "digraph {\n"
              << std::string(indent, ' ') << "graph [rankdir=LR]\n";
@@ -79,11 +97,12 @@ std::string Graph::ReturnDot(const Value &root) {
   }
 
   // Create the rest of the edges
-  for (const auto &child_parent : edges) {
-    auto &child = child_parent.first;
-    auto &parent = child_parent.second;
-    dot_stream << std::string(indent, ' ') << "\"" << child->get_id()
-               << "\" -> \"" << parent->get_id() << parent->get_op() << "\"\n";
+  for (const auto &producer_consumer : edges) {
+    auto &producer = producer_consumer.first;
+    auto &consumer = producer_consumer.second;
+    dot_stream << std::string(indent, ' ') << "\"" << producer->get_id()
+               << "\" -> \"" << consumer->get_id() << consumer->get_op()
+               << "\"\n";
   }
 
   dot_stream << "}";
