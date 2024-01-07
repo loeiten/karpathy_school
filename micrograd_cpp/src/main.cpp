@@ -36,7 +36,7 @@ int main() {
       graph.CreateValue(1.0, "gt4").get_shared_ptr()};
 
   MLP mlp{graph, 3, {4, 4, 1}};
-  mlp.Train(x, ys, 3);
+  mlp.Train(x, ys, 10);
 
   return 0;
 }

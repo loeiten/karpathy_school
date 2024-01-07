@@ -27,10 +27,16 @@ Value &Graph::CreateValue(const double value, const std::string &label) {
 }
 
 void Graph::TopologicalSort(const Value &value) {
+  topology.clear();
+  visited.clear();
+  RecursiveTopologicalSort(value);
+}
+
+void Graph::RecursiveTopologicalSort(const Value &value) {
   if (visited.find(value.get_id()) == visited.end()) {
     visited.insert(value.get_id());
     for (const auto &producer : value.get_producers()) {
-      TopologicalSort(*producer);
+      RecursiveTopologicalSort(*producer);
     }
     topology.push_back(value.get_shared_ptr());
   }

@@ -50,6 +50,7 @@ Value& Neuron::operator()(const std::vector<std::shared_ptr<Value>>& x) {
 
   activation_ptr = b;
   for (unsigned int i = 0; i < x.size(); ++i) {
+    // NOTE: We are creating new Values for each operation we are doing
     activation_ptr =
         ((*activation_ptr) + (*w.at(i)) * (*x.at(i))).get_shared_ptr();
   }

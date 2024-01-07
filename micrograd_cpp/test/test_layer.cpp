@@ -31,8 +31,9 @@ void SimpleLayer(const bool non_linear) {
 
   const auto &y = layer(x);
 
-  // NOTE: We will not do backward as we are not taking the gradients w.r.t. the
-  //       loss
+  for (const auto &output : y) {
+    output->Backward();
+  }
 
   std::cout << graph.ReturnDot(y) << std::endl;
 }

@@ -61,6 +61,8 @@ class Graph {
   std::unordered_set<std::shared_ptr<Value>> values;
   std::unordered_set<int> visited;
 
+  void RecursiveTopologicalSort(const Value &value);
+
   std::string CreateDotString(
       const std::set<const std::shared_ptr<Value>> &nodes,
       const std::set<std::pair<const std::shared_ptr<Value>,
