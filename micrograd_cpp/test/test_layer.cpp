@@ -31,6 +31,8 @@ void SimpleLayer(const bool non_linear) {
 
   const auto &y = layer(x);
 
+  // NOTE: In a real setting we would calculate the backward grad from the loss
+  // calculated at that time, and the grads would zero out between each call
   for (const auto &output : y) {
     output->Backward();
   }

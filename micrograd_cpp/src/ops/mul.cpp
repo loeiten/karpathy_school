@@ -3,6 +3,7 @@
 #include <iomanip>  // for operator<<, setprecision
 #include <memory>
 #include <sstream>
+#include <iostream>
 
 #include "../../include/graph.hpp"
 #include "../../include/ops/op.hpp"

@@ -1,41 +1,41 @@
 digraph {
     graph [rankdir=LR]
-    "1" [label="{b_1 | data 0.00 | grad 0.00}" shape=record]
-    "2" [label="{w_2 | data 0.24 | grad 0.00}" shape=record]
-    "3" [label="{w_3 | data 0.07 | grad 0.00}" shape=record]
-    "4" [label="{b_4 | data 0.00 | grad 0.00}" shape=record]
-    "5" [label="{w_5 | data 0.04 | grad 0.00}" shape=record]
-    "6" [label="{w_6 | data -0.30 | grad 0.00}" shape=record]
-    "7" [label="{x1 | data 0.50 | grad 0.00}" shape=record]
-    "8" [label="{x2 | data -2.00 | grad 0.00}" shape=record]
-    "9" [label="{mul_out_id_9 | data 0.12 | grad 0.00}" shape=record]
+    "1" [label="{b_1 | data 0.00 | grad 1.00}" shape=record]
+    "2" [label="{w_2 | data 0.24 | grad 0.50}" shape=record]
+    "3" [label="{w_3 | data 0.07 | grad -2.00}" shape=record]
+    "4" [label="{b_4 | data 0.00 | grad 0.70}" shape=record]
+    "5" [label="{w_5 | data 0.04 | grad 0.35}" shape=record]
+    "6" [label="{w_6 | data -0.30 | grad -1.39}" shape=record]
+    "7" [label="{x1 | data 0.50 | grad 0.26}" shape=record]
+    "8" [label="{x2 | data -2.00 | grad -0.14}" shape=record]
+    "9" [label="{mul_out_id_9 | data 0.12 | grad 1.00}" shape=record]
     "9*" [label="*"]
     "9*" -> "9"
-    "10" [label="{add_out_id_10 | data 0.12 | grad 0.00}" shape=record]
+    "10" [label="{add_out_id_10 | data 0.12 | grad 1.00}" shape=record]
     "10+" [label="+"]
     "10+" -> "10"
-    "11" [label="{mul_out_id_11 | data -0.13 | grad 0.00}" shape=record]
+    "11" [label="{mul_out_id_11 | data -0.13 | grad 1.00}" shape=record]
     "11*" [label="*"]
     "11*" -> "11"
-    "12" [label="{activation_12 | data -0.01 | grad 0.00}" shape=record]
+    "12" [label="{activation_12 | data -0.01 | grad 1.00}" shape=record]
     "12+" [label="+"]
     "12+" -> "12"
-    "13" [label="{tanh_out_id_13 | data -0.01 | grad 0.00}" shape=record]
+    "13" [label="{tanh_out_id_13 | data -0.01 | grad 1.00}" shape=record]
     "13tanh" [label="tanh"]
     "13tanh" -> "13"
-    "14" [label="{mul_out_id_14 | data 0.02 | grad 0.00}" shape=record]
+    "14" [label="{mul_out_id_14 | data 0.02 | grad 0.70}" shape=record]
     "14*" [label="*"]
     "14*" -> "14"
-    "15" [label="{add_out_id_15 | data 0.02 | grad 0.00}" shape=record]
+    "15" [label="{add_out_id_15 | data 0.02 | grad 0.70}" shape=record]
     "15+" [label="+"]
     "15+" -> "15"
-    "16" [label="{mul_out_id_16 | data 0.60 | grad 0.00}" shape=record]
+    "16" [label="{mul_out_id_16 | data 0.60 | grad 0.70}" shape=record]
     "16*" [label="*"]
     "16*" -> "16"
-    "17" [label="{activation_17 | data 0.62 | grad 0.00}" shape=record]
+    "17" [label="{activation_17 | data 0.62 | grad 0.70}" shape=record]
     "17+" [label="+"]
     "17+" -> "17"
-    "18" [label="{tanh_out_id_18 | data 0.55 | grad 0.00}" shape=record]
+    "18" [label="{tanh_out_id_18 | data 0.55 | grad 1.00}" shape=record]
     "18tanh" [label="tanh"]
     "18tanh" -> "18"
     "1" -> "10+"
