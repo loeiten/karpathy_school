@@ -181,6 +181,7 @@ Value &Value::operator/(const Value &rhs) {
   return out;
 }
 
+// FIXME: Add binary op subtraction as well and fix this in Loss
 Value &Value::operator-() {
   // NOTE: We need to dynamically allocate the op for it to be in scope when
   //       out.Backward_ is called

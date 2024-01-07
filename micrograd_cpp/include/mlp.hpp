@@ -6,7 +6,6 @@
 
 #include "../include/layer.hpp"  // for Layer
 
-class Layer;
 class Graph;
 
 // We have public inheritance as we want get_parameters to be publicly

@@ -21,6 +21,7 @@ class Neuron : public Module {
   explicit Neuron(Graph& graph);         // NOLINT
   Neuron(Graph& graph, const int& n_in,  // NOLINT
          const bool non_linear = true);
+  Neuron(const Neuron& neuron) = delete;
   virtual ~Neuron() = default;
   // Input Weight   Bias Activation
   //                 b

@@ -6,8 +6,8 @@
 
 #include "../include/neuron.hpp"  // for Neuron
 
-class Neuron;
 class Graph;
+class Value;
 
 // We have public inheritance as we want get_parameters to be publicly
 // accessible in the children
@@ -17,6 +17,7 @@ class Layer : public Neuron {
   explicit Layer(Graph& graph);                           // NOLINT
   Layer(Graph& graph, const int& n_in, const int& n_out,  // NOLINT
         const bool non_linear = true);
+  Layer(const Layer& layer) = delete;
   virtual ~Layer() = default;
 
   // NOTE: The out nodes shares the input, it's the weights and biases of the
@@ -33,14 +34,12 @@ class Layer : public Neuron {
   //   x1 - w21   \    \
   //   x2 - w22   -       o2
   //   x3 - w23   /
-  std::vector<std::shared_ptr<Value>>& operator()(
+  std::vector<std::shared_ptr<Value>> operator()(
       const std::vector<std::shared_ptr<Value>>& x);
 
  protected:
-  int n_out_;
   // We use vector as the order matter
   std::vector<std::shared_ptr<Neuron>> in_nodes;
-  std::vector<std::shared_ptr<Value>> out_values;
 };
 
 #endif  // MICROGRAD_CPP_INCLUDE_LAYER_HPP_

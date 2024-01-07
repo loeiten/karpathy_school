@@ -14,8 +14,9 @@ Layer::Layer(Graph& graph, const int& n_in, const int& n_out,
   }
 }
 
-std::vector<std::shared_ptr<Value>>& Layer::operator()(
+std::vector<std::shared_ptr<Value>> Layer::operator()(
     const std::vector<std::shared_ptr<Value>>& x) {
+  std::vector<std::shared_ptr<Value>> out_values;
   for (size_t i = 0; i < in_nodes.size(); ++i) {
     out_values.emplace_back(((*in_nodes.at(i))(x)).get_shared_ptr());
   }
