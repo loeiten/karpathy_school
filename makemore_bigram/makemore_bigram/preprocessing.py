@@ -108,6 +108,19 @@ def create_probability_matrix(count_matrix: torch.Tensor) -> torch.Tensor:
     return probability_matrix
 
 
+def get_padded_data() -> Tuple[str, ...]:
+    """
+    Return the padded data.
+
+    Returns:
+        Tuple[str,...]: The names padded
+    """
+    data_path = get_data_path()
+    data_tuple = read_data(data_path=data_path)
+    padded_data = pad_data(data_tuple=data_tuple)
+    return padded_data
+
+
 def get_count_matrix() -> torch.Tensor:
     """
     Return the count tensor for the data.
@@ -115,9 +128,7 @@ def get_count_matrix() -> torch.Tensor:
     Returns:
         torch.Tensor: The count matrix
     """
-    data_path = get_data_path()
-    data_tuple = read_data(data_path=data_path)
-    padded_data = pad_data(data_tuple=data_tuple)
+    padded_data = get_padded_data()
     bigram_count = create_bigram_count(padded_data=padded_data)
     count_matrix = create_count_matrix(bigram_dict=bigram_count)
     return count_matrix
