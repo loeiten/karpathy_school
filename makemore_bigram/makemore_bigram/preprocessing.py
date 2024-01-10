@@ -9,27 +9,31 @@ from makemore_bigram.utils.paths import get_data_path
 from makemore_bigram import ALPHABET_DICT
 
 
-def read_data(data_path: Path) -> Tuple:
+def read_data(data_path: Path) -> Tuple[str, ...]:
     """Return the data as a tuple.
 
     Args:
         data_path (Path): Path to the data
 
     Returns:
-        Tuple: The data as a list
+        Tuple[str, ...]: The data as a list
     """
     return tuple(data_path.open("r").read().splitlines())
 
 
-def pad_data(data_tuple: Tuple) -> Tuple:
+def pad_data(data_tuple: Tuple[str, ...]) -> Tuple[str, ...]:
     """Pad the data with start and stop tokens.
 
     We could chose to have a separate start and stop token.
-    However, having simply one token suffices.
-    We will use '.' as this token.
+    This would lead to the matrix having a row with only zeros (starting with an
+    end token), and a column with just zeros (the start token following a
+    character).
+    We can also notice that only one token can do the job for both start and
+    stop.
+    We have used '.' as this token in ALPHABET_DICT.
 
     Args:
-        data_tuple (Tuple): The unprocessed data
+        data_tuple (Tuple[str, ...]): The unprocessed data
 
     Returns:
         Tuple: The padded data
@@ -38,11 +42,11 @@ def pad_data(data_tuple: Tuple) -> Tuple:
     return tuple(padded_data)
 
 
-def create_bigram_count(padded_data: Tuple) -> Dict[Tuple[str, str], int]:
+def create_bigram_count(padded_data: Tuple[str, ...]) -> Dict[Tuple[str, str], int]:
     """Create a dict where the keys are bigrams and the value is the count.
 
     Args:
-        padded_data (Tuple): The data padded with start and stop tokens
+        padded_data (Tuple[str, ...]): The data padded with start and stop tokens
 
     Returns:
         Dict[Tuple[str, str], int]: Bigram count of the data
@@ -81,6 +85,29 @@ def create_count_matrix(bigram_dict: Dict[Tuple[str, str], int]) -> torch.Tensor
     return count_matrix
 
 
+def create_probability_matrix(count_matrix: torch.Tensor) -> torch.Tensor:
+    """Create a probability matrix from the count matrix.
+
+    Args:
+        count_matrix (torch.Tensor): The matrix containing the frequency of the bigrams
+
+    Returns:
+        torch.Tensor: The probability matrix
+    """
+    # We add one to the probability matrix to avoid dividing by zero
+    probability_matrix = (count_matrix + 1).float()
+
+    # We take the sum along the rows (axis=1)
+    # We have keep_dims=True due to the broadcasting rules
+    # The count matrix has dim 27, 27
+    # .sum will create a matrix with dims 27, 1
+    # Broadcasting rules will copy .sum to be 27 ->, 27
+    # If we had keep_dims=False we would get dims 0, 27
+    # Broadcasting rules would the copy .sum to be 27, <- 27
+    probability_matrix /= probability_matrix.sum(dim=1, keepdim=True)
+    return probability_matrix
+
+
 def get_count_matrix() -> torch.Tensor:
     """
     Return the count tensor for the data.
@@ -94,3 +121,15 @@ def get_count_matrix() -> torch.Tensor:
     bigram_count = create_bigram_count(padded_data=padded_data)
     count_matrix = create_count_matrix(bigram_dict=bigram_count)
     return count_matrix
+
+
+def get_probability_matrix() -> torch.Tensor:
+    """
+    Return the probability tensor for the data.
+
+    Returns:
+        torch.Tensor: The probability matrix
+    """
+    count_matrix = get_count_matrix()
+    probability_matrix = create_probability_matrix(count_matrix=count_matrix)
+    return probability_matrix

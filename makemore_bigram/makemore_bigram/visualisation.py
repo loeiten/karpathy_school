@@ -4,8 +4,6 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import torch
-from makemore_bigram.preprocessing import get_count_matrix
-from makemore_bigram.utils.paths import get_output_dir
 
 from makemore_bigram import INVERSE_ALPHABET_DICT
 
@@ -42,6 +40,9 @@ def create_heatmap(count_matrix: torch.Tensor, save_dir: Path) -> None:
 
 
 if __name__ == "__main__":
+    from makemore_bigram.preprocessing import get_count_matrix
+    from makemore_bigram.utils.paths import get_output_dir
+
     count_matrix_ = get_count_matrix()
     output_dir_ = get_output_dir()
     create_heatmap(count_matrix=count_matrix_, save_dir=output_dir_)
