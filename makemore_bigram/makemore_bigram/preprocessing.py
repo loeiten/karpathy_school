@@ -7,7 +7,7 @@ import torch
 import torch.nn.functional as F
 from makemore_bigram.utils.paths import get_data_path
 
-from makemore_bigram import TOKEN_TO_INDEX
+from makemore_bigram import N_TOKENS, TOKEN_TO_INDEX
 
 
 def read_data(data_path: Path) -> Tuple[str, ...]:
@@ -69,7 +69,7 @@ def create_one_hot_data(data_path: Path) -> torch.Tensor:
 
     # One hot encoding of the data
     # pylint: disable-next=not-callable
-    encoded_input = F.one_hot(input_tensor, num_classes=27)
+    encoded_input = F.one_hot(input_tensor, num_classes=N_TOKENS)
 
     return encoded_input
 

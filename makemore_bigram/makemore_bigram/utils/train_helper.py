@@ -5,7 +5,7 @@ from typing import Dict, Tuple
 import torch
 from makemore_bigram.preprocessing import get_padded_data
 
-from makemore_bigram import TOKEN_TO_INDEX
+from makemore_bigram import N_TOKENS, TOKEN_TO_INDEX
 
 
 def create_bigram_count(padded_data: Tuple[str, ...]) -> Dict[Tuple[str, str], int]:
@@ -40,7 +40,7 @@ def create_count_matrix(bigram_dict: Dict[Tuple[str, str], int]) -> torch.Tensor
     Returns:
         torch.Tensor: The count matrix
     """
-    count_matrix = torch.zeros((28, 28), dtype=torch.int32)
+    count_matrix = torch.zeros((N_TOKENS, N_TOKENS), dtype=torch.int32)
 
     for bigram, count in bigram_dict.items():
         first_token = bigram[0]

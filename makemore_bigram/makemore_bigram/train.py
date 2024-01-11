@@ -74,11 +74,11 @@ def train_probability_matrix(input_data: Tuple[str, ...]) -> torch.Tensor:
 
     # We take the sum along the rows (axis=1)
     # We have keep_dims=True due to the broadcasting rules
-    # The count matrix has dim 27, 27
-    # .sum will create a matrix with dims 27, 1
-    # Broadcasting rules will copy .sum to be 27 ->, 27
-    # If we had keep_dims=False we would get dims 0, 27
-    # Broadcasting rules would the copy .sum to be 27, <- 27
+    # The count matrix has dim N_TOKENS, N_TOKENS
+    # .sum will create a matrix with dims N_TOKENS, 1
+    # Broadcasting rules will copy .sum to be N_TOKENS ->, N_TOKENS
+    # If we had keep_dims=False we would get dims 0, N_TOKENS
+    # Broadcasting rules would the copy .sum to be N_TOKENS, <- N_TOKENS
     probability_matrix /= probability_matrix.sum(dim=1, keepdim=True)
     return probability_matrix
 

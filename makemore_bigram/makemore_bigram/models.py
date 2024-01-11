@@ -3,6 +3,8 @@
 import torch
 from makemore_bigram.train import get_probability_matrix
 
+from makemore_bigram import N_TOKENS
+
 
 def get_matrix_model() -> torch.Tensor:
     """Return the (trained) matrix model.
@@ -25,5 +27,5 @@ def get_simple_neural_net(seed: int = 2147483647) -> torch.Tensor:
         torch.Tensor: The parameters of the neural net.
     """
     g = torch.Generator().manual_seed(seed)
-    weights = torch.rand((27, 27), generator=g)
+    weights = torch.rand((N_TOKENS, N_TOKENS), generator=g)
     return weights
