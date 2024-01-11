@@ -40,10 +40,50 @@ def sample_from_matrix(
     return tuple(samples)
 
 
-if __name__ == "__main__":
-    from makemore_bigram.preprocessing import get_probability_matrix
+def neural_net_inference_without_interpretation(
+    input_data: torch, weights: torch.Tensor
+) -> torch.Tensor:
+    """Run inference on the neural net without interpretation of the data.
 
-    probability_matrix_ = get_probability_matrix()
+    Args:
+        input_data (torch.Tensor): The data to run the model on
+        weights (torch.Tensor): The model
+            (one hidden layer without bias, i.e. a matrix)
+
+    Returns:
+        torch.Tensor: The predictions
+    """
+    # Predict the log counts
+    logits = input_data @ weights
+    # This is equivalent to the count matrix
+    counts = logits.exp()
+    # NOTE: This is equivalent to softmax
+    probabilities = counts / counts.sum(dim=1, keepdim=True)
+    return probabilities
+
+
+def neural_net_inference_with_interpretation(
+    input_data: torch, weights: torch.Tensor, n_predictions: int = 10
+) -> Tuple[str, ...]:
+    """Run inference with interpretation.
+
+    Args:
+        input_data (torch): The data to run predictions on
+        weights (torch.Tensor): The model (a.k.a. the weights)
+        n_predictions (int): Number of predictions to make
+
+    Returns:
+        Tuple[str, ...]: The interpreted predictions
+    """
+    # FIXME: Implement this
+    print(f"{input_data=}, {weights=}, {n_predictions=}")
+    return tuple(["foo", "bar"])
+
+
+if __name__ == "__main__":
+    from makemore_bigram.models import get_matrix_model
+
+    probability_matrix_ = get_matrix_model()
     samples_ = sample_from_matrix(probability_matrix=probability_matrix_)
     for sample_ in samples_:
         print(sample_)

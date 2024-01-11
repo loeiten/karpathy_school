@@ -9,16 +9,28 @@ from makemore_bigram import ALPHABET_DICT
 
 def calculate_avg_nll_of_matrix_model(
     data: Tuple[str, ...], model: torch.Tensor
-) -> float:
+) -> torch.Tensor:
     """Calculate the average negative log likelihood (nll) of the matrix model.
 
-    In the model we would like to maximize the likelihood of the data with
-    respect to the model parameters.
-    As the likelihood is obtained by multiplying the probabilities we can obtain
-    very small numbers which can lead to high truncation errors.
-    Hence, we can instead maximize the log of the likelihood.
-    This is equivalent to minimizing the negative log likelihood, which is the
-    same as minimizing the average of the log likelihood.
+    If the model predicts all the bigrams in the data set perfectly, then it
+    will assign the probability 1 to all.
+
+    However, our models are only seeing bigrams, and have no notion of where in
+    the name this bigram occurs.
+    We can loop through the probabilities of the model (the matrix) assigns to
+    each bigram occurring in the data set.
+    If we want one number describing the quality of the model, we can multiply
+    these numbers to get what is called the likelihood.
+    As the probabilities are less than 1, this multiplication results in a very
+    small number which can lead to high truncation errors.
+    Hence, we take the logarithm of this number, and get the log likelihood.
+
+    If we want a good model we can maximize the likelihood.
+    This is the same as maximizing the log likelihood as log is monotonically
+    increasing.
+    This is the same as minimizing the negative of the log likelihood (nll),
+    which is appropriate for gradient DESCENT.
+    In order for the loss not to get to high, it's common to normalize the nll.
 
     A model with average nll = 0 is a model which perfectly fits the data
 
@@ -27,7 +39,7 @@ def calculate_avg_nll_of_matrix_model(
         model (torch.Tensor): The model fitting the data (a matrix)
 
     Returns:
-        float: The average negative log likelihood score
+        torch.Tensor: The average negative log likelihood score
     """
     # As the matrix model is using bigrams, we convert the data to bigrams
     log_likelihood = 0.0
@@ -38,7 +50,7 @@ def calculate_avg_nll_of_matrix_model(
             idx1 = ALPHABET_DICT[token_1]
             idx2 = ALPHABET_DICT[token_2]
             probability = model[idx1, idx2]
-            log_probability = probability.log().item()
+            log_probability = probability.log()
             # Multiplying the probabilities is equivalent of summing the log of
             # the probabilities
             log_likelihood += log_probability
@@ -49,9 +61,10 @@ def calculate_avg_nll_of_matrix_model(
 
 
 if __name__ == "__main__":
-    from makemore_bigram.preprocessing import get_padded_data, get_probability_matrix
+    from makemore_bigram.preprocessing import get_padded_data
+    from makemore_bigram.train import get_probability_matrix
 
     names_ = get_padded_data()
     probability_matrix_ = get_probability_matrix()
     avg_nll_ = calculate_avg_nll_of_matrix_model(names_, probability_matrix_)
-    print(avg_nll_)
+    print(avg_nll_.item())
