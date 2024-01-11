@@ -62,13 +62,3 @@ def calculate_avg_nll_of_matrix_model(
 
     avg_nll = -log_likelihood / n
     return avg_nll
-
-
-if __name__ == "__main__":
-    from makemore_bigram.preprocessing import get_padded_data
-    from makemore_bigram.train import get_probability_matrix
-
-    names_ = get_padded_data()
-    probability_matrix_ = get_probability_matrix()
-    avg_nll_ = calculate_avg_nll_of_matrix_model(names_, probability_matrix_)
-    print(avg_nll_.item())
