@@ -4,7 +4,7 @@ from typing import List, Tuple
 
 import torch
 
-from makemore_bigram import INVERSE_ALPHABET_DICT
+from makemore_bigram import INDEX_TO_TOKEN
 
 
 def sample_from_matrix(
@@ -35,7 +35,7 @@ def sample_from_matrix(
             # Stop when stop token is reached
             if idx == 0:
                 break
-            sample.append(INVERSE_ALPHABET_DICT[idx])
+            sample.append(INDEX_TO_TOKEN[idx])
         samples.append("".join(sample))
     return tuple(samples)
 

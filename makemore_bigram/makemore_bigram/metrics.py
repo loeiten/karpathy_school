@@ -4,7 +4,7 @@ from typing import Tuple
 
 import torch
 
-from makemore_bigram import ALPHABET_DICT
+from makemore_bigram import TOKEN_TO_INDEX
 
 
 def calculate_avg_nll_of_matrix_model(
@@ -47,8 +47,8 @@ def calculate_avg_nll_of_matrix_model(
 
     for name in data:
         for token_1, token_2 in zip(name, name[1:]):
-            idx1 = ALPHABET_DICT[token_1]
-            idx2 = ALPHABET_DICT[token_2]
+            idx1 = TOKEN_TO_INDEX[token_1]
+            idx2 = TOKEN_TO_INDEX[token_2]
             probability = model[idx1, idx2]
             log_probability = probability.log()
             # Multiplying the probabilities is equivalent of summing the log of

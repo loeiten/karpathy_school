@@ -7,6 +7,8 @@ import torch
 import torch.nn.functional as F
 from makemore_bigram.utils.paths import get_data_path
 
+from makemore_bigram import TOKEN_TO_INDEX
+
 
 def read_data(data_path: Path) -> Tuple[str, ...]:
     """Return the data as a tuple.
@@ -41,6 +43,34 @@ def pad_data(data_tuple: Tuple[str, ...]) -> Tuple[str, ...]:
     return tuple(padded_data)
 
 
+def create_one_hot_data(data_path: Path) -> torch.Tensor:
+    """Return the one hot encoded data for the bigrams.
+
+    Args:
+        data_path (Path): Path to the data
+
+    Returns:
+        torch.Tensor: The input character (one hot encoded tokens)
+    """
+    data = read_data(data_path=data_path)
+    padded_data = pad_data(data_tuple=data)
+    input_token: List[int] = []
+
+    for name in padded_data:
+        for token in name:
+            input_token.append(TOKEN_TO_INDEX[token])
+
+    # NOTE: torch.tensor is a function, whilst torch.Tensor is a constructor
+    #       which infers the dtype
+    input_tensor = torch.tensor(input_token)
+
+    # One hot encoding of the data
+    # pylint: disable-next=not-callable
+    encoded_input = F.one_hot(input_tensor, num_classes=27)
+
+    return encoded_input
+
+
 def get_padded_data() -> Tuple[str, ...]:
     """
     Return the padded data.
@@ -52,33 +82,3 @@ def get_padded_data() -> Tuple[str, ...]:
     data_tuple = read_data(data_path=data_path)
     padded_data = pad_data(data_tuple=data_tuple)
     return padded_data
-
-
-def get_bigram_ground_truth() -> Tuple[torch.Tensor, torch.Tensor]:
-    """Return the ground truth for the bigrams.
-
-    Returns:
-        torch.Tensor: The input character (one hot encoded tokens)
-        torch.Tensor: The output character (one hot encoded tokens)
-    """
-    padded_data = get_padded_data()
-    input_token: List[str] = []
-    output_token: List[str] = []
-
-    for name in padded_data:
-        for token_1, token_2 in zip(name, name[1:]):
-            input_token.append(token_1)
-            output_token.append(token_2)
-
-    # NOTE: torch.tensor is a function, whilst torch.Tensor is a constructor
-    #       which infers the dtype
-    input_tensor = torch.tensor(input_token)
-    output_tensor = torch.tensor(output_token)
-
-    # One hot encoding of the data
-    # pylint: disable-next=not-callable
-    encoded_input = F.one_hot(input_tensor, num_classes=27)
-    # pylint: disable-next=not-callable
-    encoded_output = F.one_hot(output_tensor, num_classes=27)
-
-    return encoded_input, encoded_output

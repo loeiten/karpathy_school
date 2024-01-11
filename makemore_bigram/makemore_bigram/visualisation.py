@@ -5,7 +5,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import torch
 
-from makemore_bigram import INVERSE_ALPHABET_DICT
+from makemore_bigram import INDEX_TO_TOKEN
 
 
 def create_heatmap(count_matrix: torch.Tensor, save_dir: Path) -> None:
@@ -22,12 +22,12 @@ def create_heatmap(count_matrix: torch.Tensor, save_dir: Path) -> None:
     ax.imshow(count_matrix, cmap="Blues")
 
     # Annotate the cells
-    n_tokens = len(INVERSE_ALPHABET_DICT)
+    n_tokens = len(INDEX_TO_TOKEN)
     # NOTE: x and y are here referring to the x and y of the plot
     #       For our matrix y is the row
     for x in range(n_tokens):
         for y in range(n_tokens):
-            character_string = INVERSE_ALPHABET_DICT[y] + INVERSE_ALPHABET_DICT[x]
+            character_string = INDEX_TO_TOKEN[y] + INDEX_TO_TOKEN[x]
             ax.text(x, y, character_string, ha="center", va="bottom", color="gray")
             ax.text(
                 x, y, count_matrix[y, x].item(), ha="center", va="top", color="gray"
