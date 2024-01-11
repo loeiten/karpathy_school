@@ -4,6 +4,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import torch
+from makemore_bigram.utils.train_helper import get_count_matrix
 
 from makemore_bigram import INDEX_TO_TOKEN
 
@@ -34,15 +35,36 @@ def create_heatmap(count_matrix: torch.Tensor, save_dir: Path) -> None:
             )
     plt.axis("off")
 
+    save_dir.mkdir(parents=True, exist_ok=True)
     save_path = save_dir.joinpath("heatmap.png")
     fig.savefig(save_path)
     print(f"Saved image to {save_path}")
 
 
-if __name__ == "__main__":
-    from makemore_bigram.utils.paths import get_output_dir
-    from makemore_bigram.utils.train_helper import get_count_matrix
+def main(save_dir: Path):
+    """
+    Run the main function of visualisation module.
 
+    Args:
+        save_dir (Path): Directory to store heatmap in
+    """
     count_matrix_ = get_count_matrix()
+    create_heatmap(count_matrix=count_matrix_, save_dir=save_dir)
+
+
+if __name__ == "__main__":
+    import argparse
+
+    from makemore_bigram.utils.paths import get_output_dir
+
     output_dir_ = get_output_dir()
-    create_heatmap(count_matrix=count_matrix_, save_dir=output_dir_)
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-s",
+        "--save_dir",
+        type=Path,
+        help="Directory to store heatmap plot in",
+        default=output_dir_,
+    )
+    args = parser.parse_args()
+    main(args.save_dir)
