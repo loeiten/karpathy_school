@@ -1,18 +1,11 @@
 """Module for models."""
 
 import torch
-from makemore_bigram.train import get_probability_matrix
 
 from makemore_bigram import N_TOKENS
 
-
-def get_matrix_model() -> torch.Tensor:
-    """Return the (trained) matrix model.
-
-    Returns:
-        torch.Tensor: The probability model.
-    """
-    return get_probability_matrix()
+# NOTE: The pure matrix model can be obtained from get_probability_matrix, but
+#       is not included here in order to avoid circular dependencies
 
 
 def get_simple_neural_net(seed: int = 2147483647) -> torch.Tensor:

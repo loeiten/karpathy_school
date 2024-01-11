@@ -1,8 +1,9 @@
 """Module for inference."""
 
-from typing import List, Tuple
+from typing import List, Literal, Tuple
 
 import torch
+from makemore_bigram.train import get_neural_net, get_probability_matrix
 
 from makemore_bigram import INDEX_TO_TOKEN
 
@@ -11,6 +12,9 @@ def sample_from_matrix(
     probability_matrix: torch.Tensor, n_samples: int = 20, seed: int = 2147483647
 ) -> Tuple[str, ...]:
     """Draw samples from the probability matrix.
+
+    NOTE: Normally one would predict from some input data, here however, we are
+          sampling from the matrix which is the model
 
     Args:
         probability_matrix (torch.Tensor): Matrix containing probability of the
@@ -40,50 +44,37 @@ def sample_from_matrix(
     return tuple(samples)
 
 
-def neural_net_inference_without_interpretation(
-    input_data: torch, weights: torch.Tensor
-) -> torch.Tensor:
-    """Run inference on the neural net without interpretation of the data.
+def main(model: Literal["probability_matrix", "neural_net"]) -> None:
+    """Train and run inference on model.
 
     Args:
-        input_data (torch.Tensor): The data to run the model on
-        weights (torch.Tensor): The model
-            (one hidden layer without bias, i.e. a matrix)
-
-    Returns:
-        torch.Tensor: The predictions
+        model (Literal['probability_matrix', 'neural_net']): The model to run
+            inference on
     """
-    # Predict the log counts
-    logits = input_data @ weights
-    # This is equivalent to the count matrix
-    counts = logits.exp()
-    # NOTE: This is equivalent to softmax
-    probabilities = counts / counts.sum(dim=1, keepdim=True)
-    return probabilities
+    if model == "probability_matrix":
+        matrix = get_probability_matrix()
+    elif model == "neural_net":
+        matrix = get_neural_net()
 
-
-def neural_net_inference_with_interpretation(
-    input_data: torch, weights: torch.Tensor, n_predictions: int = 10
-) -> Tuple[str, ...]:
-    """Run inference with interpretation.
-
-    Args:
-        input_data (torch): The data to run predictions on
-        weights (torch.Tensor): The model (a.k.a. the weights)
-        n_predictions (int): Number of predictions to make
-
-    Returns:
-        Tuple[str, ...]: The interpreted predictions
-    """
-    # FIXME: Implement this
-    print(f"{input_data=}, {weights=}, {n_predictions=}")
-    return tuple(["foo", "bar"])
+    samples = sample_from_matrix(probability_matrix=matrix)
+    for sample in samples:
+        print(sample)
 
 
 if __name__ == "__main__":
-    from makemore_bigram.models import get_matrix_model
+    import argparse
 
-    probability_matrix_ = get_matrix_model()
-    samples_ = sample_from_matrix(probability_matrix=probability_matrix_)
-    for sample_ in samples_:
-        print(sample_)
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "model",
+        type=str,
+        choices=("probability_matrix", "neural_net"),
+        help=(
+            "What model to use for inference. "
+            "The probability matrix is trained through counts. "
+            "The neural net will be trained through backpropagation."
+        ),
+    )
+    args = parser.parse_args()
+
+    main(args.model)

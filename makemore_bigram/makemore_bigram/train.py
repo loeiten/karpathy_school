@@ -3,53 +3,14 @@
 from typing import Tuple
 
 import torch
-from makemore_bigram.inference import neural_net_inference_without_interpretation
 from makemore_bigram.metrics import calculate_avg_nll_of_matrix_model
-from makemore_bigram.preprocessing import get_padded_data
-from makemore_bigram.utils.train_helper import create_bigram_count, create_count_matrix
-
-
-def train_neural_net_model(
-    model: torch.Tensor,
-    input_data: Tuple[str, ...],
-    epochs: int = 100,
-    learning_rate: float = 50.0,
-) -> torch.Tensor:
-    """Train the neural net model.
-
-    Args:
-        model (torch.Tensor): The model (weights) to use
-        input_data (Tuple[str, ...]): The input data
-        epochs (int, optional): Number of epochs. Defaults to 100.
-        learning_rate (float, optional): The learning rate. Defaults to 50.0.
-
-    Returns:
-        torch.Tensor: The trained model
-    """
-    # Alias
-    weights = model
-
-    for k in range(epochs):
-        # Forward pass
-        probabilities = neural_net_inference_without_interpretation(
-            input_data=input_data, weights=weights
-        )
-        loss = calculate_avg_nll_of_matrix_model(data=input_data, model=probabilities)
-
-        # Backward pass
-        # Zero out the gradients
-        weights.zero()
-        loss.backward()
-
-        # Update
-        weights.data += -learning_rate * weights.grad
-
-        if k % 10 == 0:
-            print(f"Epoch={k}, loss={loss.item():.4f}")
-
-    # Alias
-    model = weights
-    return model
+from makemore_bigram.models import get_simple_neural_net
+from makemore_bigram.preprocessing import create_one_hot_data, get_padded_data
+from makemore_bigram.utils.train_helper import (
+    create_bigram_count,
+    create_count_matrix,
+    neural_net_inference_without_interpretation,
+)
 
 
 def train_probability_matrix(input_data: Tuple[str, ...]) -> torch.Tensor:
@@ -83,9 +44,55 @@ def train_probability_matrix(input_data: Tuple[str, ...]) -> torch.Tensor:
     return probability_matrix
 
 
+def train_neural_net_model(
+    model: torch.Tensor,
+    input_data: Tuple[str, ...],
+    epochs: int = 100,
+    learning_rate: float = 50.0,
+) -> torch.Tensor:
+    """Train the neural net model.
+
+    Args:
+        model (torch.Tensor): The model (weights) to use
+        input_data (Tuple[str, ...]): The input data
+        epochs (int, optional): Number of epochs. Defaults to 100.
+        learning_rate (float, optional): The learning rate. Defaults to 50.0.
+
+    Returns:
+        torch.Tensor: The trained model
+    """
+    # Alias
+    weights = model
+    one_hot_input = create_one_hot_data(input_data=input_data)
+
+    for k in range(epochs):
+        # Forward pass
+        probabilities = neural_net_inference_without_interpretation(
+            input_data=one_hot_input, weights=weights
+        )
+        # FIXME:
+        # loss = calculate_avg_nll_of_matrix_model(data=input_data, model=probabilities)
+        loss = -probabilities[torch.arange(asdf), ground_truth].log().mean()
+
+        # Backward pass
+        # Zero out the gradients
+        weights.grad = None
+        loss.backward()
+
+        # Update
+        weights.data += -learning_rate * weights.grad
+
+        if k % 10 == 0:
+            print(f"Epoch={k}, loss={loss.item():.4f}")
+
+    # Alias
+    model = weights
+    return model
+
+
 def get_probability_matrix() -> torch.Tensor:
     """
-    Return the probability tensor for the data.
+    Return the (trained) probability tensor for the data.
 
     Note that this is the same as the trained matrix model.
 
@@ -97,8 +104,14 @@ def get_probability_matrix() -> torch.Tensor:
     return probability_matrix
 
 
-if __name__ == "__main__":
-    from makemore_bigram.models import get_simple_neural_net
+def get_neural_net() -> torch.Tensor:
+    """
+    Return a trained neural net.
 
-    neural_net = get_simple_neural_net()
-    names_ = get_padded_data()
+    Returns:
+        torch.Tensor: The weights of the trained net
+    """
+    model = get_simple_neural_net()
+    padded_data = get_padded_data()
+    neural_net = train_neural_net_model(model=model, input_data=padded_data)
+    return neural_net

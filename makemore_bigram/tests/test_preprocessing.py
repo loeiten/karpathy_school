@@ -34,9 +34,9 @@ def test_pad_data() -> None:
 
 def test_create_one_hot_data() -> None:
     """Test the pad_data and create_one_hot_data function."""
-    data_path = get_data_path()
+    padded_data = get_padded_data()
 
-    encoded_input = create_one_hot_data(data_path=data_path)
+    encoded_input = create_one_hot_data(input_data=padded_data)
     assert encoded_input.shape == torch.Size([260179, N_TOKENS])
 
     # Assert that the first name is .emma.

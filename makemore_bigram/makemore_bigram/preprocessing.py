@@ -43,23 +43,21 @@ def pad_data(data_tuple: Tuple[str, ...]) -> Tuple[str, ...]:
     return tuple(padded_data)
 
 
-def create_one_hot_data(data_path: Path) -> torch.Tensor:
+def create_one_hot_data(input_data: Tuple[str, ...]) -> torch.Tensor:
     """Return the one hot encoded data for the bigrams.
 
     NOTE: We are not generating one hot encoded data for the ground truth as all
     all information is in the padded data.
 
     Args:
-        data_path (Path): Path to the data
+        input_data (Tuple[str,...]): The data to create one hot encoding from
 
     Returns:
         torch.Tensor: The input character (one hot encoded tokens)
     """
-    data = read_data(data_path=data_path)
-    padded_data = pad_data(data_tuple=data)
     input_token: List[int] = []
 
-    for name in padded_data:
+    for name in input_data:
         for token in name:
             input_token.append(TOKEN_TO_INDEX[token])
 
@@ -71,7 +69,7 @@ def create_one_hot_data(data_path: Path) -> torch.Tensor:
     # pylint: disable-next=not-callable
     encoded_input = F.one_hot(input_tensor, num_classes=N_TOKENS)
 
-    return encoded_input
+    return encoded_input.float()
 
 
 def get_padded_data() -> Tuple[str, ...]:
