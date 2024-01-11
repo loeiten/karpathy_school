@@ -46,6 +46,9 @@ def pad_data(data_tuple: Tuple[str, ...]) -> Tuple[str, ...]:
 def create_one_hot_data(data_path: Path) -> torch.Tensor:
     """Return the one hot encoded data for the bigrams.
 
+    NOTE: We are not generating one hot encoded data for the ground truth as all
+    all information is in the padded data.
+
     Args:
         data_path (Path): Path to the data
 

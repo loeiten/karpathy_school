@@ -34,6 +34,10 @@ def calculate_avg_nll_of_matrix_model(
 
     A model with average nll = 0 is a model which perfectly fits the data
 
+    NOTE: Normally we compare a prediction against the ground truth. However, as
+    the matrix contains all the probability for all bigrams it contains all the
+    information needed to calculate the average nll
+
     Args:
         data (Tuple[str, ...]): The data the model is built from (the names)
         model (torch.Tensor): The model fitting the data (a matrix)
