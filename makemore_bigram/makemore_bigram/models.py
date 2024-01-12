@@ -20,5 +20,5 @@ def get_simple_neural_net(seed: int = 2147483647) -> torch.Tensor:
         torch.Tensor: The parameters of the neural net.
     """
     g = torch.Generator().manual_seed(seed)
-    weights = torch.rand((N_TOKENS, N_TOKENS), generator=g)
+    weights = torch.rand((N_TOKENS, N_TOKENS), generator=g, requires_grad=True)
     return weights

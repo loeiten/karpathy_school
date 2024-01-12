@@ -3,14 +3,13 @@
 from typing import Tuple
 
 import torch
-from makemore_bigram.metrics import calculate_avg_nll_of_matrix_model
+from makemore_bigram.metrics import calculate_avg_nll_of_neural_net_model
 from makemore_bigram.models import get_simple_neural_net
-from makemore_bigram.preprocessing import create_one_hot_data, get_padded_data
-from makemore_bigram.utils.train_helper import (
-    create_bigram_count,
-    create_count_matrix,
+from makemore_bigram.preprocessing import create_training_data, get_padded_data
+from makemore_bigram.utils.inference_helper import (
     neural_net_inference_without_interpretation,
 )
+from makemore_bigram.utils.train_helper import create_bigram_count, create_count_matrix
 
 
 def train_probability_matrix(input_data: Tuple[str, ...]) -> torch.Tensor:
@@ -47,7 +46,7 @@ def train_probability_matrix(input_data: Tuple[str, ...]) -> torch.Tensor:
 def train_neural_net_model(
     model: torch.Tensor,
     input_data: Tuple[str, ...],
-    epochs: int = 100,
+    epochs: int = 200,
     learning_rate: float = 50.0,
 ) -> torch.Tensor:
     """Train the neural net model.
@@ -63,16 +62,22 @@ def train_neural_net_model(
     """
     # Alias
     weights = model
-    one_hot_input = create_one_hot_data(input_data=input_data)
+
+    # Create input and ground_truth
+    one_hot_input, ground_truth = create_training_data(input_data=input_data)
+    # This is equivalent to one_hot_input.shape[0]
+    n_examples = ground_truth.nelement()
 
     for k in range(epochs):
         # Forward pass
         probabilities = neural_net_inference_without_interpretation(
             input_data=one_hot_input, weights=weights
         )
-        # FIXME:
-        # loss = calculate_avg_nll_of_matrix_model(data=input_data, model=probabilities)
-        loss = -probabilities[torch.arange(asdf), ground_truth].log().mean()
+        loss = calculate_avg_nll_of_neural_net_model(
+            probabilities=probabilities,
+            ground_truth=ground_truth,
+            n_examples=n_examples,
+        )
 
         # Backward pass
         # Zero out the gradients
@@ -80,10 +85,13 @@ def train_neural_net_model(
         loss.backward()
 
         # Update
+        assert weights.grad is not None
         weights.data += -learning_rate * weights.grad
 
         if k % 10 == 0:
             print(f"Epoch={k}, loss={loss.item():.4f}")
+
+    print(f"Final epoch={k}, loss={loss.item():.4f}")
 
     # Alias
     model = weights

@@ -2,7 +2,7 @@
 
 import torch
 from makemore_bigram.preprocessing import (
-    create_one_hot_data,
+    create_training_data,
     get_padded_data,
     pad_data,
     read_data,
@@ -32,12 +32,13 @@ def test_pad_data() -> None:
     assert padded_data == other_padded_data
 
 
-def test_create_one_hot_data() -> None:
+def test_create_training_data() -> None:
     """Test the pad_data and create_one_hot_data function."""
     padded_data = get_padded_data()
 
-    encoded_input = create_one_hot_data(input_data=padded_data)
-    assert encoded_input.shape == torch.Size([260179, N_TOKENS])
+    encoded_input, ground_truth = create_training_data(input_data=padded_data)
+    assert encoded_input.shape == torch.Size([228146, N_TOKENS])
+    assert ground_truth.shape == torch.Size([228146])
 
     # Assert that the first name is .emma.
     assert INDEX_TO_TOKEN[encoded_input[0, :].argmax().item()] == "."
@@ -46,3 +47,9 @@ def test_create_one_hot_data() -> None:
     assert INDEX_TO_TOKEN[encoded_input[3, :].argmax().item()] == "m"
     assert INDEX_TO_TOKEN[encoded_input[4, :].argmax().item()] == "a"
     assert INDEX_TO_TOKEN[encoded_input[5, :].argmax().item()] == "."
+
+    assert INDEX_TO_TOKEN[ground_truth[0].item()] == "e"
+    assert INDEX_TO_TOKEN[ground_truth[1].item()] == "m"
+    assert INDEX_TO_TOKEN[ground_truth[2].item()] == "m"
+    assert INDEX_TO_TOKEN[ground_truth[3].item()] == "a"
+    assert INDEX_TO_TOKEN[ground_truth[4].item()] == "."
