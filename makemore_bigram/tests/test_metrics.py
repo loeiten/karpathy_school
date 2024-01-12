@@ -27,4 +27,4 @@ def test_calculate_avg_nll_of_neural_net_model() -> None:
         probabilities=probabilities, ground_truth=ground_truth, n_examples=n_examples
     )
     # The above is a perfect model, so the avg_nll should be 0
-    assert avg_nll.item() < 0.001
+    assert torch.isclose(avg_nll, torch.tensor(0.0)).item()
