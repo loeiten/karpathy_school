@@ -112,14 +112,19 @@ def get_probability_matrix() -> torch.Tensor:
     return probability_matrix
 
 
-def get_neural_net() -> torch.Tensor:
+def get_neural_net(epochs: int = 200) -> torch.Tensor:
     """
     Return a trained neural net.
+
+    Args:
+        epochs (int): Number of epochs to run. Defaults to 200
 
     Returns:
         torch.Tensor: The weights of the trained net
     """
     model = get_simple_neural_net()
     padded_data = get_padded_data()
-    neural_net = train_neural_net_model(model=model, input_data=padded_data)
+    neural_net = train_neural_net_model(
+        model=model, input_data=padded_data, epochs=epochs
+    )
     return neural_net
