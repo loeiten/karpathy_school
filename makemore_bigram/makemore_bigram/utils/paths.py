@@ -20,7 +20,7 @@ def get_data_path() -> Path:
     Returns:
         Path: The path to the root directory
     """
-    return get_makemore_bigram_package_dir().parent.joinpath("data", "names.txt")
+    return get_makemore_bigram_package_dir().parents[1].joinpath("data", "names.txt")
 
 
 def get_output_dir() -> Path:
