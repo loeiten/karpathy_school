@@ -68,7 +68,7 @@ def create_feature_and_labels(
         for token in name[:block_size]:
             context.append(TOKEN_TO_INDEX[token])
         # Continue with the rest of the name
-        for token in name[block_size]:
+        for token in name[block_size:]:
             # Store the current context as the input
             input_tokens_list.append(context)
 
