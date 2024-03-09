@@ -47,6 +47,17 @@ def create_feature_and_labels(
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """Return the training data.
 
+    NOTE: We do not need to one-hot encode
+          If we have a embedding matrix
+          C = torch.rand(vocab_size, embedding_size)
+          Then
+          C[token_idx]
+          is equivalent to
+          F.one_hot(torch.tensor(token_idx), num_classes=vocab_size).float @ C
+
+    NOTE: The embedding look-up is fairly flexible in PyTorch as we can index
+          the embedding matrix with C[torch.tensor]
+
     Args:
         input_data (Tuple[str,...]): The data to create the features and labels
             from
