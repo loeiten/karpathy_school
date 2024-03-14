@@ -16,7 +16,9 @@ def get_model(
     """Return the model.
 
     Args:
-        block_size (int): The seed for the random number generator
+        block_size (int): Number of input features to the network
+            This is how many characters we are considering simultaneously, aka.
+            the context length
         embedding_size (int): The size of the embedding
         hidden_layer_neurons (int): The seed for the random number generator
         seed (int): The seed for the random number generator

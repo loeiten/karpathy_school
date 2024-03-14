@@ -32,7 +32,8 @@ def train_neural_net_model(
         # NOTE: training_data has dimension (n_samples, block_size)
         #       training_data[idxs] selects batch_size samples from the training 
         #       data
-        #       The size is therefore (batch_size, block_size)
+        #       The size of training_data[idxs] is therefore 
+        #       (batch_size, block_size)
         #       c has dimension (VOCAB_SIZE, embedding_size)
         #       c[training_data[idxs]] will grab embedding_size vectors
         #       for each of the block_size characters
@@ -43,12 +44,14 @@ def train_neural_net_model(
         #       done the following:
         #
         #       emb = C[X]
-        #       # The first dimension of C[X] would be number of parameters
+        #       # The first dimension of C[X] would be the number of parameters
         #       # The second would be the number of block_size
         #       # The last dimension would be the embedding_size
         #       torch.cat([emb[:, 0, :], emb[:, 1, :], emb[:, 2, :]])
         #
         #       However, this would fix the code to use block_size = 2
+        #       as 0 will be the first character in the block, 1 will be the
+        #       second and so on
         #
         #       Another approach could be to use
         #       torch.cat(torch.unbind(emb, 1), 1)
@@ -58,8 +61,14 @@ def train_neural_net_model(
         #       However, this would create a new tensor
         #       Instead, we can just change it's view
         #       emb.view(n_samples, block_size*embedding_size)
+        # The block needs to be concatenated before multiplying it with the 
+        # weight
+        # That is, the dimension size will be block_size*embedding_size
+        concatenated_dimension_size = emb.shape[1]*emb.shape[2]
+        # NOTE: .view(-1, x) - the -1 will make pyTorch infer the dimension for 
+        #       that dimension
         # NOTE: + b1 is broadcasting on the correct dimension
         # NOTE: The broadcasting will succeed
-        h = torch.tanh(emb.view(-1, 6) @ w1 + b1)
+        h = torch.tanh(emb.view(-1, concatenated_dimension_size) @ w1 + b1)
 
     return c, w1, b1, w2, b2
