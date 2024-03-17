@@ -17,7 +17,7 @@ def predict_neural_network(
             This data has the shape (batch_size, block_size)
 
     Returns:
-        torch.Tensor: The achieved probabilities with shape (batch_size)
+        torch.Tensor: The achieved logits with shape (batch_size)
     """
     # Alias
     c, w1, b1, w2, b2 = model
@@ -60,8 +60,5 @@ def predict_neural_network(
     h = torch.tanh(emb.view(-1, concatenated_dimension_size) @ w1 + b1)
     # The logits will have dimension (batch_size, VOCAB_SIZE)
     logits = h @ w2 + b2
-    # Get the fake counts (like in makemore_bigram)
-    counts = logits.exp()
-    # Normalize to probability
-    prob = counts / counts.sum(1, keepdim=True)
-    return prob
+
+    return logits
