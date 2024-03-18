@@ -13,6 +13,7 @@ def train_neural_net_model(
     ground_truth_data: torch.Tensor,
     n_mini_batches: int,
     batch_size: int,
+    learning_rate: float = -0.1,
 ) -> Tuple[torch.Tensor]:
     """Train the neural net model.
 
@@ -25,10 +26,15 @@ def train_neural_net_model(
             (the correct labels)
         n_mini_batches (int): Number of mini batches to use
         batch_size (int): The batch size to use
+        learning_rate (float): The learning rate to use
 
     Returns:
-        torch.Tensor: The trained model
+        Tuple[torch.Tensor, ...]: The trained model
     """
+    # Make it possible to train
+    for parameters in model:
+        parameters.requires_grad = True
+
     for _ in range(n_mini_batches):
         # Mini batch constructor
         n_samples = input_training_data.shape[0]
@@ -40,6 +46,8 @@ def train_neural_net_model(
         #       The size of input_training_data[idxs] is therefore
         #       (batch_size, block_size)
         input_data = input_training_data[idxs]
+
+        # Forward pass
         logits = predict_neural_network(model=model, input_data=input_data)
 
         # NOTE: We could have the following implementation:
@@ -68,4 +76,16 @@ def train_neural_net_model(
         # It's also numerically better behaved
         loss = F.cross_entropy(logits, ground_truth_data)
 
-    return loss
+        # Backward pass
+
+        # Reset the gradients
+        for parameters in model:
+            parameters.grad = None
+
+        loss.backward()
+
+        # Update the weights
+        for parameters in model:
+            parameters.data += learning_rate * parameters.grad
+
+    return model
