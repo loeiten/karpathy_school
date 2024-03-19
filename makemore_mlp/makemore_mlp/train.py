@@ -1,19 +1,18 @@
 """Module to train the model."""
 
-from typing import Tuple
+from typing import Optional, Tuple
 
 import torch
 import torch.nn.functional as F
 from makemore_mlp.inference import predict_neural_network
+from makemore_mlp.options import ModelOptions
 
 
 def train_neural_net_model(
     model: Tuple[torch.Tensor, ...],
     input_training_data: torch.Tensor,
     ground_truth_data: torch.Tensor,
-    n_mini_batches: int,
-    batch_size: int,
-    learning_rate: float = -0.1,
+    model_options: Optional[ModelOptions],
 ) -> Tuple[torch.Tensor]:
     """Train the neural net model.
 
@@ -24,13 +23,17 @@ def train_neural_net_model(
             This is the data that will be fed into the features
         ground_truth_data (torch.Tensor): The correct prediction for the input
             (the correct labels)
-        n_mini_batches (int): Number of mini batches to use
-        batch_size (int): The batch size to use
-        learning_rate (float): The learning rate to use
+        model_options (Optional[ModelOptions]): Model option
 
     Returns:
         Tuple[torch.Tensor, ...]: The trained model
     """
+    if model_options is None:
+        model_options = ModelOptions()
+    n_mini_batches = model_options.n_mini_batches
+    batch_size = model_options.batch_size
+    learning_rate = model_options.learning_rate
+
     # Make it possible to train
     for parameters in model:
         parameters.requires_grad = True
