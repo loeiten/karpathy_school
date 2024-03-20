@@ -38,6 +38,9 @@ def train_neural_net_model(
     for parameters in model:
         parameters.requires_grad = True
 
+    # NOTE: It's better to take a lot of steps in the approximate direction of
+    #       the true gradient than it is to take one big step in the direction
+    #       of the true gradient
     for _ in range(n_mini_batches):
         # Mini batch constructor
         n_samples = input_training_data.shape[0]
@@ -89,6 +92,6 @@ def train_neural_net_model(
 
         # Update the weights
         for parameters in model:
-            parameters.data += learning_rate * parameters.grad
+            parameters.data += -learning_rate * parameters.grad
 
     return model
