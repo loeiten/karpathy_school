@@ -1,5 +1,6 @@
 """Module for loading and preprocessing data."""
 
+import random
 from pathlib import Path
 from typing import List, Tuple
 
@@ -114,3 +115,39 @@ def get_padded_data(block_size: int) -> Tuple[str, ...]:
     data_tuple = read_data(data_path=data_path)
     padded_data = pad_data(data_tuple=data_tuple, block_size=block_size)
     return padded_data
+
+
+# FIXME: Needs testing
+def get_train_validation_and_test_set():
+    # FIXME: Docstring
+    random.seed(1988)
+
+    # FIXME: You are here
+    input_data, output_data = create_feature_and_labels()
+
+    # Shuffle the data
+    combined_data = list(zip(input_data, output_data))
+    random.shuffle(combined_data)
+    shuffled_input_data, shuffled_output_data = zip(*combined_data)
+
+    # Split the data in 80-10-10
+    n1 = int(0.8 * len(combined_data))
+    n2 = int(0.9 * len(combined_data))
+
+    train_input = shuffled_input_data[:n1]
+    train_output = shuffled_output_data[:n1]
+
+    validate_input = shuffled_input_data[:n2]
+    validate_output = shuffled_output_data[:n2]
+
+    test_input = shuffled_input_data[n2:]
+    test_output = shuffled_output_data[n2:]
+
+    return (
+        train_input,
+        train_output,
+        validate_input,
+        validate_output,
+        test_input,
+        test_output,
+    )
