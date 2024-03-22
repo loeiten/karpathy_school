@@ -118,12 +118,30 @@ def get_padded_data(block_size: int) -> Tuple[str, ...]:
 
 
 # FIXME: Needs testing
-def get_train_validation_and_test_set():
-    # FIXME: Docstring
+def get_train_validation_and_test_set(
+    block_size: int = 3,
+) -> Tuple[
+    torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor
+]:
+    """Get the train, validation and test set data.
+
+    Args:
+        block_size (int, optional): Number of input features to the network
+            This is how many characters we are considering simultaneously, aka.
+            the context length. Defaults to 3.
+
+    Returns:
+        torch.Tensor: The input data of the training set
+        torch.Tensor: The output data (labels) of the training set
+        torch.Tensor: The input data of the validation set
+        torch.Tensor: The output data (labels) of the validation set
+        torch.Tensor: The input data of the test set
+        torch.Tensor: The output data (labels) of the test set
+    """
     random.seed(1988)
 
-    # FIXME: You are here
-    input_data, output_data = create_feature_and_labels()
+    padded_data = get_padded_data(block_size=block_size)
+    input_data, output_data = create_feature_and_labels(input_data=padded_data)
 
     # Shuffle the data
     combined_data = list(zip(input_data, output_data))
