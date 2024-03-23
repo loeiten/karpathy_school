@@ -1,6 +1,5 @@
 """Module for loading and preprocessing data."""
 
-import random
 from pathlib import Path
 from typing import List, Tuple
 
@@ -117,7 +116,6 @@ def get_padded_data(block_size: int) -> Tuple[str, ...]:
     return padded_data
 
 
-# FIXME: Needs testing
 def get_train_validation_and_test_set(
     block_size: int = 3,
 ) -> Tuple[
@@ -138,25 +136,30 @@ def get_train_validation_and_test_set(
         torch.Tensor: The input data of the test set
         torch.Tensor: The output data (labels) of the test set
     """
-    random.seed(1988)
+    torch.manual_seed(1988)
 
     padded_data = get_padded_data(block_size=block_size)
     input_data, output_data = create_feature_and_labels(input_data=padded_data)
 
+    # Get the permutation to use as indices
+    # See
+    # https://stackoverflow.com/a/73187955/2786884
+    # For details
+    # Accessing the only element in the shape
+    indices = torch.randperm(output_data.shape[0])
     # Shuffle the data
-    combined_data = list(zip(input_data, output_data))
-    random.shuffle(combined_data)
-    shuffled_input_data, shuffled_output_data = zip(*combined_data)
+    shuffled_input_data = input_data[indices]
+    shuffled_output_data = output_data[indices]
 
     # Split the data in 80-10-10
-    n1 = int(0.8 * len(combined_data))
-    n2 = int(0.9 * len(combined_data))
+    n1 = int(0.8 * shuffled_output_data.shape[0])
+    n2 = int(0.9 * shuffled_output_data.shape[0])
 
     train_input = shuffled_input_data[:n1]
     train_output = shuffled_output_data[:n1]
 
-    validate_input = shuffled_input_data[:n2]
-    validate_output = shuffled_output_data[:n2]
+    validate_input = shuffled_input_data[n1:n2]
+    validate_output = shuffled_output_data[n1:n2]
 
     test_input = shuffled_input_data[n2:]
     test_output = shuffled_output_data[n2:]
