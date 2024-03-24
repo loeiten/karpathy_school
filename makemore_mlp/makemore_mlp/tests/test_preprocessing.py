@@ -4,6 +4,7 @@ import torch
 from makemore_mlp.preprocessing import (
     create_feature_and_labels,
     get_padded_data,
+    get_train_validation_and_test_set,
     pad_data,
     read_data,
 )
@@ -73,3 +74,25 @@ def test_create_feature_and_labels() -> None:
     assert INDEX_TO_TOKEN[output_tensor[2].item()] == "m"
     assert INDEX_TO_TOKEN[output_tensor[3].item()] == "a"
     assert INDEX_TO_TOKEN[output_tensor[4].item()] == "."
+
+
+def test_get_train_validation_and_test_set():
+    """Test the pad_data and create_feature_and_labels function."""
+    block_size = 3
+
+    (
+        train_input,
+        train_output,
+        validate_input,
+        validate_output,
+        test_input,
+        test_output,
+    ) = get_train_validation_and_test_set(block_size=block_size)
+
+    # Assert the shapes
+    assert train_input.shape == torch.Size([182516, block_size])
+    assert train_output.shape == torch.Size([182516])
+    assert validate_input.shape == torch.Size([22815, block_size])
+    assert validate_output.shape == torch.Size([22815])
+    assert test_input.shape == torch.Size([22815, block_size])
+    assert test_output.shape == torch.Size([22815])
