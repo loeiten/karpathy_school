@@ -9,8 +9,8 @@ from makemore_mlp import VOCAB_SIZE
 
 def get_model(
     block_size: int,
-    embedding_size: int,
-    hidden_layer_neurons: int,
+    embedding_size: int = 2,
+    hidden_layer_neurons: int = 100,
     seed: int = 2147483647,
 ) -> Tuple[torch.Tensor, ...]:
     """Return the model.
