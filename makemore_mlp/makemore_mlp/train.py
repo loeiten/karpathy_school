@@ -13,6 +13,7 @@ def train_neural_net_model(
     input_training_data: torch.Tensor,
     ground_truth_data: torch.Tensor,
     model_options: Optional[ModelOptions],
+    seed: int = 2147483647,
 ) -> Tuple[Tuple[torch.Tensor], List[float], List[int]]:
     """Train the neural net model.
 
@@ -24,6 +25,7 @@ def train_neural_net_model(
         ground_truth_data (torch.Tensor): The correct prediction for the input
             (the correct labels)
         model_options (Optional[ModelOptions]): Model option
+        seed (int): The seed for the random number generator
 
     Returns:
         Tuple[torch.Tensor, ...]: The trained model
@@ -37,6 +39,8 @@ def train_neural_net_model(
     for parameters in model:
         parameters.requires_grad = True
 
+    g = torch.Generator().manual_seed(seed)
+
     step = []
     loss_log_10 = []
     # NOTE: It's better to take a lot of steps in the approximate direction of
@@ -45,7 +49,9 @@ def train_neural_net_model(
     for i in range(model_options.n_mini_batches):
         # Mini batch constructor
         n_samples = input_training_data.shape[0]
-        idxs = torch.randint(low=0, high=n_samples, size=model_options.batch_size)
+        idxs = torch.randint(
+            low=0, high=n_samples, size=model_options.batch_size, generator=g
+        )
 
         # NOTE: input_training_data has dimension (n_samples, block_size)
         #       input_training_data[idxs] selects batch_size samples from the

@@ -118,6 +118,7 @@ def get_padded_data(block_size: int) -> Tuple[str, ...]:
 
 def get_train_validation_and_test_set(
     block_size: int = 3,
+    seed: int = 2147483647,
 ) -> Tuple[
     torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor
 ]:
@@ -127,6 +128,7 @@ def get_train_validation_and_test_set(
         block_size (int, optional): Number of input features to the network
             This is how many characters we are considering simultaneously, aka.
             the context length. Defaults to 3.
+        seed (int): The seed to use
 
     Returns:
         torch.Tensor: The input data of the training set
@@ -136,7 +138,7 @@ def get_train_validation_and_test_set(
         torch.Tensor: The input data of the test set
         torch.Tensor: The output data (labels) of the test set
     """
-    torch.manual_seed(1988)
+    torch.manual_seed(seed)
 
     padded_data = get_padded_data(block_size=block_size)
     input_data, output_data = create_feature_and_labels(input_data=padded_data)
@@ -155,20 +157,22 @@ def get_train_validation_and_test_set(
     n1 = int(0.8 * shuffled_output_data.shape[0])
     n2 = int(0.9 * shuffled_output_data.shape[0])
 
-    train_input = shuffled_input_data[:n1]
-    train_output = shuffled_output_data[:n1]
+    shuffled_data = {}
 
-    validate_input = shuffled_input_data[n1:n2]
-    validate_output = shuffled_output_data[n1:n2]
+    shuffled_data["train_input"] = shuffled_input_data[:n1]
+    shuffled_data["train_output"] = shuffled_output_data[:n1]
 
-    test_input = shuffled_input_data[n2:]
-    test_output = shuffled_output_data[n2:]
+    shuffled_data["validate_input"] = shuffled_input_data[n1:n2]
+    shuffled_data["validate_output"] = shuffled_output_data[n1:n2]
+
+    shuffled_data["test_input"] = shuffled_input_data[n2:]
+    shuffled_data["test_output"] = shuffled_output_data[n2:]
 
     return (
-        train_input,
-        train_output,
-        validate_input,
-        validate_output,
-        test_input,
-        test_output,
+        shuffled_data["train_input"],
+        shuffled_data["train_output"],
+        shuffled_data["validate_input"],
+        shuffled_data["validate_output"],
+        shuffled_data["test_input"],
+        shuffled_data["test_output"],
     )
