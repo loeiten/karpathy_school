@@ -50,7 +50,7 @@ def train_neural_net_model(
         # Mini batch constructor
         n_samples = input_training_data.shape[0]
         idxs = torch.randint(
-            low=0, high=n_samples, size=model_options.batch_size, generator=g
+            low=0, high=n_samples, size=(model_options.batch_size,), generator=g
         )
 
         # NOTE: input_training_data has dimension (n_samples, block_size)
@@ -91,7 +91,7 @@ def train_neural_net_model(
         # However, it's much more efficient both mathematically and in terms of
         # backprop
         # It's also numerically better behaved
-        loss = F.cross_entropy(logits, ground_truth_data)
+        loss = F.cross_entropy(logits, ground_truth_data[idxs])
 
         # Append loss and iteration
         loss_log_10.append(loss.log10().item())
