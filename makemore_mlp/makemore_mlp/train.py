@@ -2,10 +2,14 @@
 
 from typing import List, Optional, Tuple
 
+import matplotlib.pyplot as plt
+import seaborn as sns
 import torch
 import torch.nn.functional as F
 from makemore_mlp.inference import predict_neural_network
+from makemore_mlp.models import get_model
 from makemore_mlp.options import ModelOptions
+from makemore_mlp.preprocessing import get_train_validation_and_test_set
 
 
 def train_neural_net_model(
@@ -29,7 +33,7 @@ def train_neural_net_model(
 
     Returns:
         Tuple[torch.Tensor, ...]: The trained model
-        List[float]: The log10 of the loss for each step
+        List[float]: The loss of each step
         List[int]: The step
     """
     if model_options is None:
@@ -41,8 +45,8 @@ def train_neural_net_model(
 
     g = torch.Generator().manual_seed(seed)
 
-    step = []
-    loss_log_10 = []
+    step_list = []
+    loss_list = []
     # NOTE: It's better to take a lot of steps in the approximate direction of
     #       the true gradient than it is to take one big step in the direction
     #       of the true gradient
@@ -94,8 +98,8 @@ def train_neural_net_model(
         loss = F.cross_entropy(logits, ground_truth_data[idxs])
 
         # Append loss and iteration
-        loss_log_10.append(loss.log10().item())
-        step.append(i)
+        loss_list.append(loss.item())
+        step_list.append(i)
 
         # Backward pass
 
@@ -109,4 +113,51 @@ def train_neural_net_model(
         for parameters in model:
             parameters.data += -model_options.learning_rate * parameters.grad
 
-    return model, loss_log_10, step
+    return model, loss_list, step_list
+
+
+def main() -> None:
+    """Train and plot the model."""
+    block_size = 3
+
+    # Obtain the data
+    (
+        train_input,
+        train_output,
+        _,  # validate_input,
+        _,  # validate_output,
+        _,  # test_input,
+        _,  # test_output,
+    ) = get_train_validation_and_test_set(block_size=block_size)
+
+    # Obtain the model
+    embedding_size = 2
+    hidden_layer_neurons = 100
+    model = get_model(
+        block_size=block_size,
+        embedding_size=embedding_size,
+        hidden_layer_neurons=hidden_layer_neurons,
+    )
+
+    # Set the model options
+    model_options = ModelOptions(n_mini_batches=10000, batch_size=32, learning_rate=0.1)
+
+    # Train for one step
+    model, loss, step = train_neural_net_model(
+        model=model,
+        input_training_data=train_input,
+        ground_truth_data=train_output,
+        model_options=model_options,
+    )
+
+    sns.set_theme()
+    fig, ax = plt.subplot()
+    ax.plt(step, loss)
+    ax.set_ylabel("Loss")
+    ax.set_xlabel("Step")
+    fig.set_title("Training loss")
+    fig.show()
+
+
+if __name__ == "__main__":
+    main()
