@@ -3,6 +3,7 @@
 from typing import List, Optional, Tuple
 
 import matplotlib.pyplot as plt
+import numpy as np
 import seaborn as sns
 import torch
 import torch.nn.functional as F
@@ -124,8 +125,8 @@ def main() -> None:
     (
         train_input,
         train_output,
-        _,  # validate_input,
-        _,  # validate_output,
+        validate_input,
+        validate_output,
         _,  # test_input,
         _,  # test_output,
     ) = get_train_validation_and_test_set(block_size=block_size)
@@ -139,24 +140,53 @@ def main() -> None:
         hidden_layer_neurons=hidden_layer_neurons,
     )
 
-    # Set the model options
-    model_options = ModelOptions(n_mini_batches=10000, batch_size=32, learning_rate=0.1)
+    n_mini_batches = 10_000
+    evaluate_after_iteration = 100
+    n_evaluations = n_mini_batches // evaluate_after_iteration
+    train_loss = []
+    train_step = []
+    eval_loss = []
+    eval_step = []
 
-    # Train for one step
-    model, loss, step = train_neural_net_model(
-        model=model,
-        input_training_data=train_input,
-        ground_truth_data=train_output,
-        model_options=model_options,
-    )
+    cur_step = 0
+    for i in range(n_evaluations):
+        # Set the model options
+        model_options = ModelOptions(
+            n_mini_batches=evaluate_after_iteration, batch_size=32, learning_rate=0.1
+        )
+
+        # Train for one step
+        model, loss, step = train_neural_net_model(
+            model=model,
+            input_training_data=train_input,
+            ground_truth_data=train_output,
+            model_options=model_options,
+            seed=i,  # Change the seed in order not to train on the same data
+        )
+
+        # Save statistics
+        train_loss.extend(loss)
+        train_step.extend([s + cur_step for s in step])
+        cur_step = train_step[-1]
+
+        # Predict on evaluation set
+        logits = predict_neural_network(model=model, input_data=validate_input)
+        cur_eval_loss = F.cross_entropy(logits, validate_output)
+        eval_loss.append(cur_eval_loss.item())
+        eval_step.append(train_step[-1])
+
+    print(f"Final train loss: {train_loss[-1]:.3f}")
+    print(f"Final validation loss: {eval_loss[-1]:.3f}")
 
     sns.set_theme()
-    fig, ax = plt.subplot()
-    ax.plt(step, loss)
-    ax.set_ylabel("Loss")
+    _, ax = plt.subplots()
+    ax.plot(train_step, np.log(train_loss), label="Train loss")
+    ax.plot(eval_step, np.log(eval_loss), label="Validation loss")
+    ax.set_ylabel("Log(loss)")
     ax.set_xlabel("Step")
-    fig.set_title("Training loss")
-    fig.show()
+    ax.legend(loc="best", fancybox=True)
+    ax.set_title("Training loss")
+    plt.show()
 
 
 if __name__ == "__main__":
