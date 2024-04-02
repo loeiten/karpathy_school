@@ -1,6 +1,17 @@
 """Module containing option classes."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import List
+
+
+@dataclass
+class TrainStatistics:
+    """Class holding train statistics."""
+
+    train_loss: List[float] = field(default_factory=list)
+    train_step: List[int] = field(default_factory=list)
+    eval_loss: List[float] = field(default_factory=list)
+    eval_step: List[int] = field(default_factory=list)
 
 
 @dataclass

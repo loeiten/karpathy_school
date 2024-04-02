@@ -1,9 +1,10 @@
 """Contains tests for the models module."""
 
 from makemore_mlp.models import get_model
-from makemore_mlp.options import ModelOptions
 from makemore_mlp.preprocessing import get_train_validation_and_test_set
 from makemore_mlp.train import train_neural_net_model
+
+from makemore_mlp.makemore_mlp.data_classes import ModelOptions
 
 
 def test_train_neural_net_model() -> None:

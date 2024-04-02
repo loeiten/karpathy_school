@@ -9,8 +9,9 @@ import torch
 import torch.nn.functional as F
 from makemore_mlp.inference import predict_neural_network
 from makemore_mlp.models import get_model
-from makemore_mlp.options import ModelOptions
 from makemore_mlp.preprocessing import get_train_validation_and_test_set
+
+from makemore_mlp.makemore_mlp.data_classes import ModelOptions, TrainStatistics
 
 
 def train_neural_net_model(
@@ -143,10 +144,7 @@ def main() -> None:
     n_mini_batches = 10_000
     evaluate_after_iteration = 100
     n_evaluations = n_mini_batches // evaluate_after_iteration
-    train_loss = []
-    train_step = []
-    eval_loss = []
-    eval_step = []
+    train_statistics = TrainStatistics()
 
     cur_step = 0
     for i in range(n_evaluations):
@@ -165,18 +163,18 @@ def main() -> None:
         )
 
         # Save statistics
-        train_loss.extend(loss)
-        train_step.extend([s + cur_step for s in step])
-        cur_step = train_step[-1]
+        train_statistics.train_loss.extend(loss)
+        train_statistics.train_step.extend([s + cur_step for s in step])
+        cur_step = train_statistics.train_step[-1]
 
         # Predict on evaluation set
         logits = predict_neural_network(model=model, input_data=validate_input)
         cur_eval_loss = F.cross_entropy(logits, validate_output)
-        eval_loss.append(cur_eval_loss.item())
-        eval_step.append(train_step[-1])
+        train_statistics.eval_loss.append(cur_eval_loss.item())
+        train_statistics.eval_step.append(train_statistics.train_step[-1])
 
-    print(f"Final train loss: {train_loss[-1]:.3f}")
-    print(f"Final validation loss: {eval_loss[-1]:.3f}")
+    print(f"Final train loss: {train_statistics.train_loss[-1]:.3f}")
+    print(f"Final validation loss: {train_statistics.eval_loss[-1]:.3f}")
 
     sns.set_theme()
     _, ax = plt.subplots()
