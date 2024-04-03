@@ -2,16 +2,13 @@
 
 from typing import List, Optional, Tuple
 
-import matplotlib.pyplot as plt
-import numpy as np
-import seaborn as sns
 import torch
 import torch.nn.functional as F
+from makemore_mlp.data_classes import ModelOptions, TrainStatistics
 from makemore_mlp.inference import predict_neural_network
 from makemore_mlp.models import get_model
 from makemore_mlp.preprocessing import get_train_validation_and_test_set
-
-from makemore_mlp.makemore_mlp.data_classes import ModelOptions, TrainStatistics
+from makemore_mlp.visualisation import plot_training
 
 
 def train_neural_net_model(
@@ -176,15 +173,7 @@ def main() -> None:
     print(f"Final train loss: {train_statistics.train_loss[-1]:.3f}")
     print(f"Final validation loss: {train_statistics.eval_loss[-1]:.3f}")
 
-    sns.set_theme()
-    _, ax = plt.subplots()
-    ax.plot(train_step, np.log(train_loss), label="Train loss")
-    ax.plot(eval_step, np.log(eval_loss), label="Validation loss")
-    ax.set_ylabel("Log(loss)")
-    ax.set_xlabel("Step")
-    ax.legend(loc="best", fancybox=True)
-    ax.set_title("Training loss")
-    plt.show()
+    plot_training(train_statistics=train_statistics)
 
 
 if __name__ == "__main__":
