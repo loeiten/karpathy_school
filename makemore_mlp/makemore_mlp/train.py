@@ -117,7 +117,7 @@ def train_neural_net_model(
 
 def main() -> None:
     """Train and plot the model."""
-    block_size = 3
+    model_params = {"block_size": 3, "embedding_size": 2, "hidden_layer_neurons": 100}
 
     # Obtain the data
     (
@@ -127,27 +127,33 @@ def main() -> None:
         validate_output,
         _,  # test_input,
         _,  # test_output,
-    ) = get_train_validation_and_test_set(block_size=block_size)
+    ) = get_train_validation_and_test_set(block_size=model_params["block_size"])
 
     # Obtain the model
-    embedding_size = 2
-    hidden_layer_neurons = 100
     model = get_model(
-        block_size=block_size,
-        embedding_size=embedding_size,
-        hidden_layer_neurons=hidden_layer_neurons,
+        block_size=model_params["block_size"],
+        embedding_size=model_params["embedding_size"],
+        hidden_layer_neurons=model_params["hidden_layer_neurons"],
     )
 
-    n_mini_batches = 10_000
-    evaluate_after_iteration = 100
-    n_evaluations = n_mini_batches // evaluate_after_iteration
+    optimization_options = {
+        "total_mini_batches": 10_000,
+        "evaluate_every_iteration": 100,
+    }
+    optimization_options["n_evaluations"] = (
+        optimization_options["total_mini_batches"]
+        // optimization_options["evaluate_every_iteration"]
+    )
     train_statistics = TrainStatistics()
 
     cur_step = 0
-    for i in range(n_evaluations):
+
+    for i in range(optimization_options["n_evaluations"]):
         # Set the model options
         model_options = ModelOptions(
-            n_mini_batches=evaluate_after_iteration, batch_size=32, learning_rate=0.1
+            n_mini_batches=optimization_options["evaluate_every_iteration"],
+            batch_size=32,
+            learning_rate=0.1,
         )
 
         # Train for one step
