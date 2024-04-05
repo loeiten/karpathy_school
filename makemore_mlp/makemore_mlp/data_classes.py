@@ -1,7 +1,7 @@
 """Module containing option classes."""
 
 from dataclasses import dataclass, field
-from typing import List
+from typing import Callable, List
 
 
 @dataclass
@@ -15,11 +15,14 @@ class TrainStatistics:
 
 
 @dataclass
-class ModelOptions:
-    """Class holding possible model option."""
+class OptimizationParams:
+    """Class holding possible optimization option."""
 
-    n_mini_batches: int = 10000
+    total_mini_batches: int = 10_000
+    mini_batches_per_iteration: int = 100
     batch_size: int = 32
+    n_iterations: int = total_mini_batches // mini_batches_per_iteration
+    cur_mini_batch: int = 0
     # NOTE: How to find the optimal learning rate (roughly)
     #       1. Find the range where in the low end the loss barely moves and
     #          where it explodes
@@ -28,4 +31,15 @@ class ModelOptions:
     #       4. Plot and see where have a minima
     #       One can then run with the optimal learning rate for a while and
     #       gradually decay it
-    learning_rate: float = 0.1
+    learning_rate: Callable[[int], float] = lambda cur_mini_batch: (
+        0.1 if cur_mini_batch < 100_000 else 0.01
+    )
+
+
+@dataclass
+class ModelParams:
+    """Class holding possible model options."""
+
+    block_size: int = 3
+    embedding_size: int = 2
+    hidden_layer_neurons: int = 100

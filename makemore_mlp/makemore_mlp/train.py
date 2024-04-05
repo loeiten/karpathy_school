@@ -4,7 +4,7 @@ from typing import List, Optional, Tuple
 
 import torch
 import torch.nn.functional as F
-from makemore_mlp.data_classes import ModelOptions, TrainStatistics
+from makemore_mlp.data_classes import ModelParams, OptimizationParams, TrainStatistics
 from makemore_mlp.inference import predict_neural_network
 from makemore_mlp.models import get_model
 from makemore_mlp.preprocessing import get_train_validation_and_test_set
@@ -15,7 +15,7 @@ def train_neural_net_model(
     model: Tuple[torch.Tensor, ...],
     input_training_data: torch.Tensor,
     ground_truth_data: torch.Tensor,
-    model_options: Optional[ModelOptions],
+    optimization_params: Optional[OptimizationParams],
     seed: int = 2147483647,
 ) -> Tuple[Tuple[torch.Tensor], List[float], List[int]]:
     """Train the neural net model.
@@ -27,7 +27,8 @@ def train_neural_net_model(
             This is the data that will be fed into the features
         ground_truth_data (torch.Tensor): The correct prediction for the input
             (the correct labels)
-        model_options (Optional[ModelOptions]): Model option
+        optimization_params (Optional[OptimizationParams]): Optimization
+            options
         seed (int): The seed for the random number generator
 
     Returns:
@@ -35,8 +36,8 @@ def train_neural_net_model(
         List[float]: The loss of each step
         List[int]: The step
     """
-    if model_options is None:
-        model_options = ModelOptions()
+    if optimization_params is None:
+        optimization_params = OptimizationParams()
 
     # Make it possible to train
     for parameters in model:
@@ -49,12 +50,15 @@ def train_neural_net_model(
     # NOTE: It's better to take a lot of steps in the approximate direction of
     #       the true gradient than it is to take one big step in the direction
     #       of the true gradient
-    for i in range(model_options.n_mini_batches):
+    for i in range(optimization_params.mini_batches_per_iteration):
         # Mini batch constructor
         n_samples = input_training_data.shape[0]
         idxs = torch.randint(
-            low=0, high=n_samples, size=(model_options.batch_size,), generator=g
+            low=0, high=n_samples, size=(optimization_params.batch_size,), generator=g
         )
+
+        # Update cur_mini_batch number
+        optimization_params.cur_mini_batch += 1
 
         # NOTE: input_training_data has dimension (n_samples, block_size)
         #       input_training_data[idxs] selects batch_size samples from the
@@ -86,7 +90,7 @@ def train_neural_net_model(
         # #     of the result
         # # - The mean of this the number we want to minimize
         # loss = (
-        #     -prob[torch.arange(model_options.batch_size), ground_truth_data]
+        #     -prob[torch.arange(optimization_params.batch_size), ground_truth_data]
         #     .log()
         #     .mean()
         # )
@@ -110,14 +114,17 @@ def train_neural_net_model(
 
         # Update the weights
         for parameters in model:
-            parameters.data += -model_options.learning_rate * parameters.grad
+            parameters.data += (
+                -optimization_params.learning_rate(optimization_params.cur_mini_batch)
+                * parameters.grad
+            )
 
     return model, loss_list, step_list
 
 
 def main() -> None:
     """Train and plot the model."""
-    model_params = {"block_size": 3, "embedding_size": 2, "hidden_layer_neurons": 100}
+    model_params = ModelParams()
 
     # Obtain the data
     (
@@ -127,41 +134,27 @@ def main() -> None:
         validate_output,
         _,  # test_input,
         _,  # test_output,
-    ) = get_train_validation_and_test_set(block_size=model_params["block_size"])
+    ) = get_train_validation_and_test_set(block_size=model_params.block_size)
 
     # Obtain the model
     model = get_model(
-        block_size=model_params["block_size"],
-        embedding_size=model_params["embedding_size"],
-        hidden_layer_neurons=model_params["hidden_layer_neurons"],
+        block_size=model_params.block_size,
+        embedding_size=model_params.embedding_size,
+        hidden_layer_neurons=model_params.hidden_layer_neurons,
     )
 
-    optimization_options = {
-        "total_mini_batches": 10_000,
-        "evaluate_every_iteration": 100,
-    }
-    optimization_options["n_evaluations"] = (
-        optimization_options["total_mini_batches"]
-        // optimization_options["evaluate_every_iteration"]
-    )
+    optimization_params = OptimizationParams()
     train_statistics = TrainStatistics()
 
     cur_step = 0
 
-    for i in range(optimization_options["n_evaluations"]):
-        # Set the model options
-        model_options = ModelOptions(
-            n_mini_batches=optimization_options["evaluate_every_iteration"],
-            batch_size=32,
-            learning_rate=0.1,
-        )
-
+    for i in range(optimization_params.n_iterations):
         # Train for one step
         model, loss, step = train_neural_net_model(
             model=model,
             input_training_data=train_input,
             ground_truth_data=train_output,
-            model_options=model_options,
+            optimization_params=optimization_params,
             seed=i,  # Change the seed in order not to train on the same data
         )
 
