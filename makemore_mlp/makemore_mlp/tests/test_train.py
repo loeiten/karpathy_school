@@ -28,9 +28,12 @@ def test_train_neural_net_model() -> None:
     )
 
     # Set the model options
-    total_mini_batches = 1
+    mini_batches_per_iteration = 1
     optimization_params = OptimizationParams(
-        total_mini_batches=total_mini_batches, batch_size=32, learning_rate=0.1
+        total_mini_batches=0,  # Not in affect here
+        mini_batches_per_iteration=mini_batches_per_iteration,
+        batch_size=32,
+        learning_rate=lambda _: 0.1,
     )
 
     # Train for one step
@@ -41,14 +44,15 @@ def test_train_neural_net_model() -> None:
         optimization_params=optimization_params,
     )
 
-    assert len(loss) == total_mini_batches
-    assert len(step) == total_mini_batches
+    assert len(loss) == mini_batches_per_iteration
+    assert len(step) == mini_batches_per_iteration
+    assert optimization_params.cur_mini_batch == 1
 
     # Train the model again with changed parameters
-    total_mini_batches = 2
-    optimization_params = OptimizationParams(
-        total_mini_batches=total_mini_batches, batch_size=64, learning_rate=00.1
-    )
+    mini_batches_per_iteration = 2
+    optimization_params.batch_size = 64
+    optimization_params.mini_batches_per_iteration = 2
+    optimization_params.learning_rate = lambda _: 00.1
 
     # Train for one step
     model, loss, step = train_neural_net_model(
@@ -58,5 +62,6 @@ def test_train_neural_net_model() -> None:
         optimization_params=optimization_params,
     )
 
-    assert len(loss) == total_mini_batches
-    assert len(step) == total_mini_batches
+    assert len(loss) == mini_batches_per_iteration
+    assert len(step) == mini_batches_per_iteration
+    assert optimization_params.cur_mini_batch == 3
