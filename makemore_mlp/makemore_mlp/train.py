@@ -1,5 +1,7 @@
 """Module to train the model."""
 
+import argparse
+import sys
 from typing import List, Optional, Tuple
 
 import torch
@@ -122,10 +124,15 @@ def train_neural_net_model(
     return model, loss_list, step_list
 
 
-def main() -> None:
-    """Train and plot the model."""
-    model_params = ModelParams()
+def train_and_plot(
+    model_params: ModelParams, optimization_params: OptimizationParams
+) -> None:
+    """Train the model and plot the statistics.
 
+    Args:
+        model_params (ModelParams): The model parameters
+        optimization_params (OptimizationParams): The optimization parameters
+    """
     # Obtain the data
     (
         train_input,
@@ -143,7 +150,6 @@ def main() -> None:
         hidden_layer_neurons=model_params.hidden_layer_neurons,
     )
 
-    optimization_params = OptimizationParams()
     train_statistics = TrainStatistics()
 
     cur_step = 0
@@ -175,5 +181,96 @@ def main() -> None:
     plot_training(train_statistics=train_statistics)
 
 
+def parse_args(sys_args: List[str]) -> argparse.Namespace:
+    """Parse the arguments.
+
+    Args:
+        sys_args (List[str]): The system arguments
+
+    Returns:
+        argparse.Namespace: The parsed arguments
+    """
+    parser = argparse.ArgumentParser(description="Train a model and plot its contents.")
+
+    default_model_params = ModelParams()
+    parser.add_argument(
+        "-s",
+        "--block-size",
+        type=int,
+        required=False,
+        default=default_model_params.block_size,
+        help=(
+            "Number of input features to the network. "
+            "This is how many characters we are considering simultaneously, "
+            "aka. the context length"
+        ),
+    )
+    parser.add_argument(
+        "-e",
+        "--embedding-size",
+        type=int,
+        required=False,
+        default=default_model_params.embedding_size,
+        help="The size of the embedding space",
+    )
+    parser.add_argument(
+        "-h",
+        "--hidden-layer-neurons",
+        type=int,
+        required=False,
+        default=default_model_params.hidden_layer_neurons,
+        help="Number of neurons for the hidden layer",
+    )
+
+    default_optimization_params = OptimizationParams()
+    parser.add_argument(
+        "-t",
+        "--total-mini-batches",
+        type=int,
+        required=False,
+        default=default_optimization_params.total_mini_batches,
+        help="Total number of mini batches to train on",
+    )
+    parser.add_argument(
+        "-m",
+        "--mini-batches-per-iteration",
+        type=int,
+        required=False,
+        default=default_optimization_params.mini_batches_per_iteration,
+        help="Number of mini batches to run for each call to the training function",
+    )
+    parser.add_argument(
+        "-b",
+        "--batch-size",
+        type=int,
+        required=False,
+        default=default_optimization_params.batch_size,
+        help="Number of examples per batch",
+    )
+
+    args = parser.parse_args(sys_args)
+    return args
+
+
+def main(sys_args: List[str]):
+    """Parse the arguments and run train_and_plot.
+
+    Args:
+        sys_args (List[str]): The system arguments
+    """
+    args = parse_args(sys_args)
+    model_params = ModelParams(
+        block_size=args.block_size,
+        embedding_size=args.embedding_size,
+        hidden_layer_neurons=args.hidden_layer_neurons,
+    )
+    optimization_params = OptimizationParams(
+        total_mini_batches=args.total_mini_batches,
+        mini_batches_per_iteration=args.mini_batches_per_iteration,
+        batch_size=args.batch_size,
+    )
+    train_and_plot(model_params=model_params, optimization_params=optimization_params)
+
+
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
