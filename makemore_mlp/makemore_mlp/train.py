@@ -214,7 +214,7 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
         help="The size of the embedding space",
     )
     parser.add_argument(
-        "-h",
+        "-l",
         "--hidden-layer-neurons",
         type=int,
         required=False,
