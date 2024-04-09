@@ -21,7 +21,6 @@ class OptimizationParams:
     total_mini_batches: int = 10_000
     mini_batches_per_iteration: int = 100
     batch_size: int = 32
-    n_iterations: int = total_mini_batches // mini_batches_per_iteration
     cur_mini_batch: int = 0
     # NOTE: How to find the optimal learning rate (roughly)
     #       1. Find the range where in the low end the loss barely moves and
@@ -34,6 +33,15 @@ class OptimizationParams:
     learning_rate: Callable[[int], float] = lambda cur_mini_batch: (
         0.1 if cur_mini_batch < 100_000 else 0.01
     )
+
+    @property
+    def n_iterations(self) -> int:
+        """Return the number of iterations.
+
+        Returns:
+            int: The number of iterations
+        """
+        return self.total_mini_batches // self.mini_batches_per_iteration
 
 
 @dataclass
