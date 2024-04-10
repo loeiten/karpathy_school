@@ -7,6 +7,7 @@ from typing import List, Optional, Tuple
 import torch
 import torch.nn.functional as F
 from makemore_mlp.data_classes import ModelParams, OptimizationParams, TrainStatistics
+from makemore_mlp.evaluation import evaluate
 from makemore_mlp.inference import predict_neural_network
 from makemore_mlp.models import get_model
 from makemore_mlp.preprocessing import get_train_validation_and_test_set
@@ -137,8 +138,8 @@ def train_and_plot(
     (
         train_input,
         train_output,
-        validate_input,
-        validate_output,
+        validation_input,
+        validation_output,
         _,  # test_input,
         _,  # test_output,
     ) = get_train_validation_and_test_set(block_size=model_params.block_size)
@@ -170,9 +171,10 @@ def train_and_plot(
         cur_step = train_statistics.train_step[-1]
 
         # Predict on evaluation set
-        logits = predict_neural_network(model=model, input_data=validate_input)
-        cur_eval_loss = F.cross_entropy(logits, validate_output)
-        train_statistics.eval_loss.append(cur_eval_loss.item())
+        cur_eval_loss = evaluate(
+            model=model, input_data=validation_input, ground_truth=validation_output
+        )
+        train_statistics.eval_loss.append(cur_eval_loss)
         train_statistics.eval_step.append(train_statistics.train_step[-1])
 
     print(f"Final train loss: {train_statistics.train_loss[-1]:.3f}")
