@@ -159,20 +159,20 @@ def get_train_validation_and_test_set(
 
     shuffled_data = {}
 
-    shuffled_data["train_input"] = shuffled_input_data[:n1]
-    shuffled_data["train_output"] = shuffled_output_data[:n1]
+    shuffled_data["training_input"] = shuffled_input_data[:n1]
+    shuffled_data["training_output"] = shuffled_output_data[:n1]
 
-    shuffled_data["validate_input"] = shuffled_input_data[n1:n2]
-    shuffled_data["validate_output"] = shuffled_output_data[n1:n2]
+    shuffled_data["validation_input"] = shuffled_input_data[n1:n2]
+    shuffled_data["validation_output"] = shuffled_output_data[n1:n2]
 
     shuffled_data["test_input"] = shuffled_input_data[n2:]
     shuffled_data["test_output"] = shuffled_output_data[n2:]
 
     return (
-        shuffled_data["train_input"],
-        shuffled_data["train_output"],
-        shuffled_data["validate_input"],
-        shuffled_data["validate_output"],
+        shuffled_data["training_input"],
+        shuffled_data["training_output"],
+        shuffled_data["validation_input"],
+        shuffled_data["validation_output"],
         shuffled_data["test_input"],
         shuffled_data["test_output"],
     )

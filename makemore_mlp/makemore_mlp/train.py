@@ -136,8 +136,8 @@ def train_and_plot(
     """
     # Obtain the data
     (
-        train_input,
-        train_output,
+        training_input,
+        training_output,
         validation_input,
         validation_output,
         _,  # test_input,
@@ -159,26 +159,32 @@ def train_and_plot(
         # Train for one step
         model, loss, step = train_neural_net_model(
             model=model,
-            input_training_data=train_input,
-            ground_truth_data=train_output,
+            input_training_data=training_input,
+            ground_truth_data=training_output,
             optimization_params=optimization_params,
             seed=i,  # Change the seed in order not to train on the same data
         )
 
         # Save statistics
-        train_statistics.train_loss.extend(loss)
-        train_statistics.train_step.extend([s + cur_step for s in step])
-        cur_step = train_statistics.train_step[-1]
+        train_statistics.training_loss.extend(loss)
+        train_statistics.training_step.extend([s + cur_step for s in step])
+        cur_step = train_statistics.training_step[-1]
 
+        # Predict on the whole training set
+        cur_training_loss = evaluate(
+            model=model, input_data=training_input, ground_truth=training_output
+        )
+        train_statistics.eval_training_loss.append(cur_training_loss)
+        train_statistics.eval_training_step.append(train_statistics.training_step[-1])
         # Predict on evaluation set
-        cur_eval_loss = evaluate(
+        cur_validation_loss = evaluate(
             model=model, input_data=validation_input, ground_truth=validation_output
         )
-        train_statistics.eval_loss.append(cur_eval_loss)
-        train_statistics.eval_step.append(train_statistics.train_step[-1])
+        train_statistics.eval_validation_loss.append(cur_validation_loss)
+        train_statistics.eval_validation_step.append(train_statistics.training_step[-1])
 
-    print(f"Final train loss: {train_statistics.train_loss[-1]:.3f}")
-    print(f"Final validation loss: {train_statistics.eval_loss[-1]:.3f}")
+    print(f"Final train loss: {train_statistics.eval_training_loss[-1]:.3f}")
+    print(f"Final validation loss: {train_statistics.eval_validation_loss[-1]:.3f}")
 
     plot_training(train_statistics=train_statistics)
 

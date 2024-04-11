@@ -8,10 +8,12 @@ from typing import Callable, List
 class TrainStatistics:
     """Class holding train statistics."""
 
-    train_loss: List[float] = field(default_factory=list)
-    train_step: List[int] = field(default_factory=list)
-    eval_loss: List[float] = field(default_factory=list)
-    eval_step: List[int] = field(default_factory=list)
+    training_loss: List[float] = field(default_factory=list)
+    training_step: List[int] = field(default_factory=list)
+    eval_training_loss: List[float] = field(default_factory=list)
+    eval_training_step: List[int] = field(default_factory=list)
+    eval_validation_loss: List[float] = field(default_factory=list)
+    eval_validation_step: List[int] = field(default_factory=list)
 
 
 @dataclass

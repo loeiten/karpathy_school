@@ -81,18 +81,18 @@ def test_get_train_validation_and_test_set():
     block_size = 3
 
     (
-        train_input,
-        train_output,
-        validate_input,
-        validate_output,
+        training_input,
+        training_output,
+        validation_input,
+        validation_output,
         test_input,
         test_output,
     ) = get_train_validation_and_test_set(block_size=block_size)
 
     # Assert the shapes
-    assert train_input.shape == torch.Size([182516, block_size])
-    assert train_output.shape == torch.Size([182516])
-    assert validate_input.shape == torch.Size([22815, block_size])
-    assert validate_output.shape == torch.Size([22815])
+    assert training_input.shape == torch.Size([182516, block_size])
+    assert training_output.shape == torch.Size([182516])
+    assert validation_input.shape == torch.Size([22815, block_size])
+    assert validation_output.shape == torch.Size([22815])
     assert test_input.shape == torch.Size([22815, block_size])
     assert test_output.shape == torch.Size([22815])

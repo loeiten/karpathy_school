@@ -17,13 +17,13 @@ def plot_training(train_statistics: TrainStatistics):
     """
     _, ax = plt.subplots()
     ax.plot(
-        train_statistics.train_step,
-        np.log(train_statistics.train_loss),
-        label="Train loss",
+        train_statistics.training_step,
+        np.log(train_statistics.training_loss),
+        label="(Batch wise) training loss",
     )
     ax.plot(
-        train_statistics.eval_step,
-        np.log(train_statistics.eval_loss),
+        train_statistics.eval_validation_step,
+        np.log(train_statistics.eval_validation_loss),
         label="Validation loss",
     )
     ax.set_ylabel("Log(loss)")

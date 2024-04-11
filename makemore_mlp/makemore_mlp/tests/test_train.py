@@ -12,8 +12,8 @@ def test_train_neural_net_model() -> None:
 
     # Obtain the data
     (
-        train_input,
-        train_output,
+        training_input,
+        training_output,
         _,
         _,
         _,
@@ -39,8 +39,8 @@ def test_train_neural_net_model() -> None:
     # Train for one step
     model, loss, step = train_neural_net_model(
         model=model,
-        input_training_data=train_input,
-        ground_truth_data=train_output,
+        input_training_data=training_input,
+        ground_truth_data=training_output,
         optimization_params=optimization_params,
     )
 
@@ -57,8 +57,8 @@ def test_train_neural_net_model() -> None:
     # Train for one step
     model, loss, step = train_neural_net_model(
         model=model,
-        input_training_data=train_input,
-        ground_truth_data=train_output,
+        input_training_data=training_input,
+        ground_truth_data=training_output,
         optimization_params=optimization_params,
     )
 
