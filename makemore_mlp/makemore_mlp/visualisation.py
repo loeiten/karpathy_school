@@ -22,6 +22,11 @@ def plot_training(train_statistics: TrainStatistics):
         label="(Batch wise) training loss",
     )
     ax.plot(
+        train_statistics.eval_training_step,
+        np.log(train_statistics.eval_training_loss),
+        label="Training loss",
+    )
+    ax.plot(
         train_statistics.eval_validation_step,
         np.log(train_statistics.eval_validation_loss),
         label="Validation loss",
