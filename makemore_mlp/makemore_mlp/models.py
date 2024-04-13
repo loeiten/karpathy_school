@@ -44,4 +44,8 @@ def get_model(
     b2 = torch.randn(VOCAB_SIZE, generator=g, requires_grad=True)
     parameters = (c, w1, b1, w2, b2)
 
+    print(
+        f"Number of elements in model: {sum(layer.nelement() for layer in parameters)}"
+    )
+
     return parameters

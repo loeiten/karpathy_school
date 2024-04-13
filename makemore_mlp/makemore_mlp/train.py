@@ -12,6 +12,7 @@ from makemore_mlp.inference import predict_neural_network
 from makemore_mlp.models import get_model
 from makemore_mlp.preprocessing import get_train_validation_and_test_set
 from makemore_mlp.visualisation import plot_training
+from tqdm import tqdm
 
 
 def train_neural_net_model(
@@ -53,7 +54,11 @@ def train_neural_net_model(
     # NOTE: It's better to take a lot of steps in the approximate direction of
     #       the true gradient than it is to take one big step in the direction
     #       of the true gradient
-    for i in range(optimization_params.mini_batches_per_iteration):
+    for i in tqdm(
+        range(optimization_params.mini_batches_per_iteration),
+        desc="Mini-batch per iteration",
+        leave=False,
+    ):
         # Mini batch constructor
         n_samples = input_training_data.shape[0]
         idxs = torch.randint(
@@ -155,7 +160,7 @@ def train_and_plot(
 
     cur_step = 0
 
-    for i in range(optimization_params.n_iterations):
+    for i in tqdm(range(optimization_params.n_iterations), desc="Iteration"):
         # Train for one step
         model, loss, step = train_neural_net_model(
             model=model,
