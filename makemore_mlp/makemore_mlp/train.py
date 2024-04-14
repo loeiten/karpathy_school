@@ -203,7 +203,17 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
     Returns:
         argparse.Namespace: The parsed arguments
     """
-    parser = argparse.ArgumentParser(description="Train a model and plot its contents.")
+    parser = argparse.ArgumentParser(
+        description="Train a model and plot its contents.",
+        epilog=(
+            "Increase the size of the hidden layer and train for longer\n"
+            "python3 -m makemore_mlp.train -l 300 -t 120000 -m 1000\n\n"
+            "As we're underfitting the above we suspect that the embedding "
+            "size is the bottleneck\n"
+            "python3 -m makemore_mlp.train -l 200 -e 10 -t 200000 -m 1000\n\n"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
 
     default_model_params = ModelParams()
     parser.add_argument(
