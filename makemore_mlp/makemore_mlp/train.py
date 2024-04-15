@@ -211,6 +211,7 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
             "As we're underfitting the above we suspect that the embedding "
             "size is the bottleneck\n"
             "python3 -m makemore_mlp.train -l 200 -e 10 -t 200000 -m 1000\n\n"
+            "Training for longer seem to be a good way to decrease the loss"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )

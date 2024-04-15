@@ -1,7 +1,5 @@
 """Package containing makemore_mlp."""
 
-from typing import Literal
-
 # +1 as we'd like the start and stop token to have value 0
 TOKEN_TO_INDEX = {chr(ord("a") + i): i + 1 for i in range(26)}
 # Start/stop token
