@@ -1,4 +1,4 @@
-"""Contains tests for the models module."""
+"""Contains tests for the train module."""
 
 from makemore_mlp.data_classes import ModelParams, OptimizationParams
 from makemore_mlp.models import get_model
