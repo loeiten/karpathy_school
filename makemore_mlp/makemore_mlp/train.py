@@ -130,14 +130,18 @@ def train_neural_net_model(
     return model, loss_list, step_list
 
 
-def train_and_plot(
+def train(
     model_params: ModelParams, optimization_params: OptimizationParams
-) -> None:
-    """Train the model and plot the statistics.
+) -> Tuple[Tuple[torch.Tensor, ...], TrainStatistics]:
+    """Train the model.
 
     Args:
         model_params (ModelParams): The model parameters
         optimization_params (OptimizationParams): The optimization parameters
+
+    Returns:
+        Tuple[torch.Tensor, ...]: The model
+        TrainStatistics: Statistics from the training
     """
     # Obtain the data
     (
@@ -190,6 +194,22 @@ def train_and_plot(
 
     print(f"Final train loss: {train_statistics.eval_training_loss[-1]:.3f}")
     print(f"Final validation loss: {train_statistics.eval_validation_loss[-1]:.3f}")
+
+    return model, train_statistics
+
+
+def train_and_plot(
+    model_params: ModelParams, optimization_params: OptimizationParams
+) -> None:
+    """Train the model and plot the statistics.
+
+    Args:
+        model_params (ModelParams): The model parameters
+        optimization_params (OptimizationParams): The optimization parameters
+    """
+    _, train_statistics = train(
+        model_params=model_params, optimization_params=optimization_params
+    )
 
     plot_training(train_statistics=train_statistics)
 
