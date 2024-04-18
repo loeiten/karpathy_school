@@ -4,7 +4,7 @@ from typing import Tuple
 
 import torch
 import torch.nn.functional as F
-from makemore_mlp.inference import predict_neural_network
+from makemore_mlp.predict import predict_neural_network
 
 
 def evaluate(

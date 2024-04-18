@@ -8,8 +8,8 @@ import torch
 import torch.nn.functional as F
 from makemore_mlp.data_classes import ModelParams, OptimizationParams, TrainStatistics
 from makemore_mlp.evaluation import evaluate
-from makemore_mlp.inference import predict_neural_network
 from makemore_mlp.models import get_model
+from makemore_mlp.predict import predict_neural_network
 from makemore_mlp.preprocessing import get_train_validation_and_test_set
 from makemore_mlp.visualisation import plot_training
 from tqdm import tqdm
