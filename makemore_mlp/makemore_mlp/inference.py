@@ -1,9 +1,13 @@
 """Module to run inference on the model."""
 
+import argparse
+import sys
 from typing import List, Tuple
 
 import torch
+from makemore_mlp.data_classes import ModelParams, OptimizationParams
 from makemore_mlp.predict import predict_neural_network
+from makemore_mlp.train import train
 
 from makemore_mlp import INDEX_TO_TOKEN, TOKEN_TO_INDEX
 
@@ -46,10 +50,61 @@ def run_inference(
             # The context size is constant, so we drop the first token, and add
             # the predicted token to the next
             context = context[1:] + [index]
-            characters += f"{INDEX_TO_TOKEN[index.item()]}"
             if index == 0:
                 break
+            characters += f"{INDEX_TO_TOKEN[index.item()]}"
 
         predictions.append(characters)
 
     return tuple(predictions)
+
+
+def parse_args(sys_args: List[str]) -> argparse.Namespace:
+    """Parse the arguments.
+
+    Args:
+        sys_args (List[str]): The system arguments
+
+    Returns:
+        argparse.Namespace: The parsed arguments
+    """
+    parser = argparse.ArgumentParser(
+        description="Predict on the MLP model.",
+    )
+
+    parser.add_argument(
+        "-n",
+        "--n-predictions",
+        type=int,
+        required=False,
+        default=20,
+        help=("Number of names to predict"),
+    )
+
+    args = parser.parse_args(sys_args)
+    return args
+
+
+def main(sys_args: List[str]):
+    """Parse the arguments and run train_and_plot.
+
+    Args:
+        sys_args (List[str]): The system arguments
+    """
+    args = parse_args(sys_args)
+    model_params = ModelParams(
+        embedding_size=10,
+        hidden_layer_neurons=200,
+    )
+    optimization_params = OptimizationParams(
+        total_mini_batches=500_000,
+        mini_batches_per_iteration=1_000,
+    )
+    model, _ = train(model_params=model_params, optimization_params=optimization_params)
+    predictions = run_inference(model=model, n_samples=args.n_predictions)
+    for prediction in predictions:
+        print(f"{prediction}")
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
