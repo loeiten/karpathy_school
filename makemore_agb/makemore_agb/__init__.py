@@ -1,4 +1,4 @@
-"""Package containing makemore_mlp."""
+"""Package containing makemore_activation_gradient_batchnorm."""
 
 # +1 as we'd like the start and stop token to have value 0
 TOKEN_TO_INDEX = {chr(ord("a") + i): i + 1 for i in range(26)}
