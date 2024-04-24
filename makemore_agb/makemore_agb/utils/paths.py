@@ -3,9 +3,9 @@
 from pathlib import Path
 
 
-def get_makemore_mlp_package_dir() -> Path:
+def get_makemore_agb_package_dir() -> Path:
     """
-    Return the absolute path to the makemore_mlp package.
+    Return the absolute path to the makemore_agb package.
 
     Returns:
         Path: The path to the root directory
@@ -20,7 +20,7 @@ def get_data_path() -> Path:
     Returns:
         Path: The path to the root directory
     """
-    return get_makemore_mlp_package_dir().parents[1].joinpath("data", "names.txt")
+    return get_makemore_agb_package_dir().parents[1].joinpath("data", "names.txt")
 
 
 def get_output_dir() -> Path:
@@ -30,6 +30,6 @@ def get_output_dir() -> Path:
     Returns:
         Path: The path for outputs
     """
-    output_dir = get_makemore_mlp_package_dir().parent.joinpath("output")
+    output_dir = get_makemore_agb_package_dir().parent.joinpath("output")
     output_dir.mkdir(parents=True, exist_ok=True)
     return output_dir

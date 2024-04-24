@@ -4,9 +4,9 @@ from pathlib import Path
 from typing import List, Tuple
 
 import torch
-from makemore_mlp.utils.paths import get_data_path
+from makemore_agb.utils.paths import get_data_path
 
-from makemore_mlp import TOKEN_TO_INDEX
+from makemore_agb import TOKEN_TO_INDEX
 
 
 def read_data(data_path: Path) -> Tuple[str, ...]:

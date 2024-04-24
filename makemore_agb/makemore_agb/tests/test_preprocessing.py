@@ -1,16 +1,16 @@
 """Contains tests for the preprocessing module."""
 
 import torch
-from makemore_mlp.preprocessing import (
+from makemore_agb.preprocessing import (
     create_feature_and_labels,
     get_padded_data,
     get_train_validation_and_test_set,
     pad_data,
     read_data,
 )
-from makemore_mlp.utils.paths import get_data_path
+from makemore_agb.utils.paths import get_data_path
 
-from makemore_mlp import INDEX_TO_TOKEN
+from makemore_agb import INDEX_TO_TOKEN
 
 
 def test_read_data() -> None:

@@ -6,12 +6,12 @@ from typing import List, Optional, Tuple
 
 import torch
 import torch.nn.functional as F
-from makemore_mlp.data_classes import ModelParams, OptimizationParams, TrainStatistics
-from makemore_mlp.evaluation import evaluate
-from makemore_mlp.models import get_model
-from makemore_mlp.predict import predict_neural_network
-from makemore_mlp.preprocessing import get_train_validation_and_test_set
-from makemore_mlp.visualisation import plot_training
+from makemore_agb.data_classes import ModelParams, OptimizationParams, TrainStatistics
+from makemore_agb.evaluation import evaluate
+from makemore_agb.models import get_model
+from makemore_agb.predict import predict_neural_network
+from makemore_agb.preprocessing import get_train_validation_and_test_set
+from makemore_agb.visualisation import plot_training
 from tqdm import tqdm
 
 
@@ -227,10 +227,10 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
         description="Train a model and plot its contents.",
         epilog=(
             "Increase the size of the hidden layer and train for longer\n"
-            "python3 -m makemore_mlp.train -l 300 -t 120000 -m 1000\n\n"
+            "python3 -m makemore_agb.train -l 300 -t 120000 -m 1000\n\n"
             "As we're underfitting the above we suspect that the embedding "
             "size is the bottleneck\n"
-            "python3 -m makemore_mlp.train -l 200 -e 10 -t 200000 -m 1000\n\n"
+            "python3 -m makemore_agb.train -l 200 -e 10 -t 200000 -m 1000\n\n"
             "Training for longer seem to be a good way to decrease the loss"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,

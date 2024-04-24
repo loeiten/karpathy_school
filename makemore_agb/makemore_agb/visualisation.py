@@ -3,7 +3,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
-from makemore_mlp.data_classes import TrainStatistics
+from makemore_agb.data_classes import TrainStatistics
 
 # Use nice theme when plotting
 sns.set_theme()

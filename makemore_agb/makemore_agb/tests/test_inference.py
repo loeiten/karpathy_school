@@ -1,7 +1,7 @@
 """Contains tests for the inference module."""
 
-from makemore_mlp.inference import parse_args, run_inference
-from makemore_mlp.models import get_model
+from makemore_agb.inference import parse_args, run_inference
+from makemore_agb.models import get_model
 
 
 def test_run_inference() -> None:

@@ -2,9 +2,9 @@
 
 import pytest
 import torch
-from makemore_mlp.models import get_model
+from makemore_agb.models import get_model
 
-from makemore_mlp import VOCAB_SIZE
+from makemore_agb import VOCAB_SIZE
 
 
 @pytest.mark.parametrize(

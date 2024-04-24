@@ -4,7 +4,7 @@ from typing import Tuple
 
 import torch
 
-from makemore_mlp import VOCAB_SIZE
+from makemore_agb import VOCAB_SIZE
 
 
 def get_model(

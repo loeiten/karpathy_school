@@ -2,10 +2,10 @@
 
 from itertools import chain
 
-from makemore_mlp.data_classes import ModelParams, OptimizationParams
-from makemore_mlp.models import get_model
-from makemore_mlp.preprocessing import get_train_validation_and_test_set
-from makemore_mlp.train import parse_args, train_neural_net_model
+from makemore_agb.data_classes import ModelParams, OptimizationParams
+from makemore_agb.models import get_model
+from makemore_agb.preprocessing import get_train_validation_and_test_set
+from makemore_agb.train import parse_args, train_neural_net_model
 
 
 def test_train_neural_net_model() -> None:

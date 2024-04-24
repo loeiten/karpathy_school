@@ -5,11 +5,11 @@ import sys
 from typing import List, Tuple
 
 import torch
-from makemore_mlp.data_classes import ModelParams, OptimizationParams
-from makemore_mlp.predict import predict_neural_network
-from makemore_mlp.train import train
+from makemore_agb.data_classes import ModelParams, OptimizationParams
+from makemore_agb.predict import predict_neural_network
+from makemore_agb.train import train
 
-from makemore_mlp import INDEX_TO_TOKEN, TOKEN_TO_INDEX
+from makemore_agb import INDEX_TO_TOKEN, TOKEN_TO_INDEX
 
 
 def run_inference(
