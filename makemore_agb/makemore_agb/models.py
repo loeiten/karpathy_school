@@ -44,6 +44,7 @@ def get_model(
     b2 = torch.randn(VOCAB_SIZE, generator=g, requires_grad=True)
     parameters = (c, w1, b1, w2, b2)
 
+    # Make it possible to train
     for p in parameters:
         p.requires_grad = True
 

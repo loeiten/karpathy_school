@@ -2,7 +2,7 @@
 
 import argparse
 import sys
-from typing import List, Optional, Tuple
+from typing import Dict, List, Literal, Optional, Tuple
 
 import torch
 import torch.nn.functional as F
@@ -14,31 +14,26 @@ from makemore_agb.preprocessing import get_train_validation_and_test_set
 from makemore_agb.visualisation import plot_training
 from tqdm import tqdm
 
+DATA_SET = Dict[Literal["training_input_data", "training_ground_truth", "validation_input_data", "validation_ground_truth"], torch.Tensor]
 
 def train_neural_net_model(
     model: Tuple[torch.Tensor, ...],
-    input_training_data: torch.Tensor,
-    ground_truth_data: torch.Tensor,
+    data_set: DATA_SET,
     optimization_params: Optional[OptimizationParams],
     seed: int = 2147483647,
-) -> Tuple[Tuple[torch.Tensor], List[float], List[int]]:
+    train_statistics = Optional[TrainStatistics]=None,
+) -> None:
     """Train the neural net model.
 
     Args:
         model (Tuple[torch.Tensor, ...]): The model (weights) to use
-        input_training_data (torch.Tensor): The input training data with shape
-            (n_samples, block_size).
-            This is the data that will be fed into the features
-        ground_truth_data (torch.Tensor): The correct prediction for the input
-            (the correct labels)
+        data_set: DATA_SET
+            Data containing the training and validation set
         optimization_params (Optional[OptimizationParams]): Optimization
             options
         seed (int): The seed for the random number generator
-
-    Returns:
-        Tuple[torch.Tensor, ...]: The trained model
-        List[float]: The loss of each step
-        List[int]: The step
+        train_statistics (Optional[TrainStatistics]): Class to capture the
+            statistics of the training job
     """
     if optimization_params is None:
         optimization_params = OptimizationParams()
@@ -49,75 +44,37 @@ def train_neural_net_model(
 
     g = torch.Generator().manual_seed(seed)
 
-    step_list = []
-    loss_list = []
     # NOTE: It's better to take a lot of steps in the approximate direction of
     #       the true gradient than it is to take one big step in the direction
     #       of the true gradient
     for i in tqdm(
-        range(optimization_params.mini_batches_per_iteration),
-        desc="Mini-batch per iteration",
-        leave=False,
+        range(optimization_params.n_mini_batches),
+        desc="Mini batch",
     ):
         # Mini batch constructor
-        n_samples = input_training_data.shape[0]
+        n_samples = data_set["training_input_data"].shape[0]
         idxs = torch.randint(
             low=0, high=n_samples, size=(optimization_params.batch_size,), generator=g
         )
 
-        # Update cur_mini_batch number
-        optimization_params.cur_mini_batch += 1
-
-        # NOTE: input_training_data has dimension (n_samples, block_size)
-        #       input_training_data[idxs] selects batch_size samples from the
-        #       training data
-        #       The size of input_training_data[idxs] is therefore
-        #       (batch_size, block_size)
-        input_data = input_training_data[idxs]
-
         # Forward pass
-        logits = predict_neural_network(model=model, input_data=input_data)
-
-        # NOTE: We could have the following implementation:
-        # # Get the fake counts (like in makemore_bigram)
-        # counts = logits.exp()
-        # # Normalize to probability
-        # prob = counts/counts.sum(1, keepdim=True)
-        # # Negative loss likelihood:
-        # # - For each of the example in the batch: torch.arange(batch_size)
-        # #   - Select the probability of getting the ground truth:
-        # #     prob[torch.arange(batch_size), ground_truth_data]
-        # #     The shape of this will be the batch_size
-        # #     In a model that perfectly predicts the characters all entries in
-        # #     prob[torch.arange(batch_size), ground_truth_data]
-        # #     would be 1
-        # # - We take the logarithm of this, so that numbers under 1 becomes
-        # #   negative (in perfect prediction log(1)=0)
-        # #   - In order to get a positive number to minimize we take the
-        # #     negative
-        # #     of the result
-        # # - The mean of this the number we want to minimize
-        # loss = (
-        #     -prob[torch.arange(optimization_params.batch_size), ground_truth_data]
-        #     .log()
-        #     .mean()
-        # )
-
-        # However, it's much more efficient both mathematically and in terms of
-        # backprop
-        # It's also numerically better behaved
-        loss = F.cross_entropy(logits, ground_truth_data[idxs])
+        # NOTE: training_input_data has dimension (n_samples, block_size)
+        #       training_input_data[idxs] selects batch_size samples from the
+        #       training data
+        #       The size of training_input_data[idxs] is therefore
+        #       (batch_size, block_size)
+        logits = predict_neural_network(model=model, input_data=data_set["training_input_data"][idxs])
+        loss = F.cross_entropy(logits, data_set["training_ground_truth"][idxs])
 
         # Append loss and iteration
-        loss_list.append(loss.item())
-        step_list.append(i)
+        if train_statistics is not None:
+            train_statistics.training_loss.append(loss.item())
+            train_statistics.training_step.append(i)
 
         # Backward pass
-
         # Reset the gradients
         for parameters in model:
             parameters.grad = None
-
         loss.backward()
 
         # Update the weights
@@ -127,7 +84,24 @@ def train_neural_net_model(
                 * parameters.grad
             )
 
-    return model, loss_list, step_list
+        if i % optimization_params.mini_batches_per_data_capture == 0:
+            if train_statistics is not None:
+                # Predict on the whole training set
+                cur_training_loss = evaluate(
+                    model=model, input_data=data_set["training_input_data"], ground_truth=data_set["training_ground_truth"]
+                )
+                train_statistics.eval_training_loss.append(cur_training_loss)
+                train_statistics.eval_training_step.append(train_statistics.training_step[-1])
+                # Predict on evaluation set
+                cur_validation_loss = evaluate(
+                    model=model, input_data=data_set["validation_input_data"], ground_truth=data_set["validation_ground_truth"]
+                )
+                train_statistics.eval_validation_loss.append(cur_validation_loss)
+                train_statistics.eval_validation_step.append(train_statistics.training_step[-1])
+
+            print(f"{i:7d}/{optimization_params.n_mini_batches}: {loss.item:.4f}")
+
+    return model
 
 
 def train(
@@ -152,6 +126,16 @@ def train(
         _,  # test_input,
         _,  # test_output,
     ) = get_train_validation_and_test_set(block_size=model_params.block_size)
+    data_set = {
+"training_input_data":
+        training_input,
+"training_ground_truth":
+        training_output,
+"validation_input_data":
+        validation_input,
+"validation_ground_truth":
+        validation_output,
+    }
 
     # Obtain the model
     model = get_model(
@@ -162,35 +146,14 @@ def train(
 
     train_statistics = TrainStatistics()
 
-    cur_step = 0
-
-    for i in tqdm(range(optimization_params.n_iterations), desc="Iteration"):
-        # Train for one step
-        model, loss, step = train_neural_net_model(
-            model=model,
-            input_training_data=training_input,
-            ground_truth_data=training_output,
-            optimization_params=optimization_params,
-            seed=i,  # Change the seed in order not to train on the same data
-        )
-
-        # Save statistics
-        train_statistics.training_loss.extend(loss)
-        train_statistics.training_step.extend([s + cur_step for s in step])
-        cur_step = train_statistics.training_step[-1]
-
-        # Predict on the whole training set
-        cur_training_loss = evaluate(
-            model=model, input_data=training_input, ground_truth=training_output
-        )
-        train_statistics.eval_training_loss.append(cur_training_loss)
-        train_statistics.eval_training_step.append(train_statistics.training_step[-1])
-        # Predict on evaluation set
-        cur_validation_loss = evaluate(
-            model=model, input_data=validation_input, ground_truth=validation_output
-        )
-        train_statistics.eval_validation_loss.append(cur_validation_loss)
-        train_statistics.eval_validation_step.append(train_statistics.training_step[-1])
+    # Train for one step
+    model = train_neural_net_model(
+        model=model,
+        data_set=data_set,
+        optimization_params=optimization_params,
+        train_statistics=train_statistics
+        seed=seed,
+    )
 
     print(f"Final train loss: {train_statistics.eval_training_loss[-1]:.3f}")
     print(f"Final validation loss: {train_statistics.eval_validation_loss[-1]:.3f}")
@@ -280,7 +243,7 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
         "--mini-batches-per-iteration",
         type=int,
         required=False,
-        default=default_optimization_params.mini_batches_per_iteration,
+        default=default_optimization_params.mini_batches_per_data_capture,
         help="Number of mini batches to run for each call to the training function",
     )
     parser.add_argument(
@@ -310,7 +273,7 @@ def main(sys_args: List[str]):
     )
     optimization_params = OptimizationParams(
         total_mini_batches=args.total_mini_batches,
-        mini_batches_per_iteration=args.mini_batches_per_iteration,
+        mini_batches_per_data_capture=args.mini_batches_per_data_capture,
         batch_size=args.batch_size,
     )
     train_and_plot(model_params=model_params, optimization_params=optimization_params)

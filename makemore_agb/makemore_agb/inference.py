@@ -98,7 +98,7 @@ def main(sys_args: List[str]):
     )
     optimization_params = OptimizationParams(
         total_mini_batches=500_000,
-        mini_batches_per_iteration=1_000,
+        mini_batches_per_data_capture=1_000,
     )
     model, _ = train(model_params=model_params, optimization_params=optimization_params)
     predictions = run_inference(model=model, n_samples=args.n_predictions)

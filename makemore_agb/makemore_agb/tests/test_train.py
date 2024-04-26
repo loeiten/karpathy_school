@@ -30,10 +30,10 @@ def test_train_neural_net_model() -> None:
     )
 
     # Set the model options
-    mini_batches_per_iteration = 1
+    mini_batches_per_data_capture = 1
     optimization_params = OptimizationParams(
         total_mini_batches=0,  # Not in affect here
-        mini_batches_per_iteration=mini_batches_per_iteration,
+        mini_batches_per_data_capture=mini_batches_per_data_capture,
         batch_size=32,
         learning_rate=lambda _: 0.1,
     )
@@ -46,14 +46,14 @@ def test_train_neural_net_model() -> None:
         optimization_params=optimization_params,
     )
 
-    assert len(loss) == mini_batches_per_iteration
-    assert len(step) == mini_batches_per_iteration
+    assert len(loss) == mini_batches_per_data_capture
+    assert len(step) == mini_batches_per_data_capture
     assert optimization_params.cur_mini_batch == 1
 
     # Train the model again with changed parameters
-    mini_batches_per_iteration = 2
+    mini_batches_per_data_capture = 2
     optimization_params.batch_size = 64
-    optimization_params.mini_batches_per_iteration = 2
+    optimization_params.mini_batches_per_data_capture = 2
     optimization_params.learning_rate = lambda _: 00.1
 
     # Train for one step
@@ -64,8 +64,8 @@ def test_train_neural_net_model() -> None:
         optimization_params=optimization_params,
     )
 
-    assert len(loss) == mini_batches_per_iteration
-    assert len(step) == mini_batches_per_iteration
+    assert len(loss) == mini_batches_per_data_capture
+    assert len(step) == mini_batches_per_data_capture
     assert optimization_params.cur_mini_batch == 3
 
 
@@ -97,7 +97,7 @@ def test_parse_args() -> None:
         "--embedding-size": args.embedding_size,
         "--hidden-layer-neurons": args.hidden_layer_neurons,
         "--total-mini-batches": args.total_mini_batches,
-        "--mini-batches-per-iteration": args.mini_batches_per_iteration,
+        "--mini-batches-per-iteration": args.mini_batches_per_data_capture,
         "--batch-size": args.batch_size,
     }
 
