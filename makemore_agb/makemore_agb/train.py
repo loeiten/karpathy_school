@@ -2,7 +2,7 @@
 
 import argparse
 import sys
-from typing import Dict, List, Literal, Optional, Tuple
+from typing import List, Optional, Tuple
 
 import torch
 import torch.nn.functional as F
@@ -14,15 +14,7 @@ from makemore_agb.preprocessing import get_train_validation_and_test_set
 from makemore_agb.visualisation import plot_training
 from tqdm import tqdm
 
-DATASET = Dict[
-    Literal[
-        "training_input_data",
-        "training_ground_truth",
-        "validation_input_data",
-        "validation_ground_truth",
-    ],
-    torch.Tensor,
-]
+from makemore_agb import DATASET
 
 
 def train_neural_net_model(
@@ -63,6 +55,7 @@ def train_neural_net_model(
         range(optimization_params.n_mini_batches),
         desc="Mini batch",
     ):
+        optimization_params.cur_step += 1
         # Mini batch constructor
         n_samples = dataset["training_input_data"].shape[0]
         idxs = torch.randint(
@@ -83,7 +76,7 @@ def train_neural_net_model(
         # Append loss and iteration
         if train_statistics is not None:
             train_statistics.training_loss.append(loss.item())
-            train_statistics.training_step.append(i)
+            train_statistics.training_step.append(optimization_params.cur_step)
 
         # Backward pass
         # Reset the gradients
@@ -93,7 +86,10 @@ def train_neural_net_model(
 
         # Update the weights
         for parameters in model:
-            parameters.data += -optimization_params.learning_rate(i) * parameters.grad
+            parameters.data += (
+                -optimization_params.learning_rate(optimization_params.cur_step)
+                * parameters.grad
+            )
 
         if i % optimization_params.mini_batches_per_data_capture == 0:
             if train_statistics is not None:
@@ -104,9 +100,7 @@ def train_neural_net_model(
                     ground_truth=dataset["training_ground_truth"],
                 )
                 train_statistics.eval_training_loss.append(cur_training_loss)
-                train_statistics.eval_training_step.append(
-                    train_statistics.training_step[-1]
-                )
+                train_statistics.eval_training_step.append(optimization_params.cur_step)
                 # Predict on evaluation set
                 cur_validation_loss = evaluate(
                     model=model,
@@ -115,10 +109,12 @@ def train_neural_net_model(
                 )
                 train_statistics.eval_validation_loss.append(cur_validation_loss)
                 train_statistics.eval_validation_step.append(
-                    train_statistics.training_step[-1]
+                    optimization_params.cur_step
                 )
 
-            print(f"{i:7d}/{optimization_params.n_mini_batches}: {loss.item:.4f}")
+            print(
+                f"{optimization_params.cur_step:7d}/{optimization_params.n_mini_batches:7d}: {loss.item():.4f}"
+            )
 
     return model
 
@@ -258,7 +254,7 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
     )
     parser.add_argument(
         "-c",
-        "--mini-batches-per-mini-batches-per-data-capture",
+        "--mini-batches-per-data-capture",
         type=int,
         required=False,
         default=default_optimization_params.mini_batches_per_data_capture,

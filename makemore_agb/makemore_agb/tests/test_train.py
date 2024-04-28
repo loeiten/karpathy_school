@@ -2,10 +2,12 @@
 
 from itertools import chain
 
-from makemore_agb.data_classes import ModelParams, OptimizationParams
+from makemore_agb.data_classes import ModelParams, OptimizationParams, TrainStatistics
 from makemore_agb.models import get_model
 from makemore_agb.preprocessing import get_train_validation_and_test_set
 from makemore_agb.train import parse_args, train_neural_net_model
+
+from makemore_agb import DATASET
 
 
 def test_train_neural_net_model() -> None:
@@ -16,11 +18,17 @@ def test_train_neural_net_model() -> None:
     (
         training_input,
         training_output,
-        _,
-        _,
-        _,
-        _,
+        validation_input,
+        validation_output,
+        _,  # test_input,
+        _,  # test_output,
     ) = get_train_validation_and_test_set(block_size=model_params.block_size)
+    dataset: DATASET = {
+        "training_input_data": training_input,
+        "training_ground_truth": training_output,
+        "validation_input_data": validation_input,
+        "validation_ground_truth": validation_output,
+    }
 
     # Obtain the model
     model = get_model(
@@ -31,42 +39,61 @@ def test_train_neural_net_model() -> None:
 
     # Set the model options
     mini_batches_per_data_capture = 1
+    n_mini_batches = 1
     optimization_params = OptimizationParams(
-        total_mini_batches=0,  # Not in affect here
+        n_mini_batches=n_mini_batches,
         mini_batches_per_data_capture=mini_batches_per_data_capture,
         batch_size=32,
         learning_rate=lambda _: 0.1,
     )
 
-    # Train for one step
-    model, loss, step = train_neural_net_model(
+    # Train for one step without train_statistics
+    model = train_neural_net_model(
         model=model,
-        input_training_data=training_input,
-        ground_truth_data=training_output,
+        dataset=dataset,
         optimization_params=optimization_params,
     )
+    assert optimization_params.cur_step == 1
 
-    assert len(loss) == mini_batches_per_data_capture
-    assert len(step) == mini_batches_per_data_capture
-    assert optimization_params.cur_mini_batch == 1
+    # Add the train_statics
+    train_statistics = TrainStatistics()
+    model = train_neural_net_model(
+        model=model,
+        dataset=dataset,
+        optimization_params=optimization_params,
+        train_statistics=train_statistics,
+    )
+    assert optimization_params.cur_step == 2
+    assert len(train_statistics.training_step) == 1
+    assert len(train_statistics.training_loss) == 1
+    assert len(train_statistics.eval_training_step) == 1
+    assert len(train_statistics.eval_training_loss) == 1
+    assert len(train_statistics.eval_validation_step) == 1
+    assert len(train_statistics.eval_validation_loss) == 1
 
     # Train the model again with changed parameters
-    mini_batches_per_data_capture = 2
+    optimization_params.n_mini_batches = 3
     optimization_params.batch_size = 64
     optimization_params.mini_batches_per_data_capture = 2
     optimization_params.learning_rate = lambda _: 00.1
 
     # Train for one step
-    model, loss, step = train_neural_net_model(
+    model = train_neural_net_model(
         model=model,
-        input_training_data=training_input,
-        ground_truth_data=training_output,
+        dataset=dataset,
         optimization_params=optimization_params,
+        train_statistics=train_statistics,
     )
+    assert optimization_params.cur_step == 5
 
-    assert len(loss) == mini_batches_per_data_capture
-    assert len(step) == mini_batches_per_data_capture
-    assert optimization_params.cur_mini_batch == 3
+    assert len(train_statistics.training_step) == 4
+    assert len(train_statistics.training_loss) == 4
+    # One capture when i=0
+    # Another capture when i=2
+    assert len(train_statistics.eval_training_step) == 3
+    assert len(train_statistics.eval_training_loss) == 3
+    assert len(train_statistics.eval_validation_step) == 3
+    assert len(train_statistics.eval_validation_loss) == 3
 
 
 def test_parse_args() -> None:
@@ -76,16 +103,16 @@ def test_parse_args() -> None:
         "--block-size": 1,
         "--embedding-size": 2,
         "--hidden-layer-neurons": 3,
-        "--total-mini-batches": 4,
-        "--mini-batches-per-iteration": 5,
+        "--n-mini-batches": 4,
+        "--mini-batches-per-data-capture": 5,
         "--batch-size": 5,
     }
     long_short_map = {
         "--block-size": "-s",
         "--embedding-size": "-e",
         "--hidden-layer-neurons": "-l",
-        "--total-mini-batches": "-t",
-        "--mini-batches-per-iteration": "-m",
+        "--n-mini-batches": "-n",
+        "--mini-batches-per-data-capture": "-c",
         "--batch-size": "-b",
     }
     arguments = list(
@@ -96,8 +123,8 @@ def test_parse_args() -> None:
         "--block-size": args.block_size,
         "--embedding-size": args.embedding_size,
         "--hidden-layer-neurons": args.hidden_layer_neurons,
-        "--total-mini-batches": args.total_mini_batches,
-        "--mini-batches-per-iteration": args.mini_batches_per_data_capture,
+        "--n-mini-batches": args.n_mini_batches,
+        "--mini-batches-per-data-capture": args.mini_batches_per_data_capture,
         "--batch-size": args.batch_size,
     }
 

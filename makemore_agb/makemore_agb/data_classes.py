@@ -23,6 +23,7 @@ class OptimizationParams:
     n_mini_batches: int = 200_000
     mini_batches_per_data_capture: int = 1_000
     batch_size: int = 32
+    cur_step: int = 0
     # NOTE: How to find the optimal learning rate (roughly)
     #       1. Find the range where in the low end the loss barely moves and
     #          where it explodes
