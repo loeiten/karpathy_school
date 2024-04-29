@@ -10,7 +10,7 @@ from makemore_agb.data_classes import ModelParams, OptimizationParams, TrainStat
 from makemore_agb.evaluation import evaluate
 from makemore_agb.models import get_model
 from makemore_agb.predict import predict_neural_network
-from makemore_agb.preprocessing import get_train_validation_and_test_set
+from makemore_agb.preprocessing import get_dataset
 from makemore_agb.visualisation import plot_training
 from tqdm import tqdm
 
@@ -113,7 +113,9 @@ def train_neural_net_model(
                 )
 
             print(
-                f"{optimization_params.cur_step:7d}/{optimization_params.n_mini_batches:7d}: {loss.item():.4f}"
+                f"{optimization_params.cur_step:7d}/"
+                f"{optimization_params.n_mini_batches:7d}: "
+                f"{loss.item():.4f}"
             )
 
     return model
@@ -136,20 +138,7 @@ def train(
         TrainStatistics: Statistics from the training
     """
     # Obtain the data
-    (
-        training_input,
-        training_output,
-        validation_input,
-        validation_output,
-        _,  # test_input,
-        _,  # test_output,
-    ) = get_train_validation_and_test_set(block_size=model_params.block_size)
-    dataset: DATASET = {
-        "training_input_data": training_input,
-        "training_ground_truth": training_output,
-        "validation_input_data": validation_input,
-        "validation_ground_truth": validation_output,
-    }
+    dataset = get_dataset(block_size=model_params.block_size)
 
     # Obtain the model
     model = get_model(

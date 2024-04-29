@@ -6,7 +6,7 @@ from typing import List, Tuple
 import torch
 from makemore_agb.utils.paths import get_data_path
 
-from makemore_agb import TOKEN_TO_INDEX
+from makemore_agb import DATASET, TOKEN_TO_INDEX
 
 
 def read_data(data_path: Path) -> Tuple[str, ...]:
@@ -116,12 +116,10 @@ def get_padded_data(block_size: int) -> Tuple[str, ...]:
     return padded_data
 
 
-def get_train_validation_and_test_set(
+def get_dataset(
     block_size: int = 3,
     seed: int = 2147483647,
-) -> Tuple[
-    torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor
-]:
+) -> DATASET:
     """Get the train, validation and test set data.
 
     Args:
@@ -131,12 +129,9 @@ def get_train_validation_and_test_set(
         seed (int): The seed to use
 
     Returns:
-        torch.Tensor: The input data of the training set
-        torch.Tensor: The output data (labels) of the training set
-        torch.Tensor: The input data of the validation set
-        torch.Tensor: The output data (labels) of the validation set
-        torch.Tensor: The input data of the test set
-        torch.Tensor: The output data (labels) of the test set
+        The dataset.
+        The input data is the data fed into the model
+        The ground truth are the expected data from the model
     """
     torch.manual_seed(seed)
 
@@ -157,22 +152,15 @@ def get_train_validation_and_test_set(
     n1 = int(0.8 * shuffled_output_data.shape[0])
     n2 = int(0.9 * shuffled_output_data.shape[0])
 
-    shuffled_data = {}
+    dataset: DATASET = {}
 
-    shuffled_data["training_input"] = shuffled_input_data[:n1]
-    shuffled_data["training_output"] = shuffled_output_data[:n1]
+    dataset["training_input_data"] = shuffled_input_data[:n1]
+    dataset["training_ground_truth"] = shuffled_output_data[:n1]
 
-    shuffled_data["validation_input"] = shuffled_input_data[n1:n2]
-    shuffled_data["validation_output"] = shuffled_output_data[n1:n2]
+    dataset["validation_input_data"] = shuffled_input_data[n1:n2]
+    dataset["validation_ground_truth"] = shuffled_output_data[n1:n2]
 
-    shuffled_data["test_input"] = shuffled_input_data[n2:]
-    shuffled_data["test_output"] = shuffled_output_data[n2:]
+    dataset["test_input_data"] = shuffled_input_data[n2:]
+    dataset["test_ground_truth"] = shuffled_output_data[n2:]
 
-    return (
-        shuffled_data["training_input"],
-        shuffled_data["training_output"],
-        shuffled_data["validation_input"],
-        shuffled_data["validation_output"],
-        shuffled_data["test_input"],
-        shuffled_data["test_output"],
-    )
+    return dataset

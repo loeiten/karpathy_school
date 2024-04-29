@@ -18,6 +18,8 @@ DATASET = Dict[
         "training_ground_truth",
         "validation_input_data",
         "validation_ground_truth",
+        "test_input_data",
+        "test_ground_truth",
     ],
     torch.Tensor,
 ]

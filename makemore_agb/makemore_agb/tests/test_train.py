@@ -4,10 +4,8 @@ from itertools import chain
 
 from makemore_agb.data_classes import ModelParams, OptimizationParams, TrainStatistics
 from makemore_agb.models import get_model
-from makemore_agb.preprocessing import get_train_validation_and_test_set
+from makemore_agb.preprocessing import get_dataset
 from makemore_agb.train import parse_args, train_neural_net_model
-
-from makemore_agb import DATASET
 
 
 def test_train_neural_net_model() -> None:
@@ -15,20 +13,7 @@ def test_train_neural_net_model() -> None:
     model_params = ModelParams(block_size=3, embedding_size=2, hidden_layer_neurons=100)
 
     # Obtain the data
-    (
-        training_input,
-        training_output,
-        validation_input,
-        validation_output,
-        _,  # test_input,
-        _,  # test_output,
-    ) = get_train_validation_and_test_set(block_size=model_params.block_size)
-    dataset: DATASET = {
-        "training_input_data": training_input,
-        "training_ground_truth": training_output,
-        "validation_input_data": validation_input,
-        "validation_ground_truth": validation_output,
-    }
+    dataset = get_dataset(block_size=model_params.block_size)
 
     # Obtain the model
     model = get_model(
