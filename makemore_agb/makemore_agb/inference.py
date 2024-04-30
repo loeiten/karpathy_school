@@ -97,7 +97,7 @@ def main(sys_args: List[str]):
         hidden_layer_neurons=200,
     )
     optimization_params = OptimizationParams(
-        total_mini_batches=500_000,
+        n_mini_batches=200_000,
         mini_batches_per_data_capture=1_000,
     )
     model, _ = train(model_params=model_params, optimization_params=optimization_params)

@@ -181,7 +181,7 @@ Value &Value::operator/(const Value &rhs) {
   return out;
 }
 
-Value &Value::operator-(const Value& rhs) {
+Value &Value::operator-(const Value &rhs) {
   // NOTE: We need to dynamically allocate the op for it to be in scope when
   //       out.Backward_ is called
   auto sub_op = std::make_shared<Sub>(get_shared_ptr(), rhs.get_shared_ptr());
