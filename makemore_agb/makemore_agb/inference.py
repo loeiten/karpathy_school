@@ -42,9 +42,10 @@ def run_inference(
 
         while True:
             # Note the [] to get the batch shape correct
+            # Note the [0] as predict always returns a tuple
             logits = predict_neural_network(
                 model=model, input_data=torch.tensor([context])
-            )
+            )[0]
             probs = torch.softmax(logits, dim=1)
             index = torch.multinomial(probs, num_samples=1, generator=g)
             # The context size is constant, so we drop the first token, and add

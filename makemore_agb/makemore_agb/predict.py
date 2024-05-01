@@ -8,13 +8,16 @@ import torch
 def predict_neural_network(
     model: Tuple[torch.Tensor, ...],
     input_data: torch.Tensor,
-) -> Tuple[torch.Tensor]:
+    inspect_pre_activation_and_h: bool = False,
+) -> Tuple[torch.Tensor, ...]:
     """Predict the neural net model.
 
     Args:
         model (Tuple[torch.Tensor, ...]): The model (weights) to use
         input_data (torch.Tensor): The data to run inference on.
             This data has the shape (batch_size, block_size)
+        inspect_pre_activation_and_h (bool): Whether or not to output the
+            pre-activation and activation
 
     Returns:
         torch.Tensor: The achieved logits with shape (batch_size)
@@ -27,38 +30,20 @@ def predict_neural_network(
     #       block_size characters
     #       The dimension of emb is therefore
     #       (batch_size, block_size, embedding_size)
-    emb = c[input_data]
-    # NOTE: Given a block_size of 3 and an embedding size of 2, we could have
-    #       done the following:
-    #
-    #       emb = C[X]
-    #       # The first dimension of C[X] would be the number of parameters
-    #       # The second would be the number of block_size
-    #       # The last dimension would be the embedding_size
-    #       torch.cat([emb[:, 0, :], emb[:, 1, :], emb[:, 2, :]])
-    #
-    #       However, this would fix the code to use block_size = 2
-    #       as 0 will be the first character in the block, 1 will be the
-    #       second and so on
-    #
-    #       Another approach could be to use
-    #       torch.cat(torch.unbind(emb, 1), 1)
-    #       Where torch.unbind which splits the tensor
-    #       to a tuple of tensors along the desired dimension
-    #
-    #       However, this would create a new tensor
-    #       Instead, we can just change it's view
-    #       emb.view(n_samples, block_size*embedding_size)
+    embedding = c[input_data]
     # The block needs to be concatenated before multiplying it with the
     # weight
     # That is, the dimension size will be block_size*embedding_size
-    concatenated_dimension_size = emb.shape[1] * emb.shape[2]
-    # NOTE: .view(-1, x) - the -1 will make pyTorch infer the dimension for
-    #       that dimension
+    # Another way to look at it is that we need the batch size to stay the
+    # same, whereas the second dimension should be the rest should be squashed
+    # together
+    concatenated_embedding = embedding.view(embedding.shape[0], -1)
     # NOTE: + b1 is broadcasting on the correct dimension
-    # NOTE: The broadcasting will succeed
-    h = torch.tanh(emb.view(-1, concatenated_dimension_size) @ w1 + b1)
+    h_pre_activation = (concatenated_embedding @ w1) + b1
+    h = torch.tanh(h_pre_activation)
     # The logits will have dimension (batch_size, VOCAB_SIZE)
     logits = h @ w2 + b2
 
-    return logits
+    if not inspect_pre_activation_and_h:
+        return (logits,)
+    return (logits, h_pre_activation, h)
