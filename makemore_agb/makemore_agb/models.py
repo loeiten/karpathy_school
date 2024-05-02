@@ -12,6 +12,7 @@ def get_model(
     embedding_size: int = 2,
     hidden_layer_neurons: int = 100,
     seed: int = 2147483647,
+    good_initialization: bool = True,
 ) -> Tuple[torch.Tensor, ...]:
     """Return the model.
 
@@ -22,6 +23,8 @@ def get_model(
         embedding_size (int): The size of the embedding
         hidden_layer_neurons (int): The seed for the random number generator
         seed (int): The seed for the random number generator
+        good_initialization (bool): Whether or not to use an initialization
+            which has a good distribution of the initial weights
 
     Returns:
         Tuple[torch.Tensor, ...]: A tuple containing the parameters of the
@@ -42,6 +45,27 @@ def get_model(
         (hidden_layer_neurons, VOCAB_SIZE), generator=g, requires_grad=True
     )
     b2 = torch.randn(VOCAB_SIZE, generator=g, requires_grad=True)
+
+    if good_initialization:
+        # Initially the model is confidently wrong, that is: The probability
+        # distribution of the output is not uniform
+        # Recall that the logits are given as h @ w2 + b2
+        # Taking the softmax of the logits gives the probability
+        # The negative of the logarithm of the softmax gives the loss
+        # If the model has a high value for the logit of the correct character
+        # compared to all the others this will give a low loss
+        # If on the other hand it assigns a high probability to the wrong
+        # character, this will result in a high loss
+        # If we have initialized with uniform probability, the probability of
+        # drawing a specific character would be 1/VOCAB_SIZE
+        # If vocab size is 27, this means that -log(1/27)=3.2958 is the log that
+        # we would expect.
+        # However, we usually observe a much higher loss initially as the
+        # initialization by chance are favouring some characters
+        # Initially we would like the logits to be close to zero due to
+        # numerical stability
+        b2 *= 0
+
     parameters = (c, w1, b1, w2, b2)
 
     # Make it possible to train
