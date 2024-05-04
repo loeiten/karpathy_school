@@ -3,14 +3,17 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
+import torch
 from makemore_agb.data_classes import TrainStatistics
+from matplotlib.axes import Axes
 
 # Use nice theme when plotting
 sns.set_theme()
 
 
 def plot_training(train_statistics: TrainStatistics):
-    """Plot training data.
+    """
+    Plot training data.
 
     Args:
         train_statistics (TrainStatistics): The statistics of the train job
@@ -36,3 +39,14 @@ def plot_training(train_statistics: TrainStatistics):
     ax.legend(loc="best", fancybox=True)
     ax.set_title("Training loss")
     plt.show()
+
+
+def plot_histogram(tensor: torch.Tensor, ax: Axes) -> None:
+    """
+    Plot a histogram of the values of the tensor.
+
+    Args:
+        tensor (torch.Tensor): The tensor to plot
+        ax (Axes): The axes to plot on
+    """
+    ax.hist(tensor.view(-1).tolist(), bins=50)
