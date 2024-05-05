@@ -41,12 +41,16 @@ def plot_training(train_statistics: TrainStatistics):
     plt.show()
 
 
-def plot_histogram(tensor: torch.Tensor, ax: Axes) -> None:
+def plot_histogram(tensor: torch.Tensor, tensor_name: str, ax: Axes) -> None:
     """
     Plot a histogram of the values of the tensor.
 
     Args:
         tensor (torch.Tensor): The tensor to plot
+        tensor_name (str): Name of the tensor
         ax (Axes): The axes to plot on
     """
     ax.hist(tensor.view(-1).tolist(), bins=50)
+    ax.set_ylabel("Frequency")
+    ax.set_xlabel("Value")
+    ax.set_title(f"Histogram of {tensor_name}")
