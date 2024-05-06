@@ -54,3 +54,23 @@ def plot_histogram(tensor: torch.Tensor, tensor_name: str, ax: Axes) -> None:
     ax.set_ylabel("Frequency")
     ax.set_xlabel("Value")
     ax.set_title(f"Histogram of {tensor_name}")
+
+
+def plot_dead_neuron(
+    tensor: torch.Tensor, tensor_name: str, ax: Axes, threshold: float = 0.99
+) -> None:
+    """
+    Plot dead neurons for a given batch of examples.
+
+    White denotes dead neurons in the plot
+
+    Args:
+        tensor (torch.Tensor): The tensor to plot
+        tensor_name (str): Name of the tensor
+        ax (Axes): The axes to plot on
+        threshold (float): The threshold of which we will call a neuron dead
+    """
+    ax.imshow(tensor.abs() > threshold, cmap="gray", interpolation="nearest")
+    ax.set_ylabel("Example number")
+    ax.set_xlabel("Neuron number")
+    ax.set_title(f"Dead neurons of {tensor_name}")
