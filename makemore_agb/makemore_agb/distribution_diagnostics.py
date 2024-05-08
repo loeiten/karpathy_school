@@ -1,5 +1,6 @@
 """Module to diagnose distribution."""
 
+import matplotlib.pyplot as plt
 import torch
 from makemore_agb.models import get_model
 from makemore_agb.predict import predict_neural_network
@@ -43,9 +44,19 @@ def plot_initial_distributions(
     # We're checking for the length above, so we can safely ignore the pylint
     _, h_pre_activation, h = output  # pylint: disable=unbalanced-tuple-unpacking
 
-    import pdb
+    # Create the figures
+    _, axes = plt.subplot_mosaic(
+        [["h_pre_activation", "h"], ["dead_neurons", "dead_neurons"]],
+        layout="constrained",
+    )
 
-    pdb.set_trace()
+    plot_histogram(
+        tensor=h_pre_activation,
+        tensor_name="h pre-activation",
+        ax=axes["h_pre_activation"],
+    )
+    plot_histogram(tensor=h, tensor_name="h", ax=axes["h"])
+    plot_dead_neuron(tensor=h, tensor_name="h", ax=axes["dead_neurons"], threshold=0.99)
 
 
 if __name__ == "__main__":
