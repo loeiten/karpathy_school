@@ -58,6 +58,8 @@ def plot_initial_distributions(
     plot_histogram(tensor=h, tensor_name="h", ax=axes["h"])
     plot_dead_neuron(tensor=h, tensor_name="h", ax=axes["dead_neurons"], threshold=0.99)
 
+    plt.show()
+
 
 if __name__ == "__main__":
     GOOD_INITIALIZATION = False

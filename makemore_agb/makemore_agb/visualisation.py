@@ -73,4 +73,5 @@ def plot_dead_neuron(
     ax.imshow(tensor.abs() > threshold, cmap="gray", interpolation="nearest")
     ax.set_ylabel("Example number")
     ax.set_xlabel("Neuron number")
+    ax.grid(False)
     ax.set_title(f"Dead neurons of {tensor_name}")
