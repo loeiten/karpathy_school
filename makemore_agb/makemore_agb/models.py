@@ -64,7 +64,7 @@ def get_model(
         # initialization by chance are favouring some characters
         # Initially we would like the logits to be close to zero due to
         # numerical stability
-        b2 *= 0
+        b2.data *= 0
         # As we want the logits to be small, we could have set the initial
         # weights to 0
         # However, we want to break the symmetry for better training, so it's
@@ -72,9 +72,9 @@ def get_model(
         # Since we want the weights to be well behaved in both the forward and
         # the backward propagation, we set the initialization to the Kaiming
         # initialization
-        w2 *= (5 / 3) / (hidden_layer_neurons**0.5)
+        w2.data *= (5 / 3) / (hidden_layer_neurons**0.5)
         # We could have some small entropy in the weights as well
-        b1 *= 0.01
+        b1.data *= 0.01
         # In the pre-activation we are multiplying the embedding with some
         # random weights w1
         # This causes the product to broaden the distribution
@@ -92,7 +92,7 @@ def get_model(
         # Kaiming initialization scales the distribution so that the standard
         # deviation are well behaved both in the forward and the backward
         # propagation
-        w1 *= (5 / 3) / ((block_size * embedding_size) ** 0.5)
+        w1.data *= (5 / 3) / ((block_size * embedding_size) ** 0.5)
 
     parameters = (c, w1, b1, w2, b2)
 
