@@ -1,5 +1,9 @@
 """Module to diagnose distribution."""
 
+import argparse
+import sys
+from typing import List
+
 import matplotlib.pyplot as plt
 import torch
 from makemore_agb.models import get_model
@@ -18,7 +22,8 @@ def plot_initial_distributions(
             length
 
     Args:
-        good_initialization (bool, optional): _description_. Defaults to False.
+        good_initialization (bool): Whether or not to use an initialization
+            which has a good distribution of the initial weights
         seed (int): The seed for the random number generator
     """
     block_size = 3
@@ -61,6 +66,44 @@ def plot_initial_distributions(
     plt.show()
 
 
+def parse_args(sys_args: List[str]) -> argparse.Namespace:
+    """Parse the arguments.
+
+    Args:
+        sys_args (List[str]): The system arguments
+
+    Returns:
+        argparse.Namespace: The parsed arguments
+    """
+    parser = argparse.ArgumentParser(
+        description="Plot the initial distribution diagnostics.",
+    )
+
+    parser.add_argument(
+        "-g",
+        "--good-initialization",
+        type=bool,
+        required=False,
+        default=False,
+        help=(
+            "Whether or not to use an initialization which has a good "
+            "distribution of the initial weights"
+        ),
+    )
+
+    args = parser.parse_args(sys_args)
+    return args
+
+
+def main(sys_args: List[str]):
+    """Parse the arguments and run plot_initial_distributions.
+
+    Args:
+        sys_args (List[str]): The system arguments
+    """
+    args = parse_args(sys_args)
+    plot_initial_distributions(good_initialization=args.good_initialization)
+
+
 if __name__ == "__main__":
-    GOOD_INITIALIZATION = False
-    plot_initial_distributions(good_initialization=GOOD_INITIALIZATION)
+    main(sys.argv[1:])
