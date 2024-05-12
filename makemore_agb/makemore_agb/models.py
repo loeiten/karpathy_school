@@ -94,7 +94,15 @@ def get_model(
         # propagation
         w1.data *= (5 / 3) / ((block_size * embedding_size) ** 0.5)
 
-    parameters = (c, w1, b1, w2, b2)
+    # We would like to normalize each batch after each layer so that it's
+    # roughly normal
+    # However, only having normal distribution would yield poor results
+    # Hence we let the gain and bias be trainable parameters the network can use
+    # in order to move the distribution around
+    batch_normalization_gain = torch.ones((1, hidden_layer_neurons))
+    batch_normalization_bias = torch.zeros((1, hidden_layer_neurons))
+
+    parameters = (c, w1, b1, w2, b2, batch_normalization_gain, batch_normalization_bias)
 
     # Make it possible to train
     for p in parameters:

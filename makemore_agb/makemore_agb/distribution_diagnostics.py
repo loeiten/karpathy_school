@@ -13,7 +13,10 @@ from makemore_agb.visualisation import plot_dead_neuron, plot_histogram
 
 
 def plot_initial_distributions(
-    good_initialization: bool = False, seed: int = 2147483647
+    good_initialization: bool = False,
+    batch_normalize: bool = False,
+    seed: int = 2147483647,
+    show=True,
 ) -> None:
     """Plot the initial distribution.
 
@@ -24,7 +27,9 @@ def plot_initial_distributions(
     Args:
         good_initialization (bool): Whether or not to use an initialization
             which has a good distribution of the initial weights
+        batch_normalize (bool): Whether or not to use batch normalization
         seed (int): The seed for the random number generator
+        show (bool): Whether or not to show the plot
     """
     block_size = 3
     batch_size = 32
@@ -39,9 +44,11 @@ def plot_initial_distributions(
     training_data = dataset["training_input_data"]
     n_samples = training_data.shape[0]
     idxs = torch.randint(low=0, high=n_samples, size=(batch_size,), generator=g)
-    input_data = training_data[idxs]
     output = predict_neural_network(
-        model=model, input_data=input_data, inspect_pre_activation_and_h=True
+        model=model,
+        input_data=training_data[idxs],
+        batch_normalize=batch_normalize,
+        inspect_pre_activation_and_h=True,
     )
     if len(output) != 3:
         raise RuntimeError("Got unexpected output from the predictor")
@@ -63,7 +70,8 @@ def plot_initial_distributions(
     plot_histogram(tensor=h, tensor_name="h", ax=axes["h"])
     plot_dead_neuron(tensor=h, tensor_name="h", ax=axes["dead_neurons"], threshold=0.99)
 
-    plt.show()
+    if show:
+        plt.show()
 
 
 def parse_args(sys_args: List[str]) -> argparse.Namespace:
@@ -91,6 +99,15 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
         ),
     )
 
+    parser.add_argument(
+        "-m",
+        "--batch-normalize",
+        type=bool,
+        required=False,
+        default=False,
+        help=("Whether or not to batch normalization"),
+    )
+
     args = parser.parse_args(sys_args)
     return args
 
@@ -102,7 +119,10 @@ def main(sys_args: List[str]):
         sys_args (List[str]): The system arguments
     """
     args = parse_args(sys_args)
-    plot_initial_distributions(good_initialization=args.good_initialization)
+    plot_initial_distributions(
+        good_initialization=args.good_initialization,
+        batch_normalize=args.batch_normalize,
+    )
 
 
 if __name__ == "__main__":
