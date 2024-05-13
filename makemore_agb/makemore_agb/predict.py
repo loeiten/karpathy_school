@@ -5,6 +5,8 @@ from typing import Tuple
 import torch
 
 
+# Reducing the number of locals here will penalize the didactical purpose
+# pylint: disable=too-many-locals
 def predict_neural_network(
     model: Tuple[torch.Tensor, ...],
     input_data: torch.Tensor,
