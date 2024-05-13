@@ -23,6 +23,7 @@ def train_neural_net_model(
     optimization_params: Optional[OptimizationParams],
     seed: int = 2147483647,
     train_statistics: Optional[TrainStatistics] = None,
+    batch_normalize: bool = False,
 ) -> Tuple[torch.Tensor, ...]:
     """Train the neural net model.
 
@@ -35,6 +36,7 @@ def train_neural_net_model(
         seed (int): The seed for the random number generator
         train_statistics (Optional[TrainStatistics]): Class to capture the
             statistics of the training job
+        batch_normalize (bool): Whether or not to use batch normalization
 
     Returns:
         Tuple[torch.Tensor, ...]: The trained model
@@ -70,7 +72,9 @@ def train_neural_net_model(
         #       (batch_size, block_size)
         # Note the [0] as predict always returns a tuple
         logits = predict_neural_network(
-            model=model, input_data=dataset["training_input_data"][idxs]
+            model=model,
+            input_data=dataset["training_input_data"][idxs],
+            batch_normalize=batch_normalize,
         )[0]
         loss = F.cross_entropy(logits, dataset["training_ground_truth"][idxs])
 
@@ -99,6 +103,7 @@ def train_neural_net_model(
                     model=model,
                     input_data=dataset["training_input_data"],
                     ground_truth=dataset["training_ground_truth"],
+                    batch_normalize=batch_normalize,
                 )
                 train_statistics.eval_training_loss.append(cur_training_loss)
                 train_statistics.eval_training_step.append(optimization_params.cur_step)
@@ -107,6 +112,7 @@ def train_neural_net_model(
                     model=model,
                     input_data=dataset["validation_input_data"],
                     ground_truth=dataset["validation_ground_truth"],
+                    batch_normalize=batch_normalize,
                 )
                 train_statistics.eval_validation_loss.append(cur_validation_loss)
                 train_statistics.eval_validation_step.append(
@@ -126,6 +132,7 @@ def train(
     model_params: ModelParams,
     optimization_params: OptimizationParams,
     seed: int = 2147483647,
+    batch_normalize: bool = False,
 ) -> Tuple[Tuple[torch.Tensor, ...], TrainStatistics]:
     """Train the model.
 
@@ -133,6 +140,7 @@ def train(
         model_params (ModelParams): The model parameters
         optimization_params (OptimizationParams): The optimization parameters
         seed (int): The seed for the random number generator
+        batch_normalize (bool): Whether or not to use batch normalization
 
     Returns:
         Tuple[torch.Tensor, ...]: The model
@@ -157,6 +165,7 @@ def train(
         optimization_params=optimization_params,
         seed=seed,
         train_statistics=train_statistics,
+        batch_normalize=batch_normalize,
     )
 
     print(f"Final train loss: {train_statistics.eval_training_loss[-1]:.3f}")
@@ -166,16 +175,21 @@ def train(
 
 
 def train_and_plot(
-    model_params: ModelParams, optimization_params: OptimizationParams
+    model_params: ModelParams,
+    optimization_params: OptimizationParams,
+    batch_normalize=False,
 ) -> None:
     """Train the model and plot the statistics.
 
     Args:
         model_params (ModelParams): The model parameters
         optimization_params (OptimizationParams): The optimization parameters
+        batch_normalize (bool): Whether or not to use batch normalization
     """
     _, train_statistics = train(
-        model_params=model_params, optimization_params=optimization_params
+        model_params=model_params,
+        optimization_params=optimization_params,
+        batch_normalize=batch_normalize,
     )
 
     plot_training(train_statistics=train_statistics)
@@ -258,6 +272,14 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
         default=default_optimization_params.batch_size,
         help="Number of examples per batch",
     )
+    parser.add_argument(
+        "-m",
+        "--batch-normalization",
+        type=bool,
+        required=False,
+        default=True,
+        help="Whether or not to use batch normalization",
+    )
 
     args = parser.parse_args(sys_args)
     return args
@@ -280,7 +302,11 @@ def main(sys_args: List[str]):
         mini_batches_per_data_capture=args.mini_batches_per_data_capture,
         batch_size=args.batch_size,
     )
-    train_and_plot(model_params=model_params, optimization_params=optimization_params)
+    train_and_plot(
+        model_params=model_params,
+        optimization_params=optimization_params,
+        batch_normalize=args.batch_normalize,
+    )
 
 
 if __name__ == "__main__":

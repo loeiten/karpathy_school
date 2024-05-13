@@ -9,6 +9,7 @@ def predict_neural_network(
     model: Tuple[torch.Tensor, ...],
     input_data: torch.Tensor,
     inspect_pre_activation_and_h: bool = False,
+    batch_normalize: bool = False,
 ) -> Tuple[torch.Tensor, ...]:
     """Predict the neural net model.
 
@@ -18,12 +19,13 @@ def predict_neural_network(
             This data has the shape (batch_size, block_size)
         inspect_pre_activation_and_h (bool): Whether or not to output the
             pre-activation and activation
+        batch_normalize (bool): Whether or not to batch normalize
 
     Returns:
         torch.Tensor: The achieved logits with shape (batch_size)
     """
     # Alias
-    c, w1, b1, w2, b2 = model
+    c, w1, b1, w2, b2, batch_normalization_gain, batch_normalization_bias = model
     # NOTE: c has dimension (VOCAB_SIZE, embedding_size)
     #       input_data has the dimension (batch_size, block_size)
     #       c[input_data] will grab embedding_size vectors for each of the
@@ -40,6 +42,13 @@ def predict_neural_network(
     concatenated_embedding = embedding.view(embedding.shape[0], -1)
     # NOTE: + b1 is broadcasting on the correct dimension
     h_pre_activation = (concatenated_embedding @ w1) + b1
+    if batch_normalize:
+        h_pre_activation = (
+            batch_normalization_gain
+            * (h_pre_activation - h_pre_activation.mean(0, keepdim=True))
+            / h_pre_activation.std(0, keepdim=True)
+        ) + batch_normalization_bias
+
     h = torch.tanh(h_pre_activation)
     # The logits will have dimension (batch_size, VOCAB_SIZE)
     logits = h @ w2 + b2

@@ -1,15 +1,24 @@
 """Contains tests for the inference module."""
 
+import pytest
 from makemore_agb.inference import parse_args, run_inference
 from makemore_agb.models import get_model
 
 
-def test_run_inference() -> None:
-    """Test the run_inference function."""
+@pytest.mark.parametrize("batch_normalize", [True, False])
+def test_run_inference(batch_normalize: bool) -> None:
+    """
+    Test the run_inference function.
+
+    Args:
+        batch_normalize (bool): Whether or not to use batch normalization
+    """
     # Obtain the model with default parameters
     model = get_model(block_size=3)
     # Run inference on the untrained model
-    predictions = run_inference(model=model, n_samples=2)
+    predictions = run_inference(
+        model=model, n_samples=2, batch_normalize=batch_normalize
+    )
     assert len(predictions) == 2
 
 

@@ -15,6 +15,7 @@ from makemore_agb import INDEX_TO_TOKEN, TOKEN_TO_INDEX
 def run_inference(
     model: Tuple[torch.Tensor, ...],
     n_samples: int = 20,
+    batch_normalize: bool = True,
     seed: int = 2147483647,
 ) -> Tuple[str, ...]:
     """Run inference on the model.
@@ -23,6 +24,7 @@ def run_inference(
         model (Tuple[torch.Tensor, ...]): The model to run inference on.
         n_samples (int, optional): The number of inferences to run.
             Defaults to 20.
+        batch_normalize (bool): Whether or not to use batch normalization
         seed (int, optional): The seed to use. Defaults to 2147483647.
 
     Returns:
@@ -44,7 +46,9 @@ def run_inference(
             # Note the [] to get the batch shape correct
             # Note the [0] as predict always returns a tuple
             logits = predict_neural_network(
-                model=model, input_data=torch.tensor([context])
+                model=model,
+                input_data=torch.tensor([context]),
+                batch_normalize=batch_normalize,
             )[0]
             probs = torch.softmax(logits, dim=1)
             index = torch.multinomial(probs, num_samples=1, generator=g)
@@ -82,6 +86,15 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
         help=("Number of names to predict"),
     )
 
+    parser.add_argument(
+        "-m",
+        "--batch-normalize",
+        type=bool,
+        required=False,
+        default=True,
+        help=("Whether or not to use batch normalization"),
+    )
+
     args = parser.parse_args(sys_args)
     return args
 
@@ -101,8 +114,14 @@ def main(sys_args: List[str]):
         n_mini_batches=200_000,
         mini_batches_per_data_capture=1_000,
     )
-    model, _ = train(model_params=model_params, optimization_params=optimization_params)
-    predictions = run_inference(model=model, n_samples=args.n_predictions)
+    model, _ = train(
+        model_params=model_params,
+        optimization_params=optimization_params,
+        batch_normalize=args.batch_normalize,
+    )
+    predictions = run_inference(
+        model=model, n_samples=args.n_predictions, batch_normalize=args.batch_normalize
+    )
     for prediction in predictions:
         print(f"{prediction}")
 
