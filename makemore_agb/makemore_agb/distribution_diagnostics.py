@@ -42,8 +42,9 @@ def plot_initial_distributions(
     )
     dataset = get_dataset(block_size=block_size)
     training_data = dataset["training_input_data"]
-    n_samples = training_data.shape[0]
-    idxs = torch.randint(low=0, high=n_samples, size=(batch_size,), generator=g)
+    idxs = torch.randint(
+        low=0, high=training_data.shape[0], size=(batch_size,), generator=g
+    )
     output = predict_neural_network(
         model=model,
         input_data=training_data[idxs],
