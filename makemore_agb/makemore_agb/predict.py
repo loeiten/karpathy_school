@@ -45,6 +45,11 @@ def predict_neural_network(
     # NOTE: + b1 is broadcasting on the correct dimension
     h_pre_activation = (concatenated_embedding @ w1) + b1
     if batch_normalize:
+        # Note that batch normalization couples the batch together
+        # That is: The activation is no longer a function of the example itself,
+        # but also what batch it arrived with
+        # It turns out that this adds some entropy to the system which works as
+        # a regularizer, and makes it harder for the model to overfit
         h_pre_activation = (
             batch_normalization_gain
             * (h_pre_activation - h_pre_activation.mean(0, keepdim=True))
