@@ -26,7 +26,10 @@ def evaluate(
     """
     # Note the [0] as predict always returns a tuple
     logits = predict_neural_network(
-        model=model, input_data=input_data, batch_normalize=batch_normalize
+        model=model,
+        input_data=input_data,
+        batch_normalize=batch_normalize,
+        training=False,
     )[0]
     loss = F.cross_entropy(logits, ground_truth)
     return loss.item()

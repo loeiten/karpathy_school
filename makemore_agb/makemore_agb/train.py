@@ -75,6 +75,7 @@ def train_neural_net_model(
             model=model,
             input_data=dataset["training_input_data"][idxs],
             batch_normalize=batch_normalize,
+            training=True,
         )[0]
         loss = F.cross_entropy(logits, dataset["training_ground_truth"][idxs])
 

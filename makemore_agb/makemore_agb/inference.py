@@ -49,6 +49,7 @@ def run_inference(
                 model=model,
                 input_data=torch.tensor([context]),
                 batch_normalize=batch_normalize,
+                training=False,
             )[0]
             probs = torch.softmax(logits, dim=1)
             index = torch.multinomial(probs, num_samples=1, generator=g)

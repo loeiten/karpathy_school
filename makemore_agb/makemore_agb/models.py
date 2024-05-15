@@ -102,7 +102,7 @@ def get_model(
     batch_normalization_gain = torch.ones((1, hidden_layer_neurons))
     batch_normalization_bias = torch.zeros((1, hidden_layer_neurons))
 
-    parameters = (c, w1, b1, w2, b2, batch_normalization_gain, batch_normalization_bias)
+    parameters = [c, w1, b1, w2, b2, batch_normalization_gain, batch_normalization_bias]
 
     # Make it possible to train
     for p in parameters:
@@ -112,4 +112,13 @@ def get_model(
         f"Number of elements in model: {sum(layer.nelement() for layer in parameters)}"
     )
 
-    return parameters
+    # These parameters will be used as batch norm parameters during inference
+    # Initialized to zero as the mean and one as std as the initialization of w1
+    # and b1 is so that h_pre_activation is roughly gaussian
+    batch_normalization_mean_running = torch.zeros((1, hidden_layer_neurons))
+    batch_normalization_std_running = torch.ones((1, hidden_layer_neurons))
+
+    parameters.append(batch_normalization_mean_running)
+    parameters.append(batch_normalization_std_running)
+
+    return tuple(parameters)
