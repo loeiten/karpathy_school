@@ -7,6 +7,8 @@ import torch
 from makemore_agb import VOCAB_SIZE
 
 
+# Reducing the number of locals here will penalize the didactical purpose
+# pylint: disable=too-many-locals
 def get_model(
     block_size: int,
     embedding_size: int = 2,

@@ -17,6 +17,8 @@ from tqdm import tqdm
 from makemore_agb import DATASET
 
 
+# Reducing the number of locals here will penalize the didactical purpose
+# pylint: disable=too-many-arguments
 def train_neural_net_model(
     model: Tuple[torch.Tensor, ...],
     dataset: DATASET,
