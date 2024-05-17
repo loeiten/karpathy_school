@@ -91,22 +91,20 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
     parser.add_argument(
         "-g",
         "--good-initialization",
-        type=bool,
-        required=False,
         default=False,
         help=(
             "Whether or not to use an initialization which has a good "
             "distribution of the initial weights"
         ),
+        action="store_true",
     )
 
     parser.add_argument(
         "-m",
         "--batch-normalize",
-        type=bool,
         required=False,
-        default=False,
         help=("Whether or not to batch normalization"),
+        action="store_true",
     )
 
     args = parser.parse_args(sys_args)
