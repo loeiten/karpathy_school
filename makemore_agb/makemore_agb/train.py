@@ -278,9 +278,7 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
     parser.add_argument(
         "-m",
         "--batch-normalization",
-        type=bool,
-        required=False,
-        default=True,
+        action="store_true",
         help="Whether or not to use batch normalization",
     )
 
