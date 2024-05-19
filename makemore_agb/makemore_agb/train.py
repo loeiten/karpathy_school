@@ -46,10 +46,6 @@ def train_neural_net_model(
     if optimization_params is None:
         optimization_params = OptimizationParams()
 
-    # Make it possible to train
-    for parameters in model:
-        parameters.requires_grad = True
-
     g = torch.Generator().manual_seed(seed)
 
     # NOTE: It's better to take a lot of steps in the approximate direction of
@@ -89,15 +85,17 @@ def train_neural_net_model(
         # Backward pass
         # Reset the gradients
         for parameters in model:
-            parameters.grad = None
+            if parameters.requires_grad:
+                parameters.grad = None
         loss.backward()
 
         # Update the weights
         for parameters in model:
-            parameters.data += (
-                -optimization_params.learning_rate(optimization_params.cur_step)
-                * parameters.grad
-            )
+            if parameters.requires_grad:
+                parameters.data += (
+                    -optimization_params.learning_rate(optimization_params.cur_step)
+                    * parameters.grad
+                )
 
         if i % optimization_params.mini_batches_per_data_capture == 0:
             if train_statistics is not None:
@@ -277,7 +275,7 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
     )
     parser.add_argument(
         "-m",
-        "--batch-normalization",
+        "--batch-normalize",
         action="store_true",
         help="Whether or not to use batch normalization",
     )

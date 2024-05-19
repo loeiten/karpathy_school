@@ -117,8 +117,12 @@ def get_model(
     # These parameters will be used as batch norm parameters during inference
     # Initialized to zero as the mean and one as std as the initialization of w1
     # and b1 is so that h_pre_activation is roughly gaussian
-    batch_normalization_mean_running = torch.zeros((1, hidden_layer_neurons))
-    batch_normalization_std_running = torch.ones((1, hidden_layer_neurons))
+    batch_normalization_mean_running = torch.zeros(
+        (1, hidden_layer_neurons), requires_grad=False
+    )
+    batch_normalization_std_running = torch.ones(
+        (1, hidden_layer_neurons), requires_grad=False
+    )
 
     parameters.append(batch_normalization_mean_running)
     parameters.append(batch_normalization_std_running)
