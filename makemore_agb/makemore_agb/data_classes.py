@@ -3,6 +3,8 @@
 from dataclasses import dataclass, field
 from typing import Callable, List
 
+import torch
+
 
 @dataclass
 class TrainStatistics:
@@ -44,3 +46,11 @@ class ModelParams:
     block_size: int = 3
     embedding_size: int = 2
     hidden_layer_neurons: int = 100
+
+
+@dataclass
+class BatchNormalizationParameters:
+    """Class that holds the batch normalization parameters."""
+
+    running_mean: torch.Tensor
+    running_std: torch.Tensor

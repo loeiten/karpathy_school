@@ -6,7 +6,12 @@ from typing import List, Optional, Tuple
 
 import torch
 import torch.nn.functional as F
-from makemore_agb.data_classes import ModelParams, OptimizationParams, TrainStatistics
+from makemore_agb.data_classes import (
+    BatchNormalizationParameters,
+    ModelParams,
+    OptimizationParams,
+    TrainStatistics,
+)
 from makemore_agb.evaluation import evaluate
 from makemore_agb.models import get_model
 from makemore_agb.predict import predict_neural_network
@@ -25,7 +30,7 @@ def train_neural_net_model(
     optimization_params: Optional[OptimizationParams],
     seed: int = 2147483647,
     train_statistics: Optional[TrainStatistics] = None,
-    batch_normalize: bool = False,
+    batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
 ) -> Tuple[torch.Tensor, ...]:
     """Train the neural net model.
 
@@ -38,7 +43,8 @@ def train_neural_net_model(
         seed (int): The seed for the random number generator
         train_statistics (Optional[TrainStatistics]): Class to capture the
             statistics of the training job
-        batch_normalize (bool): Whether or not to use batch normalization
+        batch_normalization_parameters (Optional[BatchNormalizationParameters]):
+            If set: Contains the running mean and the running standard deviation
 
     Returns:
         Tuple[torch.Tensor, ...]: The trained model
@@ -72,7 +78,7 @@ def train_neural_net_model(
         logits = predict_neural_network(
             model=model,
             input_data=dataset["training_input_data"][idxs],
-            batch_normalize=batch_normalize,
+            batch_normalization_parameters=batch_normalization_parameters,
             training=True,
         )[0]
         loss = F.cross_entropy(logits, dataset["training_ground_truth"][idxs])
@@ -104,7 +110,7 @@ def train_neural_net_model(
                     model=model,
                     input_data=dataset["training_input_data"],
                     ground_truth=dataset["training_ground_truth"],
-                    batch_normalize=batch_normalize,
+                    batch_normalization_parameters=batch_normalization_parameters,
                 )
                 train_statistics.eval_training_loss.append(cur_training_loss)
                 train_statistics.eval_training_step.append(optimization_params.cur_step)
@@ -113,7 +119,7 @@ def train_neural_net_model(
                     model=model,
                     input_data=dataset["validation_input_data"],
                     ground_truth=dataset["validation_ground_truth"],
-                    batch_normalize=batch_normalize,
+                    batch_normalization_parameters=batch_normalization_parameters,
                 )
                 train_statistics.eval_validation_loss.append(cur_validation_loss)
                 train_statistics.eval_validation_step.append(
@@ -159,6 +165,22 @@ def train(
 
     train_statistics = TrainStatistics()
 
+    if batch_normalize:
+        # These parameters will be used as batch norm parameters during inference
+        # Initialized to zero as the mean and one as std as the initialization of w1
+        # and b1 is so that h_pre_activation is roughly gaussian
+        batch_normalization_parameters = BatchNormalizationParameters(
+            running_mean=torch.zeros(
+                (1, model_params.hidden_layer_neurons), requires_grad=False
+            ),
+            running_std=torch.ones(
+                (1, model_params.hidden_layer_neurons), requires_grad=False
+            ),
+        )
+
+    else:
+        batch_normalization_parameters = None
+
     # Train for one step
     model = train_neural_net_model(
         model=model,
@@ -166,7 +188,7 @@ def train(
         optimization_params=optimization_params,
         seed=seed,
         train_statistics=train_statistics,
-        batch_normalize=batch_normalize,
+        batch_normalization_parameters=batch_normalization_parameters,
     )
 
     print(f"Final train loss: {train_statistics.eval_training_loss[-1]:.3f}")
@@ -207,6 +229,7 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
     """
     parser = argparse.ArgumentParser(
         description="Train a model and plot its contents.",
+        # FIXME: Update this
         epilog=(
             "Increase the size of the hidden layer and train for longer\n"
             "python3 -m makemore_agb.train -l 300 -t 120000 -m 1000\n\n"

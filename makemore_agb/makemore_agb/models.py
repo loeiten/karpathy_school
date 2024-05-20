@@ -7,8 +7,6 @@ import torch
 from makemore_agb import VOCAB_SIZE
 
 
-# Reducing the number of locals here will penalize the didactical purpose
-# pylint: disable=too-many-locals
 def get_model(
     block_size: int,
     embedding_size: int = 2,
@@ -113,18 +111,5 @@ def get_model(
     print(
         f"Number of elements in model: {sum(layer.nelement() for layer in parameters)}"
     )
-
-    # These parameters will be used as batch norm parameters during inference
-    # Initialized to zero as the mean and one as std as the initialization of w1
-    # and b1 is so that h_pre_activation is roughly gaussian
-    batch_normalization_mean_running = torch.zeros(
-        (1, hidden_layer_neurons), requires_grad=False
-    )
-    batch_normalization_std_running = torch.ones(
-        (1, hidden_layer_neurons), requires_grad=False
-    )
-
-    parameters.append(batch_normalization_mean_running)
-    parameters.append(batch_normalization_std_running)
 
     return tuple(parameters)

@@ -1,8 +1,9 @@
 """Module to run inference on the model."""
 
-from typing import Tuple
+from typing import Optional, Tuple
 
 import torch
+from makemore_agb.data_classes import BatchNormalizationParameters
 
 
 # Reducing the number of locals here will penalize the didactical purpose
@@ -11,7 +12,7 @@ def predict_neural_network(
     model: Tuple[torch.Tensor, ...],
     input_data: torch.Tensor,
     inspect_pre_activation_and_h: bool = False,
-    batch_normalize: bool = False,
+    batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
     training: bool = False,
 ) -> Tuple[torch.Tensor, ...]:
     """Predict the neural net model.
@@ -22,7 +23,8 @@ def predict_neural_network(
             This data has the shape (batch_size, block_size)
         inspect_pre_activation_and_h (bool): Whether or not to output the
             pre-activation and activation
-        batch_normalize (bool): Whether or not to batch normalize
+        batch_normalization_parameters (Optional[BatchNormalizationParameters]):
+            If set: Contains the running mean and the running standard deviation
         training (bool): Flag to keep track of whether we're training or not
 
     Returns:
@@ -37,8 +39,6 @@ def predict_neural_network(
         b2,
         batch_normalization_gain,
         batch_normalization_bias,
-        batch_normalization_mean_running,
-        batch_normalization_std_running,
     ) = model
     # NOTE: c has dimension (VOCAB_SIZE, embedding_size)
     #       input_data has the dimension (batch_size, block_size)
@@ -57,49 +57,39 @@ def predict_neural_network(
     # NOTE: + b1 is broadcasting on the correct dimension
     h_pre_activation = (concatenated_embedding @ w1) + b1
 
-    # FIXME:
-    batch_normalization_mean = h_pre_activation.mean(0, keepdim=True)
-    batch_normalization_std = h_pre_activation.std(0, keepdim=True)
-    h_pre_activation = (
-        batch_normalization_gain
-        * (h_pre_activation - batch_normalization_mean)
-        / batch_normalization_std
-    ) + batch_normalization_bias
-    # FIXME: End
+    if batch_normalization_parameters is not None:
+        if training:
+            # Note that batch normalization couples the batch together
+            # That is: The activation is no longer a function of the example itself,
+            # but also what batch it arrived with
+            # It turns out that this adds some entropy to the system which works as
+            # a regularizer, and makes it harder for the model to overfit
+            # However, when we are doing inference, what mean and std should we use?
+            # One could take the mean and std over the whole data set as a final
+            # step during the training, but having a running updates in the
+            # direction of the current mean and stddev
+            batch_normalization_mean = h_pre_activation.mean(0, keepdim=True)
+            batch_normalization_std = h_pre_activation.std(0, keepdim=True)
 
-    # if batch_normalize:
-    #    if training:
-    #        # Note that batch normalization couples the batch together
-    #        # That is: The activation is no longer a function of the example itself,
-    #        # but also what batch it arrived with
-    #        # It turns out that this adds some entropy to the system which works as
-    #        # a regularizer, and makes it harder for the model to overfit
-    #        # However, when we are doing inference, what mean and std should we use?
-    #        # One could take the mean and std over the whole data set as a final
-    #        # step during the training, but having a running updates in the
-    #        # direction of the current mean and stddev
-    #        batch_normalization_mean = h_pre_activation.mean(0, keepdim=True)
-    #        batch_normalization_std = h_pre_activation.std(0, keepdim=True)
+            with torch.no_grad():
+                # Add small updates
+                batch_normalization_parameters.running_mean = (
+                    0.999 * batch_normalization_parameters.running_mean
+                    + 0.001 * batch_normalization_mean
+                )
+                batch_normalization_parameters.running_std = (
+                    0.999 * batch_normalization_parameters.running_std
+                    + 0.001 * batch_normalization_std
+                )
+        else:
+            batch_normalization_mean = batch_normalization_parameters.running_mean
+            batch_normalization_std = batch_normalization_parameters.running_std
 
-    #        with torch.no_grad():
-    #            # Add small updates
-    #            batch_normalization_mean_running = (
-    #                0.999 * batch_normalization_mean_running
-    #                + 0.001 * batch_normalization_mean
-    #            )
-    #            batch_normalization_std_running = (
-    #                0.999 * batch_normalization_std_running
-    #                + 0.001 * batch_normalization_std
-    #            )
-    #    else:
-    #        batch_normalization_mean = batch_normalization_mean_running
-    #        batch_normalization_std = batch_normalization_std_running
-
-    #    h_pre_activation = (
-    #        batch_normalization_gain
-    #        * (h_pre_activation - batch_normalization_mean)
-    #        / batch_normalization_std
-    #    ) + batch_normalization_bias
+        h_pre_activation = (
+            batch_normalization_gain
+            * (h_pre_activation - batch_normalization_mean)
+            / batch_normalization_std
+        ) + batch_normalization_bias
 
     h = torch.tanh(h_pre_activation)
     # The logits will have dimension (batch_size, VOCAB_SIZE)
