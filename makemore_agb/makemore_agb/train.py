@@ -229,15 +229,7 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
     """
     parser = argparse.ArgumentParser(
         description="Train a model and plot its contents.",
-        # FIXME: Update this
-        epilog=(
-            "Increase the size of the hidden layer and train for longer\n"
-            "python3 -m makemore_agb.train -l 300 -t 120000 -m 1000\n\n"
-            "As we're underfitting the above we suspect that the embedding "
-            "size is the bottleneck\n"
-            "python3 -m makemore_agb.train -l 200 -e 10 -t 200000 -m 1000\n\n"
-            "Training for longer seem to be a good way to decrease the loss"
-        ),
+        epilog=("Example using batch normalization\npython3 -m makemore_agb.train -m"),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
