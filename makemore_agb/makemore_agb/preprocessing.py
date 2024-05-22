@@ -6,7 +6,7 @@ from typing import List, Tuple
 import torch
 from makemore_agb.utils.paths import get_data_path
 
-from makemore_agb import DATASET, TOKEN_TO_INDEX
+from makemore_agb import DATASET, DEVICE, TOKEN_TO_INDEX
 
 
 def read_data(data_path: Path) -> Tuple[str, ...]:
@@ -92,8 +92,8 @@ def create_feature_and_labels(
 
     # NOTE: torch.tensor is a function, whilst torch.Tensor is a constructor
     #       which infers the dtype
-    input_tensor = torch.tensor(input_tokens_list)
-    output_tensor = torch.tensor(output_token_list)
+    input_tensor = torch.tensor(input_tokens_list, device=DEVICE)
+    output_tensor = torch.tensor(output_token_list, device=DEVICE)
 
     return input_tensor, output_tensor
 
@@ -143,7 +143,7 @@ def get_dataset(
     # https://stackoverflow.com/a/73187955/2786884
     # For details
     # Accessing the only element in the shape
-    indices = torch.randperm(output_data.shape[0])
+    indices = torch.randperm(output_data.shape[0], device=DEVICE)
     # Shuffle the data
     shuffled_input_data = input_data[indices]
     shuffled_output_data = output_data[indices]

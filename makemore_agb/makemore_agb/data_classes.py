@@ -22,7 +22,7 @@ class TrainStatistics:
 class OptimizationParams:
     """Class holding possible optimization option."""
 
-    n_mini_batches: int = 200_000
+    n_mini_batches: int = 5_000
     mini_batches_per_data_capture: int = 1_000
     batch_size: int = 32
     cur_step: int = 0

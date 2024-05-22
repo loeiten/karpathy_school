@@ -19,7 +19,7 @@ from makemore_agb.preprocessing import get_dataset
 from makemore_agb.visualisation import plot_training
 from tqdm import tqdm
 
-from makemore_agb import DATASET
+from makemore_agb import DATASET, DEVICE
 
 
 # Reducing the number of locals here will penalize the didactical purpose
@@ -52,7 +52,7 @@ def train_neural_net_model(
     if optimization_params is None:
         optimization_params = OptimizationParams()
 
-    g = torch.Generator().manual_seed(seed)
+    g = torch.Generator(device=DEVICE).manual_seed(seed)
 
     # NOTE: It's better to take a lot of steps in the approximate direction of
     #       the true gradient than it is to take one big step in the direction
@@ -65,7 +65,11 @@ def train_neural_net_model(
         # Mini batch constructor
         n_samples = dataset["training_input_data"].shape[0]
         idxs = torch.randint(
-            low=0, high=n_samples, size=(optimization_params.batch_size,), generator=g
+            low=0,
+            high=n_samples,
+            size=(optimization_params.batch_size,),
+            generator=g,
+            device=DEVICE,
         )
 
         # Forward pass
@@ -171,10 +175,14 @@ def train(
         # and b1 is so that h_pre_activation is roughly gaussian
         batch_normalization_parameters = BatchNormalizationParameters(
             running_mean=torch.zeros(
-                (1, model_params.hidden_layer_neurons), requires_grad=False
+                (1, model_params.hidden_layer_neurons),
+                requires_grad=False,
+                device=DEVICE,
             ),
             running_std=torch.ones(
-                (1, model_params.hidden_layer_neurons), requires_grad=False
+                (1, model_params.hidden_layer_neurons),
+                requires_grad=False,
+                device=DEVICE,
             ),
         )
 

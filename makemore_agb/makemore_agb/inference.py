@@ -9,7 +9,7 @@ from makemore_agb.data_classes import ModelParams, OptimizationParams
 from makemore_agb.predict import predict_neural_network
 from makemore_agb.train import train
 
-from makemore_agb import INDEX_TO_TOKEN, TOKEN_TO_INDEX
+from makemore_agb import DEVICE, INDEX_TO_TOKEN, TOKEN_TO_INDEX
 
 
 def run_inference(
@@ -35,7 +35,7 @@ def run_inference(
     # Obtain the block size from w1
     block_size = int(model[1].shape[-2] / embedding_size)
 
-    g = torch.Generator().manual_seed(seed)
+    g = torch.Generator(device=DEVICE).manual_seed(seed)
     predictions: List[str] = []
 
     for _ in range(n_samples):

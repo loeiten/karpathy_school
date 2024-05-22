@@ -11,6 +11,8 @@ from makemore_agb.predict import predict_neural_network
 from makemore_agb.preprocessing import get_dataset
 from makemore_agb.visualisation import plot_dead_neuron, plot_histogram
 
+from makemore_agb import DEVICE
+
 
 def plot_initial_distributions(
     good_initialization: bool = False,
@@ -33,7 +35,7 @@ def plot_initial_distributions(
     """
     block_size = 3
     batch_size = 32
-    g = torch.Generator().manual_seed(seed)
+    g = torch.Generator(device=DEVICE).manual_seed(seed)
     model = get_model(
         block_size=block_size,
         embedding_size=10,
@@ -43,7 +45,11 @@ def plot_initial_distributions(
     dataset = get_dataset(block_size=block_size)
     training_data = dataset["training_input_data"]
     idxs = torch.randint(
-        low=0, high=training_data.shape[0], size=(batch_size,), generator=g
+        low=0,
+        high=training_data.shape[0],
+        size=(batch_size,),
+        generator=g,
+        device=DEVICE,
     )
     output = predict_neural_network(
         model=model,

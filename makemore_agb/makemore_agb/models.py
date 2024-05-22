@@ -4,7 +4,7 @@ from typing import Tuple
 
 import torch
 
-from makemore_agb import VOCAB_SIZE
+from makemore_agb import DEVICE, VOCAB_SIZE
 
 
 def get_model(
@@ -30,21 +30,29 @@ def get_model(
         Tuple[torch.Tensor, ...]: A tuple containing the parameters of the
             neural net.
     """
-    g = torch.Generator().manual_seed(seed)
+    g = torch.Generator(device=DEVICE).manual_seed(seed)
 
     # NOTE: randn draws from normal distribution, whereas rand draws from a
     #       uniform distribution
-    c = torch.randn((VOCAB_SIZE, embedding_size), generator=g, requires_grad=True)
+    c = torch.randn(
+        (VOCAB_SIZE, embedding_size), generator=g, requires_grad=True, device=DEVICE
+    )
     w1 = torch.randn(
         (block_size * embedding_size, hidden_layer_neurons),
         generator=g,
         requires_grad=True,
+        device=DEVICE,
     )
-    b1 = torch.randn(hidden_layer_neurons, generator=g, requires_grad=True)
+    b1 = torch.randn(
+        hidden_layer_neurons, generator=g, requires_grad=True, device=DEVICE
+    )
     w2 = torch.randn(
-        (hidden_layer_neurons, VOCAB_SIZE), generator=g, requires_grad=True
+        (hidden_layer_neurons, VOCAB_SIZE),
+        generator=g,
+        requires_grad=True,
+        device=DEVICE,
     )
-    b2 = torch.randn(VOCAB_SIZE, generator=g, requires_grad=True)
+    b2 = torch.randn(VOCAB_SIZE, generator=g, requires_grad=True, device=DEVICE)
 
     if good_initialization:
         # Initially the model is confidently wrong, that is: The probability
@@ -99,8 +107,8 @@ def get_model(
     # However, only having normal distribution would yield poor results
     # Hence we let the gain and bias be trainable parameters the network can use
     # in order to move the distribution around
-    batch_normalization_gain = torch.ones((1, hidden_layer_neurons))
-    batch_normalization_bias = torch.zeros((1, hidden_layer_neurons))
+    batch_normalization_gain = torch.ones((1, hidden_layer_neurons), device=DEVICE)
+    batch_normalization_bias = torch.zeros((1, hidden_layer_neurons), device=DEVICE)
 
     parameters = [c, w1, b1, w2, b2, batch_normalization_gain, batch_normalization_bias]
 
