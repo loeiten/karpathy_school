@@ -6,6 +6,7 @@ from typing import List
 
 import matplotlib.pyplot as plt
 import torch
+from makemore_agb.data_classes import BatchNormalizationParameters
 from makemore_agb.models import get_model
 from makemore_agb.predict import predict_neural_network
 from makemore_agb.preprocessing import get_dataset
@@ -14,6 +15,8 @@ from makemore_agb.visualisation import plot_dead_neuron, plot_histogram
 from makemore_agb import DEVICE
 
 
+# Reducing the number of locals here will penalize the didactical purpose
+# pylint: disable=too-many-locals
 def plot_initial_distributions(
     good_initialization: bool = False,
     batch_normalize: bool = False,
@@ -35,11 +38,12 @@ def plot_initial_distributions(
     """
     block_size = 3
     batch_size = 32
+    hidden_layer_neurons = 200
     g = torch.Generator(device=DEVICE).manual_seed(seed)
     model = get_model(
         block_size=block_size,
         embedding_size=10,
-        hidden_layer_neurons=200,
+        hidden_layer_neurons=hidden_layer_neurons,
         good_initialization=good_initialization,
     )
     dataset = get_dataset(block_size=block_size)
@@ -51,10 +55,28 @@ def plot_initial_distributions(
         generator=g,
         device=DEVICE,
     )
+    if batch_normalize:
+        # These parameters will be used as batch norm parameters during inference
+        # Initialized to zero as the mean and one as std as the initialization of w1
+        # and b1 is so that h_pre_activation is roughly gaussian
+        batch_normalization_parameters = BatchNormalizationParameters(
+            running_mean=torch.zeros(
+                (1, hidden_layer_neurons),
+                requires_grad=False,
+                device=DEVICE,
+            ),
+            running_std=torch.ones(
+                (1, hidden_layer_neurons),
+                requires_grad=False,
+                device=DEVICE,
+            ),
+        )
+    else:
+        batch_normalization_parameters = None
     output = predict_neural_network(
         model=model,
         input_data=training_data[idxs],
-        batch_normalize=batch_normalize,
+        batch_normalization_parameters=batch_normalization_parameters,
         inspect_pre_activation_and_h=True,
     )
     if len(output) != 3:

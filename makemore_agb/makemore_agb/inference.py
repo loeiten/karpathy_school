@@ -2,10 +2,14 @@
 
 import argparse
 import sys
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import torch
-from makemore_agb.data_classes import ModelParams, OptimizationParams
+from makemore_agb.data_classes import (
+    BatchNormalizationParameters,
+    ModelParams,
+    OptimizationParams,
+)
 from makemore_agb.predict import predict_neural_network
 from makemore_agb.train import train
 
@@ -15,7 +19,7 @@ from makemore_agb import DEVICE, INDEX_TO_TOKEN, TOKEN_TO_INDEX
 def run_inference(
     model: Tuple[torch.Tensor, ...],
     n_samples: int = 20,
-    batch_normalize: bool = True,
+    batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
     seed: int = 2147483647,
 ) -> Tuple[str, ...]:
     """Run inference on the model.
@@ -24,7 +28,8 @@ def run_inference(
         model (Tuple[torch.Tensor, ...]): The model to run inference on.
         n_samples (int, optional): The number of inferences to run.
             Defaults to 20.
-        batch_normalize (bool): Whether or not to use batch normalization
+        batch_normalization_parameters (Optional[BatchNormalizationParameters]):
+            If set: Contains the running mean and the running standard deviation
         seed (int, optional): The seed to use. Defaults to 2147483647.
 
     Returns:
@@ -48,7 +53,7 @@ def run_inference(
             logits = predict_neural_network(
                 model=model,
                 input_data=torch.tensor([context]),
-                batch_normalize=batch_normalize,
+                batch_normalization_parameters=batch_normalization_parameters,
                 training=False,
             )[0]
             probs = torch.softmax(logits, dim=1)
@@ -113,13 +118,33 @@ def main(sys_args: List[str]):
         n_mini_batches=200_000,
         mini_batches_per_data_capture=1_000,
     )
+    if args.batch_normalize:
+        # These parameters will be used as batch norm parameters during inference
+        # Initialized to zero as the mean and one as std as the initialization of w1
+        # and b1 is so that h_pre_activation is roughly gaussian
+        batch_normalization_parameters = BatchNormalizationParameters(
+            running_mean=torch.zeros(
+                (1, model_params.hidden_layer_neurons),
+                requires_grad=False,
+                device=DEVICE,
+            ),
+            running_std=torch.ones(
+                (1, model_params.hidden_layer_neurons),
+                requires_grad=False,
+                device=DEVICE,
+            ),
+        )
+    else:
+        batch_normalization_parameters = None
     model, _ = train(
         model_params=model_params,
         optimization_params=optimization_params,
-        batch_normalize=args.batch_normalize,
+        batch_normalization_parameters=batch_normalization_parameters,
     )
     predictions = run_inference(
-        model=model, n_samples=args.n_predictions, batch_normalize=args.batch_normalize
+        model=model,
+        n_samples=args.n_predictions,
+        batch_normalization_parameters=batch_normalization_parameters,
     )
     for prediction in predictions:
         print(f"{prediction}")
