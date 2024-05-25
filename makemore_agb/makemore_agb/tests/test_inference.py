@@ -1,8 +1,12 @@
 """Contains tests for the inference module."""
 
 import pytest
+import torch
+from makemore_agb.data_classes import BatchNormalizationParameters
 from makemore_agb.inference import parse_args, run_inference
 from makemore_agb.models import get_model
+
+from makemore_agb import DEVICE
 
 
 @pytest.mark.parametrize("batch_normalize", [True, False])
@@ -14,10 +18,31 @@ def test_run_inference(batch_normalize: bool) -> None:
         batch_normalize (bool): Whether or not to use batch normalization
     """
     # Obtain the model with default parameters
-    model = get_model(block_size=3)
+    hidden_layer_neurons = 100
+    model = get_model(block_size=3, hidden_layer_neurons=hidden_layer_neurons)
+    if batch_normalize:
+        # These parameters will be used as batch norm parameters during inference
+        # Initialized to zero as the mean and one as std as the initialization of w1
+        # and b1 is so that h_pre_activation is roughly gaussian
+        batch_normalization_parameters = BatchNormalizationParameters(
+            running_mean=torch.zeros(
+                (1, hidden_layer_neurons),
+                requires_grad=False,
+                device=DEVICE,
+            ),
+            running_std=torch.ones(
+                (1, hidden_layer_neurons),
+                requires_grad=False,
+                device=DEVICE,
+            ),
+        )
+    else:
+        batch_normalization_parameters = None
     # Run inference on the untrained model
     predictions = run_inference(
-        model=model, n_samples=2, batch_normalize=batch_normalize
+        model=model,
+        n_samples=2,
+        batch_normalization_parameters=batch_normalization_parameters,
     )
     assert len(predictions) == 2
 
