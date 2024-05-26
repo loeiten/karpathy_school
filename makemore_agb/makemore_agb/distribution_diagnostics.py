@@ -16,7 +16,7 @@ from makemore_agb import DEVICE
 
 
 # Reducing the number of locals here will penalize the didactical purpose
-# pylint: disable=too-many-locals
+# pylint: disable-next=too-many-locals
 def plot_initial_distributions(
     good_initialization: bool = False,
     batch_normalize: bool = False,
@@ -45,6 +45,7 @@ def plot_initial_distributions(
         embedding_size=10,
         hidden_layer_neurons=hidden_layer_neurons,
         good_initialization=good_initialization,
+        batch_normalize=batch_normalize,
     )
     dataset = get_dataset(block_size=block_size)
     training_data = dataset["training_input_data"]
@@ -83,7 +84,8 @@ def plot_initial_distributions(
         raise RuntimeError("Got unexpected output from the predictor")
 
     # We're checking for the length above, so we can safely ignore the pylint
-    _, h_pre_activation, h = output  # pylint: disable=unbalanced-tuple-unpacking
+    # pylint: disable-next=unbalanced-tuple-unpacking
+    _, h_pre_activation, h = output
 
     # Create the figures
     _, axes = plt.subplot_mosaic(

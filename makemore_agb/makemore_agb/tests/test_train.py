@@ -3,10 +3,18 @@
 from itertools import chain
 
 import pytest
-from makemore_agb.data_classes import ModelParams, OptimizationParams, TrainStatistics
+import torch
+from makemore_agb.data_classes import (
+    BatchNormalizationParameters,
+    ModelParams,
+    OptimizationParams,
+    TrainStatistics,
+)
 from makemore_agb.models import get_model
 from makemore_agb.preprocessing import get_dataset
 from makemore_agb.train import parse_args, train_neural_net_model
+
+from makemore_agb import DEVICE
 
 
 @pytest.mark.parametrize("batch_normalize", [True, False])
@@ -27,7 +35,23 @@ def test_train_neural_net_model(batch_normalize: bool) -> None:
         block_size=model_params.block_size,
         embedding_size=model_params.embedding_size,
         hidden_layer_neurons=model_params.hidden_layer_neurons,
+        batch_normalize=batch_normalize,
     )
+    if batch_normalize:
+        batch_normalization_parameters = BatchNormalizationParameters(
+            running_mean=torch.zeros(
+                (1, model_params.hidden_layer_neurons),
+                requires_grad=False,
+                device=DEVICE,
+            ),
+            running_std=torch.ones(
+                (1, model_params.hidden_layer_neurons),
+                requires_grad=False,
+                device=DEVICE,
+            ),
+        )
+    else:
+        batch_normalization_parameters = None
 
     # Set the model options
     mini_batches_per_data_capture = 1
@@ -44,7 +68,7 @@ def test_train_neural_net_model(batch_normalize: bool) -> None:
         model=model,
         dataset=dataset,
         optimization_params=optimization_params,
-        batch_normalize=batch_normalize,
+        batch_normalization_parameters=batch_normalization_parameters,
     )
     assert optimization_params.cur_step == 1
 
@@ -55,7 +79,7 @@ def test_train_neural_net_model(batch_normalize: bool) -> None:
         dataset=dataset,
         optimization_params=optimization_params,
         train_statistics=train_statistics,
-        batch_normalize=batch_normalize,
+        batch_normalization_parameters=batch_normalization_parameters,
     )
     assert optimization_params.cur_step == 2
     assert len(train_statistics.training_step) == 1
@@ -77,7 +101,7 @@ def test_train_neural_net_model(batch_normalize: bool) -> None:
         dataset=dataset,
         optimization_params=optimization_params,
         train_statistics=train_statistics,
-        batch_normalize=batch_normalize,
+        batch_normalization_parameters=batch_normalization_parameters,
     )
     assert optimization_params.cur_step == 5
 

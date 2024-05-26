@@ -7,12 +7,15 @@ import torch
 from makemore_agb import DEVICE, VOCAB_SIZE
 
 
+# Reducing the number of locals here will penalize the didactical purpose
+# pylint: disable-next=too-many-locals,too-many-arguments
 def get_model(
     block_size: int,
     embedding_size: int = 2,
     hidden_layer_neurons: int = 100,
     seed: int = 2147483647,
     good_initialization: bool = True,
+    batch_normalize: bool = True,
 ) -> Tuple[torch.Tensor, ...]:
     """Return the model.
 
@@ -25,6 +28,8 @@ def get_model(
         seed (int): The seed for the random number generator
         good_initialization (bool): Whether or not to use an initialization
             which has a good distribution of the initial weights
+        batch_normalize (bool): Whether or not to include batch normalization
+            parameters
 
     Returns:
         Tuple[torch.Tensor, ...]: A tuple containing the parameters of the
@@ -102,15 +107,19 @@ def get_model(
         # propagation
         w1.data *= (5 / 3) / ((block_size * embedding_size) ** 0.5)
 
-    # We would like to normalize each batch after each layer so that it's
-    # roughly normal
-    # However, only having normal distribution would yield poor results
-    # Hence we let the gain and bias be trainable parameters the network can use
-    # in order to move the distribution around
-    batch_normalization_gain = torch.ones((1, hidden_layer_neurons), device=DEVICE)
-    batch_normalization_bias = torch.zeros((1, hidden_layer_neurons), device=DEVICE)
+    parameters = [c, w1, b1, w2, b2]
 
-    parameters = [c, w1, b1, w2, b2, batch_normalization_gain, batch_normalization_bias]
+    if batch_normalize:
+        # We would like to normalize each batch after each layer so that it's
+        # roughly normal
+        # However, only having normal distribution would yield poor results
+        # Hence we let the gain and bias be trainable parameters the network can use
+        # in order to move the distribution around
+        batch_normalization_gain = torch.ones((1, hidden_layer_neurons), device=DEVICE)
+        batch_normalization_bias = torch.zeros((1, hidden_layer_neurons), device=DEVICE)
+
+        parameters.append(batch_normalization_gain)
+        parameters.append(batch_normalization_bias)
 
     # Make it possible to train
     for p in parameters:

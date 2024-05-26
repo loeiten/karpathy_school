@@ -19,11 +19,12 @@ def test_run_inference(batch_normalize: bool) -> None:
     """
     # Obtain the model with default parameters
     hidden_layer_neurons = 100
-    model = get_model(block_size=3, hidden_layer_neurons=hidden_layer_neurons)
+    model = get_model(
+        block_size=3,
+        hidden_layer_neurons=hidden_layer_neurons,
+        batch_normalize=batch_normalize,
+    )
     if batch_normalize:
-        # These parameters will be used as batch norm parameters during inference
-        # Initialized to zero as the mean and one as std as the initialization of w1
-        # and b1 is so that h_pre_activation is roughly gaussian
         batch_normalization_parameters = BatchNormalizationParameters(
             running_mean=torch.zeros(
                 (1, hidden_layer_neurons),

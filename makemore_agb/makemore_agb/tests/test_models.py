@@ -28,6 +28,7 @@ def test_get_model(
         block_size=block_size,
         embedding_size=embedding_size,
         hidden_layer_neurons=hidden_layer_neurons,
+        batch_normalize=False,
     )
 
     # Check the number of parameters
@@ -40,6 +41,8 @@ def test_get_model(
         + VOCAB_SIZE  # size of b2
     )
 
+    # We know the exact output from the batch_normalize flag
+    # pylint: disable-next=unbalanced-tuple-unpacking
     c, w1, b1, w2, b2 = model
 
     assert c.shape == torch.Size([VOCAB_SIZE, embedding_size])
@@ -47,3 +50,34 @@ def test_get_model(
     assert b1.shape == torch.Size([hidden_layer_neurons])
     assert w2.shape == torch.Size([hidden_layer_neurons, VOCAB_SIZE])
     assert b2.shape == torch.Size([VOCAB_SIZE])
+
+    model = get_model(
+        block_size=block_size,
+        embedding_size=embedding_size,
+        hidden_layer_neurons=hidden_layer_neurons,
+        batch_normalize=True,
+    )
+
+    # Check the number of parameters
+    assert (
+        sum(parameters.nelement() for parameters in model)
+        == (VOCAB_SIZE * embedding_size)  # size of c
+        + (block_size * embedding_size * hidden_layer_neurons)  # size of w1
+        + (hidden_layer_neurons)  # size of b1
+        + (hidden_layer_neurons * VOCAB_SIZE)  # size of w2
+        + VOCAB_SIZE  # size of b2
+        + hidden_layer_neurons  # size of batch_normalization_gain
+        + hidden_layer_neurons  # size of batch_normalization_bias
+    )
+
+    # We know the exact output from the batch_normalize flag
+    # pylint: disable-next=unbalanced-tuple-unpacking
+    c, w1, b1, w2, b2, batch_normalization_gain, batch_normalization_bias = model
+
+    assert c.shape == torch.Size([VOCAB_SIZE, embedding_size])
+    assert w1.shape == torch.Size([block_size * embedding_size, hidden_layer_neurons])
+    assert b1.shape == torch.Size([hidden_layer_neurons])
+    assert w2.shape == torch.Size([hidden_layer_neurons, VOCAB_SIZE])
+    assert b2.shape == torch.Size([VOCAB_SIZE])
+    assert batch_normalization_gain.shape == torch.Size([1, hidden_layer_neurons])
+    assert batch_normalization_bias.shape == torch.Size([1, hidden_layer_neurons])

@@ -7,7 +7,7 @@ from makemore_agb.data_classes import BatchNormalizationParameters
 
 
 # Reducing the number of locals here will penalize the didactical purpose
-# pylint: disable=too-many-locals
+# pylint: disable-next=too-many-locals
 def predict_neural_network(
     model: Tuple[torch.Tensor, ...],
     input_data: torch.Tensor,
@@ -31,15 +31,24 @@ def predict_neural_network(
         torch.Tensor: The achieved logits with shape (batch_size)
     """
     # Alias
-    (
-        c,
-        w1,
-        b1,
-        w2,
-        b2,
-        batch_normalization_gain,
-        batch_normalization_bias,
-    ) = model
+    if batch_normalization_parameters is not None:
+        (
+            c,
+            w1,
+            b1,
+            w2,
+            b2,
+            batch_normalization_gain,
+            batch_normalization_bias,
+        ) = model
+    else:
+        (
+            c,
+            w1,
+            b1,
+            w2,
+            b2,
+        ) = model
     # NOTE: c has dimension (VOCAB_SIZE, embedding_size)
     #       input_data has the dimension (batch_size, block_size)
     #       c[input_data] will grab embedding_size vectors for each of the

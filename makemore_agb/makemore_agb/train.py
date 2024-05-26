@@ -23,7 +23,7 @@ from makemore_agb import DATASET, DEVICE
 
 
 # Reducing the number of locals here will penalize the didactical purpose
-# pylint: disable=too-many-arguments
+# pylint: disable-next=too-many-arguments
 def train_neural_net_model(
     model: Tuple[torch.Tensor, ...],
     dataset: DATASET,
