@@ -95,17 +95,15 @@ def train_neural_net_model(
         # Backward pass
         # Reset the gradients
         for parameters in model:
-            if parameters.requires_grad:
-                parameters.grad = None
+            parameters.grad = None
         loss.backward()
 
         # Update the weights
         for parameters in model:
-            if parameters.requires_grad:
-                parameters.data += (
-                    -optimization_params.learning_rate(optimization_params.cur_step)
-                    * parameters.grad
-                )
+            parameters.data += (
+                -optimization_params.learning_rate(optimization_params.cur_step)
+                * parameters.grad
+            )
 
         if i % optimization_params.mini_batches_per_data_capture == 0:
             if train_statistics is not None:
