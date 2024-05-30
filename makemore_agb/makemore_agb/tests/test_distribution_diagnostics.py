@@ -4,15 +4,23 @@ import pytest
 from makemore_agb.distribution_diagnostics import parse_args, plot_initial_distributions
 
 
+@pytest.mark.parametrize("batch_normalize", [True, False])
 @pytest.mark.parametrize("good_initialization", [True, False])
-def test_plot_initial_distributions(good_initialization: bool) -> None:
+def test_plot_initial_distributions(
+    good_initialization: bool, batch_normalize: bool
+) -> None:
     """Test the plot_initial_distributions function.
 
     Args:
         good_initialization (bool): Whether or not to use a good distribution
             for the initialization weights
+        batch_normalize (bool): Whether or not to use batch normalization
     """
-    plot_initial_distributions(good_initialization=good_initialization, show=False)
+    plot_initial_distributions(
+        good_initialization=good_initialization,
+        batch_normalize=batch_normalize,
+        show=False,
+    )
 
 
 def test_parse_args() -> None:
