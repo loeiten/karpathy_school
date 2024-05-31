@@ -64,6 +64,13 @@ def predict_neural_network(
     # together
     concatenated_embedding = embedding.view(embedding.shape[0], -1)
     # NOTE: + b1 is broadcasting on the correct dimension
+    # NOTE: When we are using batch normalization b1 will get cancelled out by
+    #       subtracting batch_normalization_mean, and the gradient will become
+    #       zero.
+    #       batch_normalization_bias will in any case play the role as bias in
+    #       this pre activation layer.
+    #       It's therefore wasteful to use this add operation when we're using
+    #       batch normalization
     h_pre_activation = (concatenated_embedding @ w1) + b1
 
     if batch_normalization_parameters is not None:
