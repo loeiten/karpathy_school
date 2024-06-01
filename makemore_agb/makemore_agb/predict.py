@@ -88,7 +88,12 @@ def predict_neural_network(
             batch_normalization_std = h_pre_activation.std(0, keepdim=True)
 
             with torch.no_grad():
-                # Add small updates
+                # Here we use a momentum of 0.001
+                # We expect that for large batches the mean and std ar going to
+                # be roughly the same
+                # However, here we use small batch sizes and the values may
+                # fluctuate
+                # Using a lower momentum ensures that we do not overshoot
                 batch_normalization_parameters.running_mean = (
                     0.999 * batch_normalization_parameters.running_mean
                     + 0.001 * batch_normalization_mean
