@@ -2,7 +2,7 @@
 
 import pytest
 import torch
-from makemore_agb.models import get_model
+from makemore_agb.models import get_explicit_model
 
 from makemore_agb import VOCAB_SIZE
 
@@ -11,10 +11,10 @@ from makemore_agb import VOCAB_SIZE
     "block_size, embedding_size, hidden_layer_neurons",
     ((3, 2, 100), (8, 15, 200), (20, 3, 5)),
 )
-def test_get_model(
+def test_get_explicit_model(
     block_size: int, embedding_size: int, hidden_layer_neurons: int
 ) -> None:
-    """Test the get_model function.
+    """Test the get_explicit_model function.
 
     Args:
         block_size (int): The context length
@@ -24,7 +24,7 @@ def test_get_model(
     block_size = 3
     embedding_size = 2
     hidden_layer_neurons = 100
-    model = get_model(
+    model = get_explicit_model(
         block_size=block_size,
         embedding_size=embedding_size,
         hidden_layer_neurons=hidden_layer_neurons,
@@ -51,7 +51,7 @@ def test_get_model(
     assert w2.shape == torch.Size([hidden_layer_neurons, VOCAB_SIZE])
     assert b2.shape == torch.Size([VOCAB_SIZE])
 
-    model = get_model(
+    model = get_explicit_model(
         block_size=block_size,
         embedding_size=embedding_size,
         hidden_layer_neurons=hidden_layer_neurons,

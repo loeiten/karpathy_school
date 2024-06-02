@@ -13,7 +13,7 @@ from makemore_agb.data_classes import (
     TrainStatistics,
 )
 from makemore_agb.evaluation import evaluate
-from makemore_agb.models import get_model
+from makemore_agb.models import get_explicit_model
 from makemore_agb.predict import predict_neural_network
 from makemore_agb.preprocessing import get_dataset
 from makemore_agb.visualisation import plot_training
@@ -160,7 +160,7 @@ def train(
     dataset = get_dataset(block_size=model_params.block_size)
 
     # Obtain the model
-    model = get_model(
+    model = get_explicit_model(
         block_size=model_params.block_size,
         embedding_size=model_params.embedding_size,
         hidden_layer_neurons=model_params.hidden_layer_neurons,

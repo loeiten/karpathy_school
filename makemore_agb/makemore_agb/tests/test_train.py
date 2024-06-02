@@ -10,7 +10,7 @@ from makemore_agb.data_classes import (
     OptimizationParams,
     TrainStatistics,
 )
-from makemore_agb.models import get_model
+from makemore_agb.models import get_explicit_model
 from makemore_agb.preprocessing import get_dataset
 from makemore_agb.train import parse_args, train_neural_net_model
 
@@ -31,7 +31,7 @@ def test_train_neural_net_model(batch_normalize: bool) -> None:
     dataset = get_dataset(block_size=model_params.block_size)
 
     # Obtain the model
-    model = get_model(
+    model = get_explicit_model(
         block_size=model_params.block_size,
         embedding_size=model_params.embedding_size,
         hidden_layer_neurons=model_params.hidden_layer_neurons,

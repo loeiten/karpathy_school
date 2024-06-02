@@ -7,7 +7,7 @@ from typing import List
 import matplotlib.pyplot as plt
 import torch
 from makemore_agb.data_classes import BatchNormalizationParameters
-from makemore_agb.models import get_model
+from makemore_agb.models import get_explicit_model
 from makemore_agb.predict import predict_neural_network
 from makemore_agb.preprocessing import get_dataset
 from makemore_agb.visualisation import plot_dead_neuron, plot_histogram
@@ -40,7 +40,7 @@ def plot_initial_distributions(
     batch_size = 32
     hidden_layer_neurons = 200
     g = torch.Generator(device=DEVICE).manual_seed(seed)
-    model = get_model(
+    model = get_explicit_model(
         block_size=block_size,
         embedding_size=10,
         hidden_layer_neurons=hidden_layer_neurons,

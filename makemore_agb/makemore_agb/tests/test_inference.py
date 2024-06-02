@@ -4,7 +4,7 @@ import pytest
 import torch
 from makemore_agb.data_classes import BatchNormalizationParameters
 from makemore_agb.inference import parse_args, run_inference
-from makemore_agb.models import get_model
+from makemore_agb.models import get_explicit_model
 
 from makemore_agb import DEVICE
 
@@ -19,7 +19,7 @@ def test_run_inference(batch_normalize: bool) -> None:
     """
     # Obtain the model with default parameters
     hidden_layer_neurons = 100
-    model = get_model(
+    model = get_explicit_model(
         block_size=3,
         hidden_layer_neurons=hidden_layer_neurons,
         batch_normalize=batch_normalize,

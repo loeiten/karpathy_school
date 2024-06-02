@@ -9,7 +9,7 @@ from makemore_agb import DEVICE, VOCAB_SIZE
 
 # Reducing the number of locals here will penalize the didactical purpose
 # pylint: disable-next=too-many-locals,too-many-arguments
-def get_model(
+def get_explicit_model(
     block_size: int,
     embedding_size: int = 2,
     hidden_layer_neurons: int = 100,
@@ -17,7 +17,7 @@ def get_model(
     good_initialization: bool = True,
     batch_normalize: bool = True,
 ) -> Tuple[torch.Tensor, ...]:
-    """Return the model.
+    """Return the explicit model.
 
     Args:
         block_size (int): Number of input features to the network
