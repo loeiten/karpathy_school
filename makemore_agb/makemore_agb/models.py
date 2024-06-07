@@ -3,6 +3,9 @@
 from typing import Tuple
 
 import torch
+from makemore_agb.batchnorm1d import BatchNorm1d
+from makemore_agb.linear import Linear
+from makemore_agb.tanh import Tanh
 
 from makemore_agb import DEVICE, VOCAB_SIZE
 
@@ -120,6 +123,89 @@ def get_explicit_model(
 
         parameters.append(batch_normalization_gain)
         parameters.append(batch_normalization_bias)
+
+    # Make it possible to train
+    for p in parameters:
+        p.requires_grad = True
+
+    print(
+        f"Number of elements in model: {sum(layer.nelement() for layer in parameters)}"
+    )
+
+    return tuple(parameters)
+
+
+def get_pytorch_model(
+    block_size: int,
+    embedding_size: int = 2,
+    hidden_layer_neurons: int = 100,
+    seed: int = 2147483647,
+    batch_normalize: bool = True,
+) -> Tuple[torch.Tensor, ...]:
+    """Return the pytorch model.
+
+    Args:
+        block_size (int): Number of input features to the network
+            This is how many characters we are considering simultaneously, aka.
+            the context length
+        embedding_size (int): The size of the embedding
+        hidden_layer_neurons (int): The seed for the random number generator
+        seed (int): The seed for the random number generator
+        batch_normalize (bool): Whether or not to include batch normalization
+            parameters
+
+    Returns:
+        Tuple[torch.Tensor, ...]: A tuple containing the parameters of the
+            neural net.
+    """
+    g = torch.Generator(device=DEVICE).manual_seed(seed)
+    c = torch.randn(
+        (VOCAB_SIZE, embedding_size), generator=g, requires_grad=True, device=DEVICE
+    )
+
+    if batch_normalize:
+        # NOTE: When we are using batch normalization the biases will get
+        #       cancelled out by subtracting batch_normalization_mean, and the
+        #       gradient will become zero.
+        #       batch_normalization_bias will in any case play the role as bias
+        #       in the pre activation layers.
+        layers = [
+            Linear(fan_in=embedding_size * block_size, fan_out=hidden_layer_neurons),
+            BatchNorm1d(dim=hidden_layer_neurons),
+            Tanh(),
+            Linear(fan_in=hidden_layer_neurons, fan_out=hidden_layer_neurons),
+            BatchNorm1d(dim=hidden_layer_neurons),
+            Tanh(),
+            Linear(fan_in=hidden_layer_neurons, fan_out=hidden_layer_neurons),
+            BatchNorm1d(dim=hidden_layer_neurons),
+            Tanh(),
+            Linear(fan_in=hidden_layer_neurons, fan_out=hidden_layer_neurons),
+            BatchNorm1d(dim=hidden_layer_neurons),
+            Tanh(),
+            Linear(fan_in=hidden_layer_neurons, fan_out=hidden_layer_neurons),
+            BatchNorm1d(dim=hidden_layer_neurons),
+            Tanh(),
+            Linear(fan_in=hidden_layer_neurons, fan_out=VOCAB_SIZE),
+            BatchNorm1d(VOCAB_SIZE),
+        ]
+    else:
+        layers = [
+            Linear(fan_in=embedding_size * block_size, fan_out=hidden_layer_neurons),
+            Tanh(),
+            Linear(fan_in=hidden_layer_neurons, fan_out=hidden_layer_neurons),
+            Tanh(),
+            Linear(fan_in=hidden_layer_neurons, fan_out=hidden_layer_neurons),
+            Tanh(),
+            Linear(fan_in=hidden_layer_neurons, fan_out=hidden_layer_neurons),
+            Tanh(),
+            Linear(fan_in=hidden_layer_neurons, fan_out=hidden_layer_neurons),
+            Tanh(),
+            Linear(fan_in=hidden_layer_neurons, fan_out=VOCAB_SIZE),
+        ]
+
+    parameters = [c] + [
+        params for layer in layers for params in layer.parameters()  # type: ignore
+    ]
 
     # Make it possible to train
     for p in parameters:
