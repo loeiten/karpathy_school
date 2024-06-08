@@ -140,6 +140,7 @@ def get_pytorch_model(
     embedding_size: int = 2,
     hidden_layer_neurons: int = 100,
     seed: int = 2147483647,
+    good_initialization: bool = True,
     batch_normalize: bool = True,
 ) -> Tuple[torch.Tensor, ...]:
     """Return the pytorch model.
@@ -151,6 +152,8 @@ def get_pytorch_model(
         embedding_size (int): The size of the embedding
         hidden_layer_neurons (int): The seed for the random number generator
         seed (int): The seed for the random number generator
+        good_initialization (bool): Whether or not to use an initialization
+            which has a good distribution of the initial weights
         batch_normalize (bool): Whether or not to include batch normalization
             parameters
 
@@ -170,22 +173,34 @@ def get_pytorch_model(
         #       batch_normalization_bias will in any case play the role as bias
         #       in the pre activation layers.
         layers = [
-            Linear(fan_in=embedding_size * block_size, fan_out=hidden_layer_neurons),
+            Linear(
+                fan_in=embedding_size * block_size,
+                fan_out=hidden_layer_neurons,
+                bias=False,
+            ),
             BatchNorm1d(dim=hidden_layer_neurons),
             Tanh(),
-            Linear(fan_in=hidden_layer_neurons, fan_out=hidden_layer_neurons),
+            Linear(
+                fan_in=hidden_layer_neurons, fan_out=hidden_layer_neurons, bias=False
+            ),
             BatchNorm1d(dim=hidden_layer_neurons),
             Tanh(),
-            Linear(fan_in=hidden_layer_neurons, fan_out=hidden_layer_neurons),
+            Linear(
+                fan_in=hidden_layer_neurons, fan_out=hidden_layer_neurons, bias=False
+            ),
             BatchNorm1d(dim=hidden_layer_neurons),
             Tanh(),
-            Linear(fan_in=hidden_layer_neurons, fan_out=hidden_layer_neurons),
+            Linear(
+                fan_in=hidden_layer_neurons, fan_out=hidden_layer_neurons, bias=False
+            ),
             BatchNorm1d(dim=hidden_layer_neurons),
             Tanh(),
-            Linear(fan_in=hidden_layer_neurons, fan_out=hidden_layer_neurons),
+            Linear(
+                fan_in=hidden_layer_neurons, fan_out=hidden_layer_neurons, bias=False
+            ),
             BatchNorm1d(dim=hidden_layer_neurons),
             Tanh(),
-            Linear(fan_in=hidden_layer_neurons, fan_out=VOCAB_SIZE),
+            Linear(fan_in=hidden_layer_neurons, fan_out=VOCAB_SIZE, bias=False),
             BatchNorm1d(VOCAB_SIZE),
         ]
     else:
@@ -202,6 +217,10 @@ def get_pytorch_model(
             Tanh(),
             Linear(fan_in=hidden_layer_neurons, fan_out=VOCAB_SIZE),
         ]
+
+    if good_initialization:
+        # FIXME: You are here
+        pass
 
     parameters = [c] + [
         params for layer in layers for params in layer.parameters()  # type: ignore
