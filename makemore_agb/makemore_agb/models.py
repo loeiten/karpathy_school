@@ -219,8 +219,16 @@ def get_pytorch_model(
         ]
 
     if good_initialization:
-        # FIXME: You are here
-        pass
+        # Set the correct gain in the sandwich layers as the tanh layers are
+        # compressing the distribution
+        with torch.no_grad():
+            # Make last layer less confident
+            layers[-1].weight += 0.1
+            for layer in layers[:-1]:
+                if isinstance(layer, Linear):
+                    layer.weight *= 5 / 3
+                    # Let the bias be close to zero, but with some entropy
+                    layer.bias *= 0.01
 
     parameters = [c] + [
         params for layer in layers for params in layer.parameters()  # type: ignore
