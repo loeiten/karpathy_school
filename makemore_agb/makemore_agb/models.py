@@ -135,6 +135,8 @@ def get_explicit_model(
     return tuple(parameters)
 
 
+# Reducing the number of locals here will penalize the didactical purpose
+# pylint: disable-next=too-many-arguments
 def get_pytorch_model(
     block_size: int,
     embedding_size: int = 2,
@@ -144,6 +146,9 @@ def get_pytorch_model(
     batch_normalize: bool = True,
 ) -> Tuple[torch.Tensor, ...]:
     """Return the pytorch model.
+
+    Raises:
+        TypeError: If last layer is not Linear
 
     Args:
         block_size (int): Number of input features to the network
@@ -222,8 +227,10 @@ def get_pytorch_model(
         # Set the correct gain in the sandwich layers as the tanh layers are
         # compressing the distribution
         with torch.no_grad():
+            if not isinstance(layers[-1], Linear):
+                raise TypeError("Last layer must be linear")
             # Make last layer less confident
-            layers[-1].weight += 0.1
+            layers[-1].weight *= 0.1
             for layer in layers[:-1]:
                 if isinstance(layer, Linear):
                     layer.weight *= 5 / 3
