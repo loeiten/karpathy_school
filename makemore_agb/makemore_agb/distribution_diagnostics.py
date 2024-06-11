@@ -2,12 +2,12 @@
 
 import argparse
 import sys
-from typing import List
+from typing import List, Literal
 
 import matplotlib.pyplot as plt
 import torch
 from makemore_agb.data_classes import BatchNormalizationParameters
-from makemore_agb.models import get_explicit_model
+from makemore_agb.models import get_explicit_model, get_pytorch_model
 from makemore_agb.predict import predict_neural_network
 from makemore_agb.preprocessing import get_dataset
 from makemore_agb.visualisation import plot_dead_neuron, plot_histogram
@@ -18,6 +18,7 @@ from makemore_agb import DEVICE
 # Reducing the number of locals here will penalize the didactical purpose
 # pylint: disable-next=too-many-locals
 def plot_initial_distributions(
+    model_type: Literal["explicit", "pytorch"] = "explicit",
     good_initialization: bool = False,
     batch_normalize: bool = False,
     seed: int = 2147483647,
@@ -26,10 +27,12 @@ def plot_initial_distributions(
     """Plot the initial distribution.
 
     Raises:
+        ValueError: If an unsupported model_type is given
         RuntimeError: In case the prediction outputs an output with unexpected
             length
 
     Args:
+        model_type (Literal["explicit", "pytorch"]): What model type to use
         good_initialization (bool): Whether or not to use an initialization
             which has a good distribution of the initial weights
         batch_normalize (bool): Whether or not to use batch normalization
@@ -40,7 +43,14 @@ def plot_initial_distributions(
     batch_size = 32
     hidden_layer_neurons = 200
     g = torch.Generator(device=DEVICE).manual_seed(seed)
-    model = get_explicit_model(
+    if model_type == "explicit":
+        model_function = get_explicit_model
+    elif model_type == "pytorch":
+        model_function = get_pytorch_model
+    else:
+        raise ValueError(f"Unknown model type {model_type}")
+
+    model = model_function(
         block_size=block_size,
         embedding_size=10,
         hidden_layer_neurons=hidden_layer_neurons,
