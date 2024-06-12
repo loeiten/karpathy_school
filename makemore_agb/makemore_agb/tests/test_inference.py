@@ -1,25 +1,41 @@
 """Contains tests for the inference module."""
 
+from typing import Literal
+
 import pytest
 import torch
 from makemore_agb.data_classes import BatchNormalizationParameters
 from makemore_agb.inference import parse_args, run_inference
-from makemore_agb.models import get_explicit_model
+from makemore_agb.models import get_explicit_model, get_pytorch_model
 
 from makemore_agb import DEVICE
 
 
 @pytest.mark.parametrize("batch_normalize", [True, False])
-def test_run_inference(batch_normalize: bool) -> None:
+@pytest.mark.parametrize("model_type", ["explicit", "pytorch"])
+def test_run_inference(
+    batch_normalize: bool, model_type: Literal["explicit", "pytorch"]
+) -> None:
     """
     Test the run_inference function.
 
+    Raises:
+        ValueError: If an unsupported model_type is given
+
     Args:
         batch_normalize (bool): Whether or not to use batch normalization
+        model_type (Literal["explicit", "pytorch"]): What model type to use
     """
     # Obtain the model with default parameters
     hidden_layer_neurons = 100
-    model = get_explicit_model(
+    if model_type == "explicit":
+        model_function = get_explicit_model
+    elif model_type == "pytorch":
+        model_function = get_pytorch_model
+    else:
+        raise ValueError(f"Unknown model type {model_type}")
+
+    model = model_function(
         block_size=3,
         hidden_layer_neurons=hidden_layer_neurons,
         batch_normalize=batch_normalize,
