@@ -7,7 +7,7 @@ from typing import List, Literal
 import matplotlib.pyplot as plt
 import torch
 from makemore_agb.data_classes import BatchNormalizationParameters
-from makemore_agb.models import get_explicit_model, get_pytorch_model
+from makemore_agb.models import get_model_function
 from makemore_agb.predict import predict_neural_network
 from makemore_agb.preprocessing import get_dataset
 from makemore_agb.visualisation import plot_dead_neuron, plot_histogram
@@ -27,7 +27,6 @@ def plot_initial_distributions(
     """Plot the initial distribution.
 
     Raises:
-        ValueError: If an unsupported model_type is given
         RuntimeError: In case the prediction outputs an output with unexpected
             length
 
@@ -43,12 +42,8 @@ def plot_initial_distributions(
     batch_size = 32
     hidden_layer_neurons = 200
     g = torch.Generator(device=DEVICE).manual_seed(seed)
-    if model_type == "explicit":
-        model_function = get_explicit_model
-    elif model_type == "pytorch":
-        model_function = get_pytorch_model
-    else:
-        raise ValueError(f"Unknown model type {model_type}")
+
+    model_function = get_model_function(model_type)
 
     model = model_function(
         block_size=block_size,

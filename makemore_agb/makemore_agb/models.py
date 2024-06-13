@@ -1,6 +1,6 @@
 """Module for models."""
 
-from typing import Tuple
+from typing import Callable, Literal, Tuple
 
 import torch
 from makemore_agb.batchnorm1d import BatchNorm1d
@@ -250,3 +250,26 @@ def get_pytorch_model(
     )
 
     return tuple(parameters)
+
+
+def get_model_function(
+    model_type: Literal["explicit", "pytorch"] = "explicit"
+) -> Callable[[int, int, int, int, bool, bool], Tuple[torch.Tensor, ...]]:
+    """Return the model function.
+
+    Raises:
+        ValueError: If an unsupported model_type is given
+
+    Args:
+        model_type (Literal["explicit", "pytorch"]): What model type to use
+
+    Returns:
+        Callable[[int, int, int, int, bool, bool], Tuple[torch.Tensor, ...]]: The
+            function to get the model from
+    """
+    if model_type == "explicit":
+        return get_explicit_model
+    elif model_type == "pytorch":
+        return get_pytorch_model
+    else:
+        raise ValueError(f"Unknown model type {model_type}")
