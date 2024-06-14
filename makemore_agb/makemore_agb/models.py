@@ -4,65 +4,57 @@ from typing import Callable, Literal, Tuple
 
 import torch
 from makemore_agb.batchnorm1d import BatchNorm1d
+from makemore_agb.data_classes import ModelParams
 from makemore_agb.linear import Linear
 from makemore_agb.tanh import Tanh
 
 from makemore_agb import DEVICE, VOCAB_SIZE
 
 
-# Reducing the number of locals here will penalize the didactical purpose
-# pylint: disable-next=too-many-locals,too-many-arguments
-def get_explicit_model(
-    block_size: int,
-    embedding_size: int = 2,
-    hidden_layer_neurons: int = 100,
-    seed: int = 2147483647,
-    good_initialization: bool = True,
-    batch_normalize: bool = True,
-) -> Tuple[torch.Tensor, ...]:
+def get_explicit_model(model_params: ModelParams) -> Tuple[torch.Tensor, ...]:
     """Return the explicit model.
 
     Args:
-        block_size (int): Number of input features to the network
-            This is how many characters we are considering simultaneously, aka.
-            the context length
-        embedding_size (int): The size of the embedding
-        hidden_layer_neurons (int): The seed for the random number generator
-        seed (int): The seed for the random number generator
-        good_initialization (bool): Whether or not to use an initialization
-            which has a good distribution of the initial weights
-        batch_normalize (bool): Whether or not to include batch normalization
-            parameters
+        model_params (ModelParams): The parameters of the model
 
     Returns:
         Tuple[torch.Tensor, ...]: A tuple containing the parameters of the
             neural net.
     """
-    g = torch.Generator(device=DEVICE).manual_seed(seed)
+    g = torch.Generator(device=DEVICE).manual_seed(model_params.seed)
 
     # NOTE: randn draws from normal distribution, whereas rand draws from a
     #       uniform distribution
     c = torch.randn(
-        (VOCAB_SIZE, embedding_size), generator=g, requires_grad=True, device=DEVICE
+        (VOCAB_SIZE, model_params.embedding_size),
+        generator=g,
+        requires_grad=True,
+        device=DEVICE,
     )
     w1 = torch.randn(
-        (block_size * embedding_size, hidden_layer_neurons),
+        (
+            model_params.block_size * model_params.embedding_size,
+            model_params.hidden_layer_neurons,
+        ),
         generator=g,
         requires_grad=True,
         device=DEVICE,
     )
     b1 = torch.randn(
-        hidden_layer_neurons, generator=g, requires_grad=True, device=DEVICE
+        model_params.hidden_layer_neurons,
+        generator=g,
+        requires_grad=True,
+        device=DEVICE,
     )
     w2 = torch.randn(
-        (hidden_layer_neurons, VOCAB_SIZE),
+        (model_params.hidden_layer_neurons, VOCAB_SIZE),
         generator=g,
         requires_grad=True,
         device=DEVICE,
     )
     b2 = torch.randn(VOCAB_SIZE, generator=g, requires_grad=True, device=DEVICE)
 
-    if good_initialization:
+    if model_params.good_initialization:
         # Initially the model is confidently wrong, that is: The probability
         # distribution of the output is not uniform
         # Recall that the logits are given as h @ w2 + b2
@@ -88,7 +80,7 @@ def get_explicit_model(
         # Since we want the weights to be well behaved in both the forward and
         # the backward propagation, we set the initialization to the Kaiming
         # initialization
-        w2.data *= (5 / 3) / (hidden_layer_neurons**0.5)
+        w2.data *= (5 / 3) / (model_params.hidden_layer_neurons**0.5)
         # We could have some small entropy in the weights as well
         b1.data *= 0.01
         # In the pre-activation we are multiplying the embedding with some
@@ -108,18 +100,24 @@ def get_explicit_model(
         # Kaiming initialization scales the distribution so that the standard
         # deviation are well behaved both in the forward and the backward
         # propagation
-        w1.data *= (5 / 3) / ((block_size * embedding_size) ** 0.5)
+        w1.data *= (5 / 3) / (
+            (model_params.block_size * model_params.embedding_size) ** 0.5
+        )
 
     parameters = [c, w1, b1, w2, b2]
 
-    if batch_normalize:
+    if model_params.batch_normalize:
         # We would like to normalize each batch after each layer so that it's
         # roughly normal
         # However, only having normal distribution would yield poor results
         # Hence we let the gain and bias be trainable parameters the network can use
         # in order to move the distribution around
-        batch_normalization_gain = torch.ones((1, hidden_layer_neurons), device=DEVICE)
-        batch_normalization_bias = torch.zeros((1, hidden_layer_neurons), device=DEVICE)
+        batch_normalization_gain = torch.ones(
+            (1, model_params.hidden_layer_neurons), device=DEVICE
+        )
+        batch_normalization_bias = torch.zeros(
+            (1, model_params.hidden_layer_neurons), device=DEVICE
+        )
 
         parameters.append(batch_normalization_gain)
         parameters.append(batch_normalization_bias)
@@ -138,12 +136,7 @@ def get_explicit_model(
 # Reducing the number of locals here will penalize the didactical purpose
 # pylint: disable-next=too-many-arguments
 def get_pytorch_model(
-    block_size: int,
-    embedding_size: int = 2,
-    hidden_layer_neurons: int = 100,
-    seed: int = 2147483647,
-    good_initialization: bool = True,
-    batch_normalize: bool = True,
+    model_params: ModelParams,
 ) -> Tuple[torch.Tensor, ...]:
     """Return the pytorch model.
 
@@ -151,27 +144,21 @@ def get_pytorch_model(
         TypeError: If last layer is not Linear
 
     Args:
-        block_size (int): Number of input features to the network
-            This is how many characters we are considering simultaneously, aka.
-            the context length
-        embedding_size (int): The size of the embedding
-        hidden_layer_neurons (int): The seed for the random number generator
-        seed (int): The seed for the random number generator
-        good_initialization (bool): Whether or not to use an initialization
-            which has a good distribution of the initial weights
-        batch_normalize (bool): Whether or not to include batch normalization
-            parameters
+        model_params (ModelParams): The parameters of the model
 
     Returns:
         Tuple[torch.Tensor, ...]: A tuple containing the parameters of the
             neural net.
     """
-    g = torch.Generator(device=DEVICE).manual_seed(seed)
+    g = torch.Generator(device=DEVICE).manual_seed(model_params.seed)
     c = torch.randn(
-        (VOCAB_SIZE, embedding_size), generator=g, requires_grad=True, device=DEVICE
+        (VOCAB_SIZE, model_params.embedding_size),
+        generator=g,
+        requires_grad=True,
+        device=DEVICE,
     )
 
-    if batch_normalize:
+    if model_params.batch_normalize:
         # NOTE: When we are using batch normalization the biases will get
         #       cancelled out by subtracting batch_normalization_mean, and the
         #       gradient will become zero.
@@ -179,51 +166,76 @@ def get_pytorch_model(
         #       in the pre activation layers.
         layers = [
             Linear(
-                fan_in=embedding_size * block_size,
-                fan_out=hidden_layer_neurons,
+                fan_in=model_params.embedding_size * model_params.block_size,
+                fan_out=model_params.hidden_layer_neurons,
                 bias=False,
             ),
-            BatchNorm1d(dim=hidden_layer_neurons),
+            BatchNorm1d(dim=model_params.hidden_layer_neurons),
             Tanh(),
             Linear(
-                fan_in=hidden_layer_neurons, fan_out=hidden_layer_neurons, bias=False
+                fan_in=model_params.hidden_layer_neurons,
+                fan_out=model_params.hidden_layer_neurons,
+                bias=False,
             ),
-            BatchNorm1d(dim=hidden_layer_neurons),
+            BatchNorm1d(dim=model_params.hidden_layer_neurons),
             Tanh(),
             Linear(
-                fan_in=hidden_layer_neurons, fan_out=hidden_layer_neurons, bias=False
+                fan_in=model_params.hidden_layer_neurons,
+                fan_out=model_params.hidden_layer_neurons,
+                bias=False,
             ),
-            BatchNorm1d(dim=hidden_layer_neurons),
+            BatchNorm1d(dim=model_params.hidden_layer_neurons),
             Tanh(),
             Linear(
-                fan_in=hidden_layer_neurons, fan_out=hidden_layer_neurons, bias=False
+                fan_in=model_params.hidden_layer_neurons,
+                fan_out=model_params.hidden_layer_neurons,
+                bias=False,
             ),
-            BatchNorm1d(dim=hidden_layer_neurons),
+            BatchNorm1d(dim=model_params.hidden_layer_neurons),
             Tanh(),
             Linear(
-                fan_in=hidden_layer_neurons, fan_out=hidden_layer_neurons, bias=False
+                fan_in=model_params.hidden_layer_neurons,
+                fan_out=model_params.hidden_layer_neurons,
+                bias=False,
             ),
-            BatchNorm1d(dim=hidden_layer_neurons),
+            BatchNorm1d(dim=model_params.hidden_layer_neurons),
             Tanh(),
-            Linear(fan_in=hidden_layer_neurons, fan_out=VOCAB_SIZE, bias=False),
+            Linear(
+                fan_in=model_params.hidden_layer_neurons, fan_out=VOCAB_SIZE, bias=False
+            ),
             BatchNorm1d(VOCAB_SIZE),
         ]
     else:
         layers = [
-            Linear(fan_in=embedding_size * block_size, fan_out=hidden_layer_neurons),
+            Linear(
+                fan_in=model_params.embedding_size * model_params.block_size,
+                fan_out=model_params.hidden_layer_neurons,
+            ),
             Tanh(),
-            Linear(fan_in=hidden_layer_neurons, fan_out=hidden_layer_neurons),
+            Linear(
+                fan_in=model_params.hidden_layer_neurons,
+                fan_out=model_params.hidden_layer_neurons,
+            ),
             Tanh(),
-            Linear(fan_in=hidden_layer_neurons, fan_out=hidden_layer_neurons),
+            Linear(
+                fan_in=model_params.hidden_layer_neurons,
+                fan_out=model_params.hidden_layer_neurons,
+            ),
             Tanh(),
-            Linear(fan_in=hidden_layer_neurons, fan_out=hidden_layer_neurons),
+            Linear(
+                fan_in=model_params.hidden_layer_neurons,
+                fan_out=model_params.hidden_layer_neurons,
+            ),
             Tanh(),
-            Linear(fan_in=hidden_layer_neurons, fan_out=hidden_layer_neurons),
+            Linear(
+                fan_in=model_params.hidden_layer_neurons,
+                fan_out=model_params.hidden_layer_neurons,
+            ),
             Tanh(),
-            Linear(fan_in=hidden_layer_neurons, fan_out=VOCAB_SIZE),
+            Linear(fan_in=model_params.hidden_layer_neurons, fan_out=VOCAB_SIZE),
         ]
 
-    if good_initialization:
+    if model_params.good_initialization:
         # Set the correct gain in the sandwich layers as the tanh layers are
         # compressing the distribution
         with torch.no_grad():
