@@ -25,17 +25,19 @@ def test_train_neural_net_model(batch_normalize: bool) -> None:
     Args:
         batch_normalize (bool): Whether or not to use batch normalization
     """
-    model_params = ModelParams(block_size=3, embedding_size=2, hidden_layer_neurons=100)
+    model_params = ModelParams(
+        block_size=3,
+        embedding_size=2,
+        hidden_layer_neurons=100,
+        batch_normalize=batch_normalize,
+    )
 
     # Obtain the data
     dataset = get_dataset(block_size=model_params.block_size)
 
     # Obtain the model
     model = get_explicit_model(
-        block_size=model_params.block_size,
-        embedding_size=model_params.embedding_size,
-        hidden_layer_neurons=model_params.hidden_layer_neurons,
-        batch_normalize=batch_normalize,
+        model_params=model_params,
     )
     if batch_normalize:
         batch_normalization_parameters = BatchNormalizationParameters(

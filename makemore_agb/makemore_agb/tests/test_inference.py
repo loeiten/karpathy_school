@@ -4,7 +4,7 @@ from typing import Literal
 
 import pytest
 import torch
-from makemore_agb.data_classes import BatchNormalizationParameters
+from makemore_agb.data_classes import BatchNormalizationParameters, ModelParams
 from makemore_agb.inference import parse_args, run_inference
 from makemore_agb.models import get_model_function
 
@@ -25,13 +25,14 @@ def test_run_inference(
     """
     # Obtain the model with default parameters
     hidden_layer_neurons = 100
-    model_function = get_model_function(model_type=model_type)
 
-    model = model_function(
+    model_params = ModelParams(
         block_size=3,
         hidden_layer_neurons=hidden_layer_neurons,
         batch_normalize=batch_normalize,
     )
+    model_function = get_model_function(model_type=model_type)
+    model = model_function(model_params)
     if batch_normalize:
         batch_normalization_parameters = BatchNormalizationParameters(
             running_mean=torch.zeros(

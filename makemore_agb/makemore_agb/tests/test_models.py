@@ -2,6 +2,7 @@
 
 import pytest
 import torch
+from makemore_agb.data_classes import ModelParams
 from makemore_agb.models import get_explicit_model
 
 from makemore_agb import VOCAB_SIZE
@@ -21,15 +22,11 @@ def test_get_explicit_model(
         embedding_size (int): Size of the embedding space
         hidden_layer_neurons (int): Number of neurons in the hidden layer
     """
-    block_size = 3
-    embedding_size = 2
-    hidden_layer_neurons = 100
-    model = get_explicit_model(
-        block_size=block_size,
-        embedding_size=embedding_size,
-        hidden_layer_neurons=hidden_layer_neurons,
-        batch_normalize=False,
+    model_params = ModelParams(
+        block_size=3, embedding_size=2, hidden_layer_neurons=100, batch_normalize=False
     )
+
+    model = get_explicit_model(model_params=model_params)
 
     # Check the number of parameters
     assert (
@@ -51,12 +48,8 @@ def test_get_explicit_model(
     assert w2.shape == torch.Size([hidden_layer_neurons, VOCAB_SIZE])
     assert b2.shape == torch.Size([VOCAB_SIZE])
 
-    model = get_explicit_model(
-        block_size=block_size,
-        embedding_size=embedding_size,
-        hidden_layer_neurons=hidden_layer_neurons,
-        batch_normalize=True,
-    )
+    model_params.batch_normalize = True
+    model = get_explicit_model(model_params=model_params)
 
     # Check the number of parameters
     assert (

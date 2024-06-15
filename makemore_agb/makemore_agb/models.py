@@ -266,7 +266,7 @@ def get_pytorch_model(
 
 def get_model_function(
     model_type: Literal["explicit", "pytorch"] = "explicit"
-) -> Callable[[int, int, int, int, bool, bool], Tuple[torch.Tensor, ...]]:
+) -> Callable[[ModelParams], Tuple[torch.Tensor, ...]]:
     """Return the model function.
 
     Raises:
@@ -276,12 +276,11 @@ def get_model_function(
         model_type (Literal["explicit", "pytorch"]): What model type to use
 
     Returns:
-        Callable[[int, int, int, int, bool, bool], Tuple[torch.Tensor, ...]]: The
+        Callable[[ModelParams], Tuple[torch.Tensor, ...]]: The
             function to get the model from
     """
     if model_type == "explicit":
         return get_explicit_model
-    elif model_type == "pytorch":
+    if model_type == "pytorch":
         return get_pytorch_model
-    else:
-        raise ValueError(f"Unknown model type {model_type}")
+    raise ValueError(f"Unknown model type {model_type}")

@@ -160,11 +160,7 @@ def train(
     dataset = get_dataset(block_size=model_params.block_size)
 
     # Obtain the model
-    model = get_explicit_model(
-        block_size=model_params.block_size,
-        embedding_size=model_params.embedding_size,
-        hidden_layer_neurons=model_params.hidden_layer_neurons,
-    )
+    model = get_explicit_model(model_params=model_params)
 
     train_statistics = TrainStatistics()
 
