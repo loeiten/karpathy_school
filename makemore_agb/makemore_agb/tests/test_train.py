@@ -1,6 +1,7 @@
 """Contains tests for the train module."""
 
 from itertools import chain
+from typing import Literal
 
 import pytest
 import torch
@@ -10,7 +11,7 @@ from makemore_agb.data_classes import (
     OptimizationParams,
     TrainStatistics,
 )
-from makemore_agb.models import get_explicit_model
+from makemore_agb.models import get_model_function
 from makemore_agb.preprocessing import get_dataset
 from makemore_agb.train import parse_args, train_neural_net_model
 
@@ -18,12 +19,16 @@ from makemore_agb import DEVICE
 
 
 @pytest.mark.parametrize("batch_normalize", [True, False])
-def test_train_neural_net_model(batch_normalize: bool) -> None:
+@pytest.mark.parametrize("model_type", ["explicit", "pytorch"])
+def test_train_neural_net_model(
+    batch_normalize: bool, model_type: Literal["explicit", "pytorch"]
+) -> None:
     """
     Test the test_train_neural_net_model function.
 
     Args:
         batch_normalize (bool): Whether or not to use batch normalization
+        model_type (Literal["explicit", "pytorch"]): Model to use
     """
     model_params = ModelParams(
         block_size=3,
@@ -36,9 +41,8 @@ def test_train_neural_net_model(batch_normalize: bool) -> None:
     dataset = get_dataset(block_size=model_params.block_size)
 
     # Obtain the model
-    model = get_explicit_model(
-        model_params=model_params,
-    )
+    model_function = get_model_function(model_type=model_type)
+    model = model_function(model_params)
     if batch_normalize:
         batch_normalization_parameters = BatchNormalizationParameters(
             running_mean=torch.zeros(
