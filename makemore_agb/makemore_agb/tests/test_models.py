@@ -74,3 +74,7 @@ def test_get_explicit_model(
     assert b2.shape == torch.Size([VOCAB_SIZE])
     assert batch_normalization_gain.shape == torch.Size([1, hidden_layer_neurons])
     assert batch_normalization_bias.shape == torch.Size([1, hidden_layer_neurons])
+
+
+# FIXME: Add test for pytorch model
+# FIXME: Add test for get_model_function

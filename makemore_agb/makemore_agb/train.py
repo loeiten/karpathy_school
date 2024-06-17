@@ -160,6 +160,7 @@ def train(
     dataset = get_dataset(block_size=model_params.block_size)
 
     # Obtain the model
+    # FIXME: Use get_model_function
     model = get_explicit_model(model_params=model_params)
 
     train_statistics = TrainStatistics()
