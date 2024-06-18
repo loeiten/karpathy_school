@@ -2,7 +2,7 @@
 
 import argparse
 import sys
-from typing import List, Optional, Tuple
+from typing import List, Literal, Optional, Tuple
 
 import torch
 import torch.nn.functional as F
@@ -13,7 +13,7 @@ from makemore_agb.data_classes import (
     TrainStatistics,
 )
 from makemore_agb.evaluation import evaluate
-from makemore_agb.models import get_explicit_model
+from makemore_agb.models import get_model_function
 from makemore_agb.predict import predict_neural_network
 from makemore_agb.preprocessing import get_dataset
 from makemore_agb.visualisation import plot_training
@@ -142,6 +142,7 @@ def train(
     optimization_params: OptimizationParams,
     seed: int = 2147483647,
     batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
+    model_type: Literal["explicit", "pytorch"] = "explicit",
 ) -> Tuple[Tuple[torch.Tensor, ...], TrainStatistics]:
     """Train the model.
 
@@ -151,6 +152,7 @@ def train(
         seed (int): The seed for the random number generator
         batch_normalization_parameters (Optional[BatchNormalizationParameters]):
             If set: Contains the running mean and the running standard deviation
+        model_type (Literal["explicit", "pytorch"]): What model type to use
 
     Returns:
         Tuple[torch.Tensor, ...]: The model
@@ -160,8 +162,8 @@ def train(
     dataset = get_dataset(block_size=model_params.block_size)
 
     # Obtain the model
-    # FIXME: Use get_model_function
-    model = get_explicit_model(model_params=model_params)
+    model_function = get_model_function(model_type=model_type)
+    model = model_function(model_params)
 
     train_statistics = TrainStatistics()
 
@@ -184,7 +186,8 @@ def train(
 def train_and_plot(
     model_params: ModelParams,
     optimization_params: OptimizationParams,
-    batch_normalize=False,
+    batch_normalize: bool = False,
+    model_type: Literal["explicit", "pytorch"] = "explicit",
 ) -> None:
     """Train the model and plot the statistics.
 
@@ -192,6 +195,7 @@ def train_and_plot(
         model_params (ModelParams): The model parameters
         optimization_params (OptimizationParams): The optimization parameters
         batch_normalize (bool): Whether or not to use batch normalization
+        model_type (Literal["explicit", "pytorch"]): What model type to use
     """
     if batch_normalize:
         # These parameters will be used as batch norm parameters during inference
@@ -215,6 +219,7 @@ def train_and_plot(
         model_params=model_params,
         optimization_params=optimization_params,
         batch_normalization_parameters=batch_normalization_parameters,
+        model_type=model_type,
     )
 
     plot_training(train_statistics=train_statistics)
@@ -296,6 +301,13 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
         action="store_true",
         help="Whether or not to use batch normalization",
     )
+    parser.add_argument(
+        "-t",
+        "--model-type",
+        type=str,
+        choices=("explicit", "pytorch"),
+        help="What model type to use",
+    )
 
     args = parser.parse_args(sys_args)
     return args
@@ -322,6 +334,7 @@ def main(sys_args: List[str]):
         model_params=model_params,
         optimization_params=optimization_params,
         batch_normalize=args.batch_normalize,
+        model_type=args.model_type,
     )
 
 
