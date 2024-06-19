@@ -3,7 +3,10 @@
 import pytest
 import torch
 from makemore_agb.data_classes import ModelParams
-from makemore_agb.models import get_explicit_model
+from makemore_agb.models import (
+    get_explicit_model,
+    get_model_function,
+)
 
 from makemore_agb import VOCAB_SIZE
 
@@ -77,4 +80,12 @@ def test_get_explicit_model(
 
 
 # FIXME: Add test for pytorch model
-# FIXME: Add test for get_model_function
+def test_get_model_function() -> None:
+    """Test the get model function."""
+    model_function = get_model_function("explicit")
+    assert model_function.__name__ == "get_explicit_model"
+    model_function = get_model_function("pytorch")
+    assert model_function.__name__ == "get_pytorch_model"
+
+    with pytest.raises(ValueError):
+        get_model_function("I do not exists")  # type: ignore
