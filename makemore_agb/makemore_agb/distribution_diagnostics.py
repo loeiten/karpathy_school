@@ -6,7 +6,7 @@ from typing import List, Literal
 
 import matplotlib.pyplot as plt
 import torch
-from makemore_agb.data_classes import BatchNormalizationParameters
+from makemore_agb.data_classes import BatchNormalizationParameters, ModelParams
 from makemore_agb.models import get_model_function
 from makemore_agb.predict import predict_neural_network
 from makemore_agb.preprocessing import get_dataset
@@ -38,21 +38,20 @@ def plot_initial_distributions(
         seed (int): The seed for the random number generator
         show (bool): Whether or not to show the plot
     """
-    block_size = 3
+    model_params = ModelParams(
+        block_size=3,
+        embedding_size=10,
+        hidden_layer_neurons=200,
+        seed=seed,
+        good_initialization=good_initialization,
+    )
     batch_size = 32
-    hidden_layer_neurons = 200
     g = torch.Generator(device=DEVICE).manual_seed(seed)
 
     model_function = get_model_function(model_type)
 
-    model = model_function(
-        block_size=block_size,
-        embedding_size=10,
-        hidden_layer_neurons=hidden_layer_neurons,
-        good_initialization=good_initialization,
-        batch_normalize=batch_normalize,
-    )
-    dataset = get_dataset(block_size=block_size)
+    model = model_function(model_params)
+    dataset = get_dataset(block_size=model_params.block_size)
     training_data = dataset["training_input_data"]
     idxs = torch.randint(
         low=0,
@@ -67,12 +66,12 @@ def plot_initial_distributions(
         # and b1 is so that h_pre_activation is roughly gaussian
         batch_normalization_parameters = BatchNormalizationParameters(
             running_mean=torch.zeros(
-                (1, hidden_layer_neurons),
+                (1, model_params.hidden_layer_neurons),
                 requires_grad=False,
                 device=DEVICE,
             ),
             running_std=torch.ones(
-                (1, hidden_layer_neurons),
+                (1, model_params.hidden_layer_neurons),
                 requires_grad=False,
                 device=DEVICE,
             ),
