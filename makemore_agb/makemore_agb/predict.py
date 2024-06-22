@@ -1,14 +1,57 @@
 """Module to run inference on the model."""
 
-from typing import Optional, Tuple
+from typing import Literal, Optional, Tuple
 
 import torch
 from makemore_agb.data_classes import BatchNormalizationParameters
 
 
 # Reducing the number of locals here will penalize the didactical purpose
-# pylint: disable-next=too-many-locals
+# pylint: disable-next=too-many-arguments
 def predict_neural_network(
+    model: Tuple[torch.Tensor, ...],
+    input_data: torch.Tensor,
+    inspect_pre_activation_and_h: bool = False,
+    batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
+    training: bool = False,
+    model_type: Literal["explicit", "pytorch"] = "explicit",
+) -> Tuple[torch.Tensor, ...]:
+    """Predict the neural net model.
+
+    Raises:
+        NotImplementedError: If a model_type with no implemented predictor is used
+
+    Args:
+        model (Tuple[torch.Tensor, ...]): The model (weights) to use
+        input_data (torch.Tensor): The data to run inference on.
+            This data has the shape (batch_size, block_size)
+        inspect_pre_activation_and_h (bool): Whether or not to output the
+            pre-activation and activation
+        batch_normalization_parameters (Optional[BatchNormalizationParameters]):
+            If set: Contains the running mean and the running standard deviation
+        training (bool): Flag to keep track of whether we're training or not
+        model_type (Literal["explicit", "pytorch"]): What model type to use
+
+    Returns:
+        torch.Tensor: The achieved logits with shape (batch_size)
+    """
+    if model_type == "explicit":
+        return predict_using_explicit_network(
+            model=model,
+            input_data=input_data,
+            inspect_pre_activation_and_h=inspect_pre_activation_and_h,
+            batch_normalization_parameters=batch_normalization_parameters,
+            training=training,
+        )
+
+    raise NotImplementedError(
+        f"Model type {model_type} is not supported for prediction"
+    )
+
+
+# Reducing the number of locals here will penalize the didactical purpose
+# pylint: disable-next=too-many-locals
+def predict_using_explicit_network(
     model: Tuple[torch.Tensor, ...],
     input_data: torch.Tensor,
     inspect_pre_activation_and_h: bool = False,
