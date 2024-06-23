@@ -20,6 +20,9 @@ def predict_neural_network(
 
     Raises:
         NotImplementedError: If a model_type with no implemented predictor is used
+        ValueError: If inspect_pre_activation_and_h is passed to the pytorch model
+        ValueError: If batch_normalization_parameters is passed to the pytorch model
+        ValueError: If training is passed to the pytorch model
 
     Args:
         model (Tuple[torch.Tensor, ...]): The model (weights) to use
@@ -43,6 +46,23 @@ def predict_neural_network(
             batch_normalization_parameters=batch_normalization_parameters,
             training=training,
         )
+    if model_type == "pytorch":
+        if inspect_pre_activation_and_h:
+            raise ValueError(
+                "Inspection of pre activation and h not possible using the "
+                "pytorch model"
+            )
+        if batch_normalization_parameters is not None:
+            raise ValueError("Batch normalization parameters are inherent in the layer")
+        if training:
+            raise ValueError(
+                "Training is inherent in the layers needing it and does not need "
+                "to be passed to the predictor"
+            )
+        return predict_using_pytorch_network(
+            model=model,
+            input_data=input_data,
+        )
 
     raise NotImplementedError(
         f"Model type {model_type} is not supported for prediction"
@@ -58,7 +78,7 @@ def predict_using_explicit_network(
     batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
     training: bool = False,
 ) -> Tuple[torch.Tensor, ...]:
-    """Predict the neural net model.
+    """Predict using the explicit network model.
 
     Args:
         model (Tuple[torch.Tensor, ...]): The model (weights) to use
@@ -162,3 +182,41 @@ def predict_using_explicit_network(
     if not inspect_pre_activation_and_h:
         return (logits,)
     return (logits, h_pre_activation, h)
+
+
+def predict_using_pytorch_network(
+    model: Tuple[torch.Tensor, ...],
+    input_data: torch.Tensor,
+) -> Tuple[torch.Tensor, ...]:
+    """Predict using the pytorch-like model.
+
+    Args:
+        model (Tuple[torch.Tensor, ...]): The model (weights) to use
+        input_data (torch.Tensor): The data to run inference on.
+            This data has the shape (batch_size, block_size)
+
+    Returns:
+        torch.Tensor: The achieved logits with shape (batch_size)
+    """
+    c = model[0]
+    # NOTE: c has dimension (VOCAB_SIZE, embedding_size)
+    #       input_data has the dimension (batch_size, block_size)
+    #       c[input_data] will grab embedding_size vectors for each of the
+    #       block_size characters
+    #       The dimension of emb is therefore
+    #       (batch_size, block_size, embedding_size)
+    embedding = c[input_data]
+    # The block needs to be concatenated before multiplying it with the
+    # weight
+    # That is, the dimension size will be block_size*embedding_size
+    # Another way to look at it is that we need the batch size to stay the
+    # same, whereas the second dimension should be the rest should be squashed
+    # together
+    concatenated_embedding = embedding.view(embedding.shape[0], -1)
+    # Alias
+    x = concatenated_embedding
+    for layer in model[1:]:
+        x = layer(x)
+    logits = x
+
+    return (logits,)
