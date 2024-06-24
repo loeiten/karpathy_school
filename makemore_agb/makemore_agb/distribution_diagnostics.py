@@ -44,6 +44,7 @@ def plot_initial_distributions(
         hidden_layer_neurons=200,
         seed=seed,
         good_initialization=good_initialization,
+        batch_normalize=batch_normalize,
     )
     batch_size = 32
     g = torch.Generator(device=DEVICE).manual_seed(seed)
