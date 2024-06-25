@@ -239,11 +239,19 @@ def get_pytorch_model(
         # Set the correct gain in the sandwich layers as the tanh layers are
         # compressing the distribution
         with torch.no_grad():
-            if not isinstance(layers[-1], Linear):
-                raise TypeError("Last layer must be linear")
+            if model_params.batch_normalize:
+                last_linear_layer = -2
+            else:
+                last_linear_layer = -1
+            if not isinstance(layers[last_linear_layer], Linear):
+                raise TypeError(
+                    "Expected to find linear layer, "
+                    f"found {type(layers[last_linear_layer])}"
+                )
             # Make last layer less confident
-            layers[-1].weight *= 0.1
-            for layer in layers[:-1]:
+            # mypy does not correctly infer the type
+            layers[last_linear_layer].weight *= 0.1  # type: ignore
+            for layer in layers[:last_linear_layer]:
                 if isinstance(layer, Linear):
                     layer.weight *= 5 / 3
                     # Let the bias be close to zero, but with some entropy
