@@ -255,7 +255,8 @@ def get_pytorch_model(
                 if isinstance(layer, Linear):
                     layer.weight *= 5 / 3
                     # Let the bias be close to zero, but with some entropy
-                    layer.bias *= 0.01
+                    layer.bias = torch.zeros(layer.weight.shape[1])
+                    layer.bias += 0.01
 
     parameters = [c] + [
         params for layer in layers for params in layer.parameters()  # type: ignore
