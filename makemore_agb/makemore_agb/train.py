@@ -23,7 +23,7 @@ from makemore_agb import DATASET, DEVICE
 
 
 # Reducing the number of locals here will penalize the didactical purpose
-# pylint: disable-next=too-many-arguments
+# pylint: disable-next=too-many-arguments,too-many-locals
 def train_neural_net_model(
     model: Tuple[torch.Tensor, ...],
     dataset: DATASET,
@@ -31,6 +31,7 @@ def train_neural_net_model(
     seed: int = 2147483647,
     train_statistics: Optional[TrainStatistics] = None,
     batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
+    model_type: Literal["explicit", "pytorch"] = "explicit",
 ) -> Tuple[torch.Tensor, ...]:
     """Train the neural net model.
 
@@ -45,6 +46,7 @@ def train_neural_net_model(
             statistics of the training job
         batch_normalization_parameters (Optional[BatchNormalizationParameters]):
             If set: Contains the running mean and the running standard deviation
+        model_type (Literal["explicit", "pytorch"]): What model type to use
 
     Returns:
         Tuple[torch.Tensor, ...]: The trained model
@@ -84,6 +86,7 @@ def train_neural_net_model(
             input_data=dataset["training_input_data"][idxs],
             batch_normalization_parameters=batch_normalization_parameters,
             training=True,
+            model_type=model_type,
         )[0]
         loss = F.cross_entropy(logits, dataset["training_ground_truth"][idxs])
 
@@ -113,6 +116,7 @@ def train_neural_net_model(
                     input_data=dataset["training_input_data"],
                     ground_truth=dataset["training_ground_truth"],
                     batch_normalization_parameters=batch_normalization_parameters,
+                    model_type=model_type,
                 )
                 train_statistics.eval_training_loss.append(cur_training_loss)
                 train_statistics.eval_training_step.append(optimization_params.cur_step)
@@ -122,6 +126,7 @@ def train_neural_net_model(
                     input_data=dataset["validation_input_data"],
                     ground_truth=dataset["validation_ground_truth"],
                     batch_normalization_parameters=batch_normalization_parameters,
+                    model_type=model_type,
                 )
                 train_statistics.eval_validation_loss.append(cur_validation_loss)
                 train_statistics.eval_validation_step.append(

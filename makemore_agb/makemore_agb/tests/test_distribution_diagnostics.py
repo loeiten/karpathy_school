@@ -1,13 +1,18 @@
 """Contains tests for the distribution diagnostics module."""
 
+from typing import Literal
+
 import pytest
 from makemore_agb.distribution_diagnostics import parse_args, plot_initial_distributions
 
 
 @pytest.mark.parametrize("batch_normalize", [True, False])
 @pytest.mark.parametrize("good_initialization", [True, False])
+@pytest.mark.parametrize("model_type", ["explicit", "pytorch"])
 def test_plot_initial_distributions(
-    good_initialization: bool, batch_normalize: bool
+    good_initialization: bool,
+    batch_normalize: bool,
+    model_type: Literal["explicit", "pytorch"] = "explicit",
 ) -> None:
     """Test the plot_initial_distributions function.
 
@@ -15,11 +20,13 @@ def test_plot_initial_distributions(
         good_initialization (bool): Whether or not to use a good distribution
             for the initialization weights
         batch_normalize (bool): Whether or not to use batch normalization
+        model_type (Literal["explicit", "pytorch"]): What model type to use
     """
     plot_initial_distributions(
         good_initialization=good_initialization,
         batch_normalize=batch_normalize,
         show=False,
+        model_type=model_type,
     )
 
 

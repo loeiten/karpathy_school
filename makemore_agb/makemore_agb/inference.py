@@ -2,7 +2,7 @@
 
 import argparse
 import sys
-from typing import List, Optional, Tuple
+from typing import List, Literal, Optional, Tuple
 
 import torch
 from makemore_agb.data_classes import (
@@ -21,6 +21,7 @@ def run_inference(
     n_samples: int = 20,
     batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
     seed: int = 2147483647,
+    model_type: Literal["explicit", "pytorch"] = "explicit",
 ) -> Tuple[str, ...]:
     """Run inference on the model.
 
@@ -31,6 +32,7 @@ def run_inference(
         batch_normalization_parameters (Optional[BatchNormalizationParameters]):
             If set: Contains the running mean and the running standard deviation
         seed (int, optional): The seed to use. Defaults to 2147483647.
+        model_type (Literal["explicit", "pytorch"]): What model type to use
 
     Returns:
         Tuple[str, ...]: The predictions
@@ -55,6 +57,7 @@ def run_inference(
                 input_data=torch.tensor([context]),
                 batch_normalization_parameters=batch_normalization_parameters,
                 training=False,
+                model_type=model_type,
             )[0]
             probs = torch.softmax(logits, dim=1)
             index = torch.multinomial(probs, num_samples=1, generator=g)
@@ -91,12 +94,18 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
         default=20,
         help=("Number of names to predict"),
     )
-
     parser.add_argument(
         "-m",
         "--batch-normalize",
         help=("Whether or not to use batch normalization"),
         action="store_true",
+    )
+    parser.add_argument(
+        "-t",
+        "--model-type",
+        type=str,
+        choices=("explicit", "pytorch"),
+        help="What model type to use",
     )
 
     args = parser.parse_args(sys_args)
@@ -145,6 +154,7 @@ def main(sys_args: List[str]):
         model=model,
         n_samples=args.n_predictions,
         batch_normalization_parameters=batch_normalization_parameters,
+        model_type=args.model_type,
     )
     for prediction in predictions:
         print(f"{prediction}")

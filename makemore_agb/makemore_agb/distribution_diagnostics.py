@@ -84,6 +84,7 @@ def plot_initial_distributions(
         input_data=training_data[idxs],
         batch_normalization_parameters=batch_normalization_parameters,
         inspect_pre_activation_and_h=True,
+        model_type=model_type,
     )
     if len(output) != 3:
         raise RuntimeError("Got unexpected output from the predictor")
