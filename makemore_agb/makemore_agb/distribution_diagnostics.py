@@ -18,7 +18,7 @@ from makemore_agb import DEVICE
 # Reducing the number of locals here will penalize the didactical purpose
 # pylint: disable-next=too-many-locals
 def plot_initial_distributions(
-    model_type: Literal["explicit", "pytorch"] = "explicit",
+    model_type: Literal["explicit", "pytorch"],
     good_initialization: bool = False,
     batch_normalize: bool = False,
     seed: int = 2147483647,
@@ -80,11 +80,11 @@ def plot_initial_distributions(
     else:
         batch_normalization_parameters = None
     output = predict_neural_network(
+        model_type=model_type,
         model=model,
         input_data=training_data[idxs],
         batch_normalization_parameters=batch_normalization_parameters,
         inspect_pre_activation_and_h=True,
-        model_type=model_type,
     )
     if len(output) != 3:
         raise RuntimeError("Got unexpected output from the predictor")

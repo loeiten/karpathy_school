@@ -25,17 +25,18 @@ from makemore_agb import DATASET, DEVICE
 # Reducing the number of locals here will penalize the didactical purpose
 # pylint: disable-next=too-many-arguments,too-many-locals
 def train_neural_net_model(
+    model_type: Literal["explicit", "pytorch"],
     model: Tuple[torch.Tensor, ...],
     dataset: DATASET,
     optimization_params: Optional[OptimizationParams],
     seed: int = 2147483647,
     train_statistics: Optional[TrainStatistics] = None,
     batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
-    model_type: Literal["explicit", "pytorch"] = "explicit",
 ) -> Tuple[torch.Tensor, ...]:
     """Train the neural net model.
 
     Args:
+        model_type (Literal["explicit", "pytorch"]): What model type to use
         model (Tuple[torch.Tensor, ...]): The model (weights) to use
         dataset: DATASET
             Data containing the training and validation set
@@ -46,7 +47,6 @@ def train_neural_net_model(
             statistics of the training job
         batch_normalization_parameters (Optional[BatchNormalizationParameters]):
             If set: Contains the running mean and the running standard deviation
-        model_type (Literal["explicit", "pytorch"]): What model type to use
 
     Returns:
         Tuple[torch.Tensor, ...]: The trained model
@@ -82,11 +82,11 @@ def train_neural_net_model(
         #       (batch_size, block_size)
         # Note the [0] as predict always returns a tuple
         logits = predict_neural_network(
+            model_type=model_type,
             model=model,
             input_data=dataset["training_input_data"][idxs],
             batch_normalization_parameters=batch_normalization_parameters,
             training=True,
-            model_type=model_type,
         )[0]
         loss = F.cross_entropy(logits, dataset["training_ground_truth"][idxs])
 
@@ -112,21 +112,21 @@ def train_neural_net_model(
             if train_statistics is not None:
                 # Predict on the whole training set
                 cur_training_loss = evaluate(
+                    model_type=model_type,
                     model=model,
                     input_data=dataset["training_input_data"],
                     ground_truth=dataset["training_ground_truth"],
                     batch_normalization_parameters=batch_normalization_parameters,
-                    model_type=model_type,
                 )
                 train_statistics.eval_training_loss.append(cur_training_loss)
                 train_statistics.eval_training_step.append(optimization_params.cur_step)
                 # Predict on evaluation set
                 cur_validation_loss = evaluate(
+                    model_type=model_type,
                     model=model,
                     input_data=dataset["validation_input_data"],
                     ground_truth=dataset["validation_ground_truth"],
                     batch_normalization_parameters=batch_normalization_parameters,
-                    model_type=model_type,
                 )
                 train_statistics.eval_validation_loss.append(cur_validation_loss)
                 train_statistics.eval_validation_step.append(
@@ -143,21 +143,21 @@ def train_neural_net_model(
 
 
 def train(
+    model_type: Literal["explicit", "pytorch"],
     model_params: ModelParams,
     optimization_params: OptimizationParams,
     seed: int = 2147483647,
     batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
-    model_type: Literal["explicit", "pytorch"] = "explicit",
 ) -> Tuple[Tuple[torch.Tensor, ...], TrainStatistics]:
     """Train the model.
 
     Args:
+        model_type (Literal["explicit", "pytorch"]): What model type to use
         model_params (ModelParams): The model parameters
         optimization_params (OptimizationParams): The optimization parameters
         seed (int): The seed for the random number generator
         batch_normalization_parameters (Optional[BatchNormalizationParameters]):
             If set: Contains the running mean and the running standard deviation
-        model_type (Literal["explicit", "pytorch"]): What model type to use
 
     Returns:
         Tuple[torch.Tensor, ...]: The model
@@ -189,18 +189,18 @@ def train(
 
 
 def train_and_plot(
+    model_type: Literal["explicit", "pytorch"],
     model_params: ModelParams,
     optimization_params: OptimizationParams,
     batch_normalize: bool = False,
-    model_type: Literal["explicit", "pytorch"] = "explicit",
 ) -> None:
     """Train the model and plot the statistics.
 
     Args:
+        model_type (Literal["explicit", "pytorch"]): What model type to use
         model_params (ModelParams): The model parameters
         optimization_params (OptimizationParams): The optimization parameters
         batch_normalize (bool): Whether or not to use batch normalization
-        model_type (Literal["explicit", "pytorch"]): What model type to use
     """
     if batch_normalize:
         # These parameters will be used as batch norm parameters during inference
@@ -221,10 +221,10 @@ def train_and_plot(
     else:
         batch_normalization_parameters = None
     _, train_statistics = train(
+        model_type=model_type,
         model_params=model_params,
         optimization_params=optimization_params,
         batch_normalization_parameters=batch_normalization_parameters,
-        model_type=model_type,
     )
 
     plot_training(train_statistics=train_statistics)
@@ -336,10 +336,10 @@ def main(sys_args: List[str]):
         batch_size=args.batch_size,
     )
     train_and_plot(
+        model_type=args.model_type,
         model_params=model_params,
         optimization_params=optimization_params,
         batch_normalize=args.batch_normalize,
-        model_type=args.model_type,
     )
 
 

@@ -9,12 +9,12 @@ from makemore_agb.data_classes import BatchNormalizationParameters
 # Reducing the number of locals here will penalize the didactical purpose
 # pylint: disable-next=too-many-arguments
 def predict_neural_network(
+    model_type: Literal["explicit", "pytorch"],
     model: Tuple[torch.Tensor, ...],
     input_data: torch.Tensor,
     inspect_pre_activation_and_h: bool = False,
     batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
     training: bool = False,
-    model_type: Literal["explicit", "pytorch"] = "explicit",
 ) -> Tuple[torch.Tensor, ...]:
     """Predict the neural net model.
 
@@ -25,6 +25,7 @@ def predict_neural_network(
         ValueError: If training is passed to the pytorch model
 
     Args:
+        model_type (Literal["explicit", "pytorch"]): What model type to use
         model (Tuple[torch.Tensor, ...]): The model (weights) to use
         input_data (torch.Tensor): The data to run inference on.
             This data has the shape (batch_size, block_size)
@@ -33,7 +34,6 @@ def predict_neural_network(
         batch_normalization_parameters (Optional[BatchNormalizationParameters]):
             If set: Contains the running mean and the running standard deviation
         training (bool): Flag to keep track of whether we're training or not
-        model_type (Literal["explicit", "pytorch"]): What model type to use
 
     Returns:
         torch.Tensor: The achieved logits with shape (batch_size)

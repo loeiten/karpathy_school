@@ -274,7 +274,7 @@ def get_pytorch_model(
 
 
 def get_model_function(
-    model_type: Literal["explicit", "pytorch"] = "explicit"
+    model_type: Literal["explicit", "pytorch"]
 ) -> Callable[[ModelParams], Tuple[torch.Tensor, ...]]:
     """Return the model function.
 

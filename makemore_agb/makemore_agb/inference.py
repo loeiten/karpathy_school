@@ -17,22 +17,22 @@ from makemore_agb import DEVICE, INDEX_TO_TOKEN, TOKEN_TO_INDEX
 
 
 def run_inference(
+    model_type: Literal["explicit", "pytorch"],
     model: Tuple[torch.Tensor, ...],
     n_samples: int = 20,
     batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
     seed: int = 2147483647,
-    model_type: Literal["explicit", "pytorch"] = "explicit",
 ) -> Tuple[str, ...]:
     """Run inference on the model.
 
     Args:
+        model_type (Literal["explicit", "pytorch"]): What model type to use
         model (Tuple[torch.Tensor, ...]): The model to run inference on.
         n_samples (int, optional): The number of inferences to run.
             Defaults to 20.
         batch_normalization_parameters (Optional[BatchNormalizationParameters]):
             If set: Contains the running mean and the running standard deviation
         seed (int, optional): The seed to use. Defaults to 2147483647.
-        model_type (Literal["explicit", "pytorch"]): What model type to use
 
     Returns:
         Tuple[str, ...]: The predictions
@@ -53,11 +53,11 @@ def run_inference(
             # Note the [] to get the batch shape correct
             # Note the [0] as predict always returns a tuple
             logits = predict_neural_network(
+                model_type=model_type,
                 model=model,
                 input_data=torch.tensor([context]),
                 batch_normalization_parameters=batch_normalization_parameters,
                 training=False,
-                model_type=model_type,
             )[0]
             probs = torch.softmax(logits, dim=1)
             index = torch.multinomial(probs, num_samples=1, generator=g)
@@ -151,10 +151,10 @@ def main(sys_args: List[str]):
         batch_normalization_parameters=batch_normalization_parameters,
     )
     predictions = run_inference(
+        model_type=args.model_type,
         model=model,
         n_samples=args.n_predictions,
         batch_normalization_parameters=batch_normalization_parameters,
-        model_type=args.model_type,
     )
     for prediction in predictions:
         print(f"{prediction}")
