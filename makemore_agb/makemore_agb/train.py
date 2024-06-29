@@ -174,6 +174,7 @@ def train(
 
     # Train for one step
     model = train_neural_net_model(
+        model_type=model_type,
         model=model,
         dataset=dataset,
         optimization_params=optimization_params,

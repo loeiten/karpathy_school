@@ -146,6 +146,7 @@ def main(sys_args: List[str]):
     else:
         batch_normalization_parameters = None
     model, _ = train(
+        model_type=args.model_type,
         model_params=model_params,
         optimization_params=optimization_params,
         batch_normalization_parameters=batch_normalization_parameters,

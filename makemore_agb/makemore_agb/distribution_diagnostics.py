@@ -133,12 +133,18 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
         ),
         action="store_true",
     )
-
     parser.add_argument(
         "-m",
         "--batch-normalize",
         help=("Whether or not to batch normalization"),
         action="store_true",
+    )
+    parser.add_argument(
+        "-t",
+        "--model-type",
+        type=str,
+        choices=("explicit", "pytorch"),
+        help="What model type to use",
     )
 
     args = parser.parse_args(sys_args)
@@ -153,6 +159,7 @@ def main(sys_args: List[str]):
     """
     args = parse_args(sys_args)
     plot_initial_distributions(
+        model_type=args.model_type,
         good_initialization=args.good_initialization,
         batch_normalize=args.batch_normalize,
     )
