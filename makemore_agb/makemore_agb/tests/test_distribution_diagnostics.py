@@ -12,7 +12,7 @@ from makemore_agb.distribution_diagnostics import parse_args, plot_initial_distr
 def test_plot_initial_distributions(
     good_initialization: bool,
     batch_normalize: bool,
-    model_type: Literal["explicit", "pytorch"] = "explicit",
+    model_type: Literal["explicit", "pytorch"],
 ) -> None:
     """Test the plot_initial_distributions function.
 
