@@ -71,6 +71,7 @@ def test_train_neural_net_model(
 
     # Train for one step without train_statistics
     model = train_neural_net_model(
+        model_type=model_type,
         model=model,
         dataset=dataset,
         optimization_params=optimization_params,
@@ -81,6 +82,7 @@ def test_train_neural_net_model(
     # Add the train_statics
     train_statistics = TrainStatistics()
     model = train_neural_net_model(
+        model_type=model_type,
         model=model,
         dataset=dataset,
         optimization_params=optimization_params,
@@ -103,6 +105,7 @@ def test_train_neural_net_model(
 
     # Train for one step
     model = train_neural_net_model(
+        model_type=model_type,
         model=model,
         dataset=dataset,
         optimization_params=optimization_params,
