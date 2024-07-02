@@ -43,7 +43,7 @@ def test_train_neural_net_model(
     # Obtain the model
     model_function = get_model_function(model_type=model_type)
     model = model_function(model_params)
-    if batch_normalize:
+    if batch_normalize and model_type == "explicit":
         batch_normalization_parameters = BatchNormalizationParameters(
             running_mean=torch.zeros(
                 (1, model_params.hidden_layer_neurons),
