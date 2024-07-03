@@ -5,6 +5,7 @@ from typing import Callable, Literal, Tuple
 import torch
 from makemore_agb.batchnorm1d import BatchNorm1d
 from makemore_agb.data_classes import ModelParams
+from makemore_agb.embedding import Embedding
 from makemore_agb.linear import Linear
 from makemore_agb.tanh import Tanh
 
@@ -150,14 +151,6 @@ def get_pytorch_model(
         Tuple[torch.Tensor, ...]: A tuple containing the parameters of the
             neural net.
     """
-    g = torch.Generator(device=DEVICE).manual_seed(model_params.seed)
-    c = torch.randn(
-        (VOCAB_SIZE, model_params.embedding_size),
-        generator=g,
-        requires_grad=True,
-        device=DEVICE,
-    )
-
     if model_params.batch_normalize:
         # NOTE: When we are using batch normalization the biases will get
         #       cancelled out by subtracting batch_normalization_mean, and the
@@ -165,6 +158,9 @@ def get_pytorch_model(
         #       batch_normalization_bias will in any case play the role as bias
         #       in the pre activation layers.
         layers = [
+            Embedding(
+                num_embeddings=VOCAB_SIZE, embedding_dim=model_params.embedding_size
+            ),
             Linear(
                 fan_in=model_params.embedding_size * model_params.block_size,
                 fan_out=model_params.hidden_layer_neurons,
@@ -207,6 +203,9 @@ def get_pytorch_model(
         ]
     else:
         layers = [
+            Embedding(
+                num_embeddings=VOCAB_SIZE, embedding_dim=model_params.embedding_size
+            ),
             Linear(
                 fan_in=model_params.embedding_size * model_params.block_size,
                 fan_out=model_params.hidden_layer_neurons,
@@ -258,6 +257,7 @@ def get_pytorch_model(
                     layer.bias = torch.zeros(layer.weight.shape[1])
                     layer.bias += 0.01
 
+    # FIXME: Need to output list of objects instead of tensors
     parameters = [c] + [
         params for layer in layers for params in layer.parameters()  # type: ignore
     ]
