@@ -258,7 +258,7 @@ def get_pytorch_model(
                     layer.bias += 0.01
 
     # FIXME: Need to output list of objects instead of tensors
-    parameters = [c] + [
+    parameters = [
         params for layer in layers for params in layer.parameters()  # type: ignore
     ]
 
@@ -270,7 +270,7 @@ def get_pytorch_model(
         f"Number of elements in model: {sum(layer.nelement() for layer in parameters)}"
     )
 
-    return tuple(parameters)
+    return tuple(layers)
 
 
 def get_model_function(

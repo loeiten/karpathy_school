@@ -17,7 +17,7 @@ class Embedding:
         device: Optional[torch.device] = None,
         seed: int = 2147483647,
     ):
-        """Set the weights and biases for the embedding layer.
+        """Set the weights for the embedding layer.
 
         Args:
             num_embeddings (int): Size of the dictionary of the embeddings.
