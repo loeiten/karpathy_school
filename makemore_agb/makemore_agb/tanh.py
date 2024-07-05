@@ -3,9 +3,10 @@
 from typing import List, Optional
 
 import torch
+from makemore_agb.module import Module
 
 
-class Tanh:
+class Tanh(Module):
     """Class mimicking the torch.nn.Tanh Module in PyTorch."""
 
     # Reducing the number of arguments here would be counter productive
