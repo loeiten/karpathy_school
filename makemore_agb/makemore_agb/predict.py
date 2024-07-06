@@ -205,7 +205,7 @@ def predict_using_pytorch_network(
     #       block_size characters
     #       The dimension of emb is therefore
     #       (batch_size, block_size, embedding_size)
-    embedding = c[input_data]
+    embedding = c(input_data)
     # The block needs to be concatenated before multiplying it with the
     # weight
     # That is, the dimension size will be block_size*embedding_size

@@ -1,12 +1,13 @@
 """Module for models."""
 
-from typing import Callable, Literal, Tuple
+from typing import Callable, Literal, Tuple, Union
 
 import torch
 from makemore_agb.batchnorm1d import BatchNorm1d
 from makemore_agb.data_classes import ModelParams
 from makemore_agb.embedding import Embedding
 from makemore_agb.linear import Linear
+from makemore_agb.module import Module
 from makemore_agb.tanh import Tanh
 
 from makemore_agb import DEVICE, VOCAB_SIZE
@@ -138,7 +139,7 @@ def get_explicit_model(model_params: ModelParams) -> Tuple[torch.Tensor, ...]:
 # pylint: disable-next=too-many-arguments
 def get_pytorch_model(
     model_params: ModelParams,
-) -> Tuple[torch.Tensor, ...]:
+) -> Tuple[Module, ...]:
     """Return the pytorch model.
 
     Raises:
@@ -148,7 +149,7 @@ def get_pytorch_model(
         model_params (ModelParams): The parameters of the model
 
     Returns:
-        Tuple[torch.Tensor, ...]: A tuple containing the parameters of the
+        Tuple[Module, ...]: A tuple containing the parameters of the
             neural net.
     """
     if model_params.batch_normalize:
@@ -275,7 +276,7 @@ def get_pytorch_model(
 
 def get_model_function(
     model_type: Literal["explicit", "pytorch"]
-) -> Callable[[ModelParams], Tuple[torch.Tensor, ...]]:
+) -> Callable[[ModelParams], Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]]:
     """Return the model function.
 
     Raises:
@@ -285,8 +286,8 @@ def get_model_function(
         model_type (Literal["explicit", "pytorch"]): What model type to use
 
     Returns:
-        Callable[[ModelParams], Tuple[torch.Tensor, ...]]: The
-            function to get the model from
+        Callable[[ModelParams], Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]]:
+            The function to get the model from
     """
     if model_type == "explicit":
         return get_explicit_model
