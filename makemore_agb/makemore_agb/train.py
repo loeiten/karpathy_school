@@ -2,7 +2,7 @@
 
 import argparse
 import sys
-from typing import List, Literal, Optional, Tuple
+from typing import List, Literal, Optional, Tuple, Union
 
 import torch
 import torch.nn.functional as F
@@ -14,6 +14,7 @@ from makemore_agb.data_classes import (
 )
 from makemore_agb.evaluation import evaluate
 from makemore_agb.models import get_model_function
+from makemore_agb.module import Module
 from makemore_agb.predict import predict_neural_network
 from makemore_agb.preprocessing import get_dataset
 from makemore_agb.visualisation import plot_training
@@ -26,7 +27,7 @@ from makemore_agb import DATASET, DEVICE
 # pylint: disable-next=too-many-arguments,too-many-locals
 def train_neural_net_model(
     model_type: Literal["explicit", "pytorch"],
-    model: Tuple[torch.Tensor, ...],
+    model: Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]],
     dataset: DATASET,
     optimization_params: Optional[OptimizationParams],
     seed: int = 2147483647,
@@ -37,7 +38,7 @@ def train_neural_net_model(
 
     Args:
         model_type (Literal["explicit", "pytorch"]): What model type to use
-        model (Tuple[torch.Tensor, ...]): The model (weights) to use
+        model (Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]): The model (weights or Modules) to use
         dataset: DATASET
             Data containing the training and validation set
         optimization_params (Optional[OptimizationParams]): Optimization

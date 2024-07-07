@@ -1,16 +1,17 @@
 """Module to run inference on the model."""
 
-from typing import Literal, Optional, Tuple
+from typing import Literal, Optional, Tuple, Union
 
 import torch
 from makemore_agb.data_classes import BatchNormalizationParameters
+from makemore_agb.module import Module
 
 
 # Reducing the number of locals here will penalize the didactical purpose
 # pylint: disable-next=too-many-arguments
 def predict_neural_network(
     model_type: Literal["explicit", "pytorch"],
-    model: Tuple[torch.Tensor, ...],
+    model: Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]],
     input_data: torch.Tensor,
     inspect_pre_activation_and_h: bool = False,
     batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
@@ -26,7 +27,7 @@ def predict_neural_network(
 
     Args:
         model_type (Literal["explicit", "pytorch"]): What model type to use
-        model (Tuple[torch.Tensor, ...]): The model (weights) to use
+        model (Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]): The model (weights or Modules) to use
         input_data (torch.Tensor): The data to run inference on.
             This data has the shape (batch_size, block_size)
         inspect_pre_activation_and_h (bool): Whether or not to output the
@@ -72,7 +73,7 @@ def predict_neural_network(
 # Reducing the number of locals here will penalize the didactical purpose
 # pylint: disable-next=too-many-locals
 def predict_using_explicit_network(
-    model: Tuple[torch.Tensor, ...],
+    model: Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]],
     input_data: torch.Tensor,
     inspect_pre_activation_and_h: bool = False,
     batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
@@ -81,7 +82,7 @@ def predict_using_explicit_network(
     """Predict using the explicit network model.
 
     Args:
-        model (Tuple[torch.Tensor, ...]): The model (weights) to use
+        model (Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]): The model (weights or Modules) to use
         input_data (torch.Tensor): The data to run inference on.
             This data has the shape (batch_size, block_size)
         inspect_pre_activation_and_h (bool): Whether or not to output the
@@ -185,13 +186,13 @@ def predict_using_explicit_network(
 
 
 def predict_using_pytorch_network(
-    model: Tuple[torch.Tensor, ...],
+    model: Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]],
     input_data: torch.Tensor,
 ) -> Tuple[torch.Tensor, ...]:
     """Predict using the pytorch-like model.
 
     Args:
-        model (Tuple[torch.Tensor, ...]): The model (weights) to use
+        model (Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]): The model (weights or Modules) to use
         input_data (torch.Tensor): The data to run inference on.
             This data has the shape (batch_size, block_size)
 

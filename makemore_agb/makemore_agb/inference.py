@@ -2,7 +2,7 @@
 
 import argparse
 import sys
-from typing import List, Literal, Optional, Tuple
+from typing import List, Literal, Optional, Tuple, Union
 
 import torch
 from makemore_agb.data_classes import (
@@ -10,6 +10,7 @@ from makemore_agb.data_classes import (
     ModelParams,
     OptimizationParams,
 )
+from makemore_agb.module import Module
 from makemore_agb.predict import predict_neural_network
 from makemore_agb.train import train
 
@@ -18,7 +19,7 @@ from makemore_agb import DEVICE, INDEX_TO_TOKEN, TOKEN_TO_INDEX
 
 def run_inference(
     model_type: Literal["explicit", "pytorch"],
-    model: Tuple[torch.Tensor, ...],
+    model: Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]],
     n_samples: int = 20,
     batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
     seed: int = 2147483647,
@@ -27,7 +28,7 @@ def run_inference(
 
     Args:
         model_type (Literal["explicit", "pytorch"]): What model type to use
-        model (Tuple[torch.Tensor, ...]): The model to run inference on.
+        model (Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]) The model to run inference on.
         n_samples (int, optional): The number of inferences to run.
             Defaults to 20.
         batch_normalization_parameters (Optional[BatchNormalizationParameters]):
