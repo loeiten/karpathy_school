@@ -26,9 +26,13 @@ def run_inference(
 ) -> Tuple[str, ...]:
     """Run inference on the model.
 
+    Raises:
+        TypeError: If invalid model is given
+
     Args:
         model_type (Literal["explicit", "pytorch"]): What model type to use
-        model (Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]) The model to run inference on.
+        model (Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]): The model to
+            run inference on.
         n_samples (int, optional): The number of inferences to run.
             Defaults to 20.
         batch_normalization_parameters (Optional[BatchNormalizationParameters]):
@@ -38,10 +42,28 @@ def run_inference(
     Returns:
         Tuple[str, ...]: The predictions
     """
-    # Obtain the embedding size from c
-    embedding_size = int(model[0].shape[-1])
-    # Obtain the block size from w1
-    block_size = int(model[1].shape[-2] / embedding_size)
+    if (
+        model_type == "explicit"
+        and isinstance(model[0], torch.Tensor)
+        and isinstance(model[1], torch.Tensor)
+    ):
+        # Obtain the embedding size from c
+        embedding_size = int(model[0].shape[-1])
+        # Obtain the block size from w1
+        block_size = int(model[1].shape[-2] / embedding_size)
+    elif (
+        model_type == "pytorch"
+        and isinstance(model[0], Module)
+        and isinstance(model[1], Module)
+    ):
+        # Obtain the embedding size from c
+        embedding_size = int(model[0].weight.shape[-1])
+        # Obtain the block size from w1
+        block_size = int(model[1].weight.shape[-2] / embedding_size)
+    else:
+        raise TypeError(
+            f"{model_type=} with {type(model[0])=} and {type(model[1])=} not recognized"
+        )
 
     g = torch.Generator(device=DEVICE).manual_seed(seed)
     predictions: List[str] = []
