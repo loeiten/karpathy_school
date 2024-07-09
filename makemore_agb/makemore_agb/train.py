@@ -36,9 +36,13 @@ def train_neural_net_model(
 ) -> Tuple[torch.Tensor, ...]:
     """Train the neural net model.
 
+    Raises:
+        TypeError: If wrong model type is given
+
     Args:
         model_type (Literal["explicit", "pytorch"]): What model type to use
-        model (Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]): The model (weights or Modules) to use
+        model (Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]): The model
+            (weights or Modules) to use
         dataset: DATASET
             Data containing the training and validation set
         optimization_params (Optional[OptimizationParams]): Optimization
@@ -87,7 +91,7 @@ def train_neural_net_model(
             model=model,
             input_data=dataset["training_input_data"][idxs],
             batch_normalization_parameters=batch_normalization_parameters,
-            training=True if model_type == "explicit" else False,
+            training=(model_type == "explicit"),
         )[0]
         loss = F.cross_entropy(logits, dataset["training_ground_truth"][idxs])
 
@@ -97,13 +101,27 @@ def train_neural_net_model(
             train_statistics.training_step.append(optimization_params.cur_step)
 
         # Backward pass
+        layered_parameters: List[torch.Tensor] = []
+        if all(isinstance(layer, torch.Tensor) for layer in model):
+            # Mypy doesn't recognize that these are all Tensors
+            layered_parameters = model  # type: ignore
+        elif all(isinstance(layer, Module) for layer in model):
+            # Mypy doesn't recognize that these are all Modules
+            # type: ignore
+            layered_parameters = [p for layer in model for p in layer.parameters()]
+        else:
+            raise TypeError(
+                "Model where all the layers are neither Tensors nor "
+                "Modules not recognized"
+            )
+
         # Reset the gradients
-        for parameters in model:
+        for parameters in layered_parameters:
             parameters.grad = None
         loss.backward()
 
         # Update the weights
-        for parameters in model:
+        for parameters in layered_parameters:
             parameters.data += (
                 -optimization_params.learning_rate(optimization_params.cur_step)
                 * parameters.grad
