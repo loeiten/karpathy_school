@@ -70,7 +70,7 @@ class BatchNorm1d(Module):
 
         # Update the running buffers
         if self.training:
-            with torch.no_grad:
+            with torch.no_grad():
                 self.running_mean = (
                     1 - self.momentum
                 ) * self.running_mean + self.momentum * x_mean
