@@ -100,9 +100,11 @@ def test_get_pytorch_model(
 
     model = get_pytorch_model(model_params=model_params)
 
+    layered_parameters = [p for layer in model for p in layer.parameters()]
+
     # Check the number of parameters
     assert (
-        sum(parameters.nelement() for parameters in model)
+        sum(parameters.nelement() for parameters in layered_parameters)
         == (VOCAB_SIZE * embedding_size)  # size of c
         + (block_size * embedding_size * hidden_layer_neurons)  # size of w1
         + (hidden_layer_neurons)  # size of b1
@@ -123,9 +125,11 @@ def test_get_pytorch_model(
     model_params.batch_normalize = True
     model = get_explicit_model(model_params=model_params)
 
+    layered_parameters = [p for layer in model for p in layer.parameters()]
+
     # Check the number of parameters
     assert (
-        sum(parameters.nelement() for parameters in model)
+        sum(parameters.nelement() for parameters in layered_parameters)
         == (VOCAB_SIZE * embedding_size)  # size of c
         + (block_size * embedding_size * hidden_layer_neurons)  # size of w1
         + (hidden_layer_neurons)  # size of b1

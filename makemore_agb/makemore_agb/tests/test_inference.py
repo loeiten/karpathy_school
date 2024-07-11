@@ -50,6 +50,7 @@ def test_run_inference(
         batch_normalization_parameters = None
     # Run inference on the untrained model
     predictions = run_inference(
+        model_type=model_type,
         model=model,
         n_samples=2,
         batch_normalization_parameters=batch_normalization_parameters,
