@@ -258,7 +258,6 @@ def get_pytorch_model(
                     layer.bias = torch.zeros(layer.weight.shape[1])
                     layer.bias += 0.01
 
-    # FIXME: Need to output list of objects instead of tensors
     parameters = [
         params for layer in layers for params in layer.parameters()  # type: ignore
     ]
