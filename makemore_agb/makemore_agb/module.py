@@ -16,8 +16,13 @@ class Module(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def __init__(self, *args, **kwargs) -> None:
-        """Initialize the layer."""
-        self.weight: torch.Tensor
+        """
+        Initialize the layer.
+
+        NOTE: self.out is not in the real PyTorch Module, but we use it to
+              inspect the output in different experiments
+        """
+        self.out: torch.Tensor
 
     @abc.abstractmethod
     def __call__(self, x: torch.Tensor) -> torch.Tensor:
