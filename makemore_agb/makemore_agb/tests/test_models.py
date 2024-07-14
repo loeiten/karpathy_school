@@ -27,7 +27,10 @@ def test_get_explicit_model(
         hidden_layer_neurons (int): Number of neurons in the hidden layer
     """
     model_params = ModelParams(
-        block_size=3, embedding_size=2, hidden_layer_neurons=100, batch_normalize=False
+        block_size=block_size,
+        embedding_size=embedding_size,
+        hidden_layer_neurons=hidden_layer_neurons,
+        batch_normalize=False,
     )
 
     model = get_explicit_model(model_params=model_params)
@@ -95,7 +98,10 @@ def test_get_pytorch_model(
         hidden_layer_neurons (int): Number of neurons in the hidden layer
     """
     model_params = ModelParams(
-        block_size=3, embedding_size=2, hidden_layer_neurons=100, batch_normalize=False
+        block_size=block_size,
+        embedding_size=embedding_size,
+        hidden_layer_neurons=hidden_layer_neurons,
+        batch_normalize=False,
     )
 
     model = get_pytorch_model(model_params=model_params)
@@ -108,8 +114,13 @@ def test_get_pytorch_model(
         == (VOCAB_SIZE * embedding_size)  # size of c
         + (block_size * embedding_size * hidden_layer_neurons)  # size of w1
         + (hidden_layer_neurons)  # size of b1
-        + (hidden_layer_neurons * VOCAB_SIZE)  # size of w2
-        + VOCAB_SIZE  # size of b2
+        + (
+            (hidden_layer_neurons * hidden_layer_neurons)  # size of wx
+            + hidden_layer_neurons  # size of bx
+        )
+        * 4  # Repeated 4 times
+        + (hidden_layer_neurons * VOCAB_SIZE)  # size of wn
+        + VOCAB_SIZE  # size of bn
     )
 
     # We know the exact output from the batch_normalize flag
