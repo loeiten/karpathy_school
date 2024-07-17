@@ -1,5 +1,7 @@
 """Contains tests for the models module."""
 
+import typing
+
 import pytest
 import torch
 from makemore_agb.data_classes import ModelParams
@@ -84,6 +86,8 @@ def test_get_explicit_model(
     assert batch_normalization_bias.shape == torch.Size([1, hidden_layer_neurons])
 
 
+# We disable mypy check as layers have different attributes
+@typing.no_type_check
 @pytest.mark.parametrize(
     "block_size, embedding_size, hidden_layer_neurons",
     ((3, 2, 100), (8, 15, 200), (20, 3, 5)),
