@@ -33,7 +33,7 @@ def test_run_inference(
     )
     model_function = get_model_function(model_type=model_type)
     model = model_function(model_params)
-    if batch_normalize:
+    if batch_normalize and model_type == "explicit":
         batch_normalization_parameters = BatchNormalizationParameters(
             running_mean=torch.zeros(
                 (1, hidden_layer_neurons),
