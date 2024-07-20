@@ -10,6 +10,8 @@ from makemore_agb.data_classes import (
     ModelParams,
     OptimizationParams,
 )
+from makemore_agb.embedding import Embedding
+from makemore_agb.linear import Linear
 from makemore_agb.module import Module
 from makemore_agb.predict import predict_neural_network
 from makemore_agb.train import train
@@ -53,8 +55,8 @@ def run_inference(
         block_size = int(model[1].shape[-2] / embedding_size)
     elif (
         model_type == "pytorch"
-        and isinstance(model[0], Module)
-        and isinstance(model[1], Module)
+        and isinstance(model[0], Embedding)
+        and isinstance(model[1], Linear)
     ):
         # Obtain the embedding size from c
         embedding_size = int(model[0].weight.shape[-1])
