@@ -62,6 +62,10 @@ def run_inference(
         embedding_size = int(model[0].weight.shape[-1])
         # Obtain the block size from w1
         block_size = int(model[1].weight.shape[-2] / embedding_size)
+        # Disable training
+        for layer in model:
+            if hasattr(layer, "training"):
+                layer.training = False
     else:
         raise TypeError(
             f"{model_type=} with {type(model[0])=} and {type(model[1])=} not recognized"
