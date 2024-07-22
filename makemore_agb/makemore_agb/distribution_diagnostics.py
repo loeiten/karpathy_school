@@ -38,6 +38,11 @@ def plot_initial_distributions(
         seed (int): The seed for the random number generator
         show (bool): Whether or not to show the plot
     """
+    if model_type != "explicit":
+        raise NotImplementedError(
+            "The distribution plotting only supported for the explicit model as "
+            "the h_pre_activation as h is available in this model"
+        )
     model_params = ModelParams(
         block_size=3,
         embedding_size=10,
@@ -79,6 +84,7 @@ def plot_initial_distributions(
         )
     else:
         batch_normalization_parameters = None
+
     output = predict_neural_network(
         model_type=model_type,
         model=model,
