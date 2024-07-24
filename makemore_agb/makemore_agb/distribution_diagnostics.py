@@ -38,11 +38,6 @@ def plot_initial_distributions(
         seed (int): The seed for the random number generator
         show (bool): Whether or not to show the plot
     """
-    if model_type != "explicit":
-        raise NotImplementedError(
-            "The distribution plotting only supported for the explicit model as "
-            "the h_pre_activation as h is available in this model"
-        )
     model_params = ModelParams(
         block_size=3,
         embedding_size=10,
@@ -66,7 +61,7 @@ def plot_initial_distributions(
         generator=g,
         device=DEVICE,
     )
-    if batch_normalize:
+    if batch_normalize and model_type == "explicit":
         # These parameters will be used as batch norm parameters during inference
         # Initialized to zero as the mean and one as std as the initialization of w1
         # and b1 is so that h_pre_activation is roughly gaussian
@@ -85,13 +80,29 @@ def plot_initial_distributions(
     else:
         batch_normalization_parameters = None
 
-    output = predict_neural_network(
-        model_type=model_type,
-        model=model,
-        input_data=training_data[idxs],
-        batch_normalization_parameters=batch_normalization_parameters,
-        inspect_pre_activation_and_h=True,
-    )
+    if model_type == "explicit":
+        output = predict_neural_network(
+            model_type=model_type,
+            model=model,
+            input_data=training_data[idxs],
+            batch_normalization_parameters=batch_normalization_parameters,
+            inspect_pre_activation_and_h=True,
+        )
+        plot_distributions_from_explicit_model(output=output, show=show)
+
+
+def plot_distributions_from_explicit_model(
+    output: torch.Tensor, show: bool = True
+) -> None:
+    """Plot the distributions from the explicit model.
+
+    Args:
+        output (torch.Tensor): The output from a prediction, must be of size 3
+        show (bool, optional): Whether or not to show the plot. Defaults to True.
+
+    Raises:
+        RuntimeError: If unexpected input is obtained.
+    """
     if len(output) != 3:
         raise RuntimeError("Got unexpected output from the predictor")
 
