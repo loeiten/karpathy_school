@@ -26,10 +26,6 @@ def plot_initial_distributions(
 ) -> None:
     """Plot the initial distribution.
 
-    Raises:
-        RuntimeError: In case the prediction outputs an output with unexpected
-            length
-
     Args:
         model_type (Literal["explicit", "pytorch"]): What model type to use
         good_initialization (bool): Whether or not to use an initialization

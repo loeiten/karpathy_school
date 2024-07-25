@@ -142,11 +142,11 @@ def get_pytorch_model(
 ) -> Tuple[Module, ...]:
     """Return the pytorch model.
 
-    Raises:
-        TypeError: If last layer is not Linear
-
     Args:
         model_params (ModelParams): The parameters of the model
+
+    Raises:
+        TypeError: If last layer is not Linear
 
     Returns:
         Tuple[Module, ...]: A tuple containing the parameters of the
@@ -278,11 +278,11 @@ def get_model_function(
 ) -> Callable[[ModelParams], Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]]:
     """Return the model function.
 
-    Raises:
-        ValueError: If an unsupported model_type is given
-
     Args:
         model_type (Literal["explicit", "pytorch"]): What model type to use
+
+    Raises:
+        ValueError: If an unsupported model_type is given
 
     Returns:
         Callable[[ModelParams], Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]]:

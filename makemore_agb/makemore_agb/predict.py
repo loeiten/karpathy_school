@@ -19,12 +19,6 @@ def predict_neural_network(
 ) -> Tuple[torch.Tensor, ...]:
     """Predict the neural net model.
 
-    Raises:
-        NotImplementedError: If a model_type with no implemented predictor is used
-        ValueError: If inspect_pre_activation_and_h is passed to the pytorch model
-        ValueError: If batch_normalization_parameters is passed to the pytorch model
-        ValueError: If training is passed to the pytorch model
-
     Args:
         model_type (Literal["explicit", "pytorch"]): What model type to use
         model (Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]): The model
@@ -36,6 +30,12 @@ def predict_neural_network(
         batch_normalization_parameters (Optional[BatchNormalizationParameters]):
             If set: Contains the running mean and the running standard deviation
         training (bool): Flag to keep track of whether we're training or not
+
+    Raises:
+        NotImplementedError: If a model_type with no implemented predictor is used
+        ValueError: If inspect_pre_activation_and_h is passed to the pytorch model
+        ValueError: If batch_normalization_parameters is passed to the pytorch model
+        ValueError: If training is passed to the pytorch model
 
     Returns:
         torch.Tensor: The achieved logits with shape (batch_size)

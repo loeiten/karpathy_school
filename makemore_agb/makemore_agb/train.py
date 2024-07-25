@@ -36,9 +36,6 @@ def train_neural_net_model(
 ) -> Tuple[torch.Tensor, ...]:
     """Train the neural net model.
 
-    Raises:
-        TypeError: If wrong model type is given
-
     Args:
         model_type (Literal["explicit", "pytorch"]): What model type to use
         model (Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]): The model
@@ -52,6 +49,9 @@ def train_neural_net_model(
             statistics of the training job
         batch_normalization_parameters (Optional[BatchNormalizationParameters]):
             If set: Contains the running mean and the running standard deviation
+
+    Raises:
+        TypeError: If wrong model type is given
 
     Returns:
         Tuple[torch.Tensor, ...]: The trained model

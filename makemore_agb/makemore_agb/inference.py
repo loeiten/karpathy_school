@@ -28,9 +28,6 @@ def run_inference(
 ) -> Tuple[str, ...]:
     """Run inference on the model.
 
-    Raises:
-        TypeError: If invalid model is given
-
     Args:
         model_type (Literal["explicit", "pytorch"]): What model type to use
         model (Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]): The model to
@@ -40,6 +37,9 @@ def run_inference(
         batch_normalization_parameters (Optional[BatchNormalizationParameters]):
             If set: Contains the running mean and the running standard deviation
         seed (int, optional): The seed to use. Defaults to 2147483647.
+
+    Raises:
+        TypeError: If invalid model is given
 
     Returns:
         Tuple[str, ...]: The predictions
