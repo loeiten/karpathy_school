@@ -1,10 +1,14 @@
 """Module for visualisation."""
 
+from typing import List
+
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 import torch
 from makemore_agb.data_classes import TrainStatistics
+from makemore_agb.module import Module
+from makemore_agb.tanh import Tanh
 from matplotlib.axes import Axes
 
 # Use nice theme when plotting
@@ -75,3 +79,26 @@ def plot_dead_neuron(
     ax.set_xlabel("Neuron number")
     ax.grid(False)
     ax.set_title(f"Dead neurons of {tensor_name}")
+
+
+def plot_activation_distribution_per_layer(model: List[Module], ax: Axes) -> None:
+    """Plot the distribution of the activation functions.
+
+    Args:
+        model (List[Module]): The model to plot the activations from
+        ax (Axes): The axes to plot on
+    """
+    for layer_nr, layer in enumerate(model):
+        if isinstance(layer, Tanh):
+            out = layer.out
+            hy, hx = torch.histogram(out, density=True)
+            ax.plot(
+                hx,
+                hy,
+                label=f"Layer {layer_nr} ({layer.__class__.__name__})",
+            )
+
+    ax.set_title("Activation distribution")
+    ax.set_ylabel("Frequency")
+    ax.set_xlabel("Value")
+    ax.legend(loc="best", fancybox=True)
