@@ -82,7 +82,7 @@ def plot_dead_neuron(
 
 
 def plot_activation_distribution_per_layer(model: List[Module], ax: Axes) -> None:
-    """Plot the distribution of the activation functions.
+    """Plot and report the distribution of the activation functions.
 
     Args:
         model (List[Module]): The model to plot the activations from
@@ -96,6 +96,12 @@ def plot_activation_distribution_per_layer(model: List[Module], ax: Axes) -> Non
                 hx,
                 hy,
                 label=f"Layer {layer_nr} ({layer.__class__.__name__})",
+            )
+            print(
+                f"Layer {layer_nr} ({layer.__class__.__name__}): "
+                f"Mean: {out.mean():+.2f}, "
+                f"Std: {out.std():.2f}, "
+                f"Saturated: {(out.abs() > 0.97).abs().mean()*100:.2f} %"
             )
 
     ax.set_title("Activation distribution")
