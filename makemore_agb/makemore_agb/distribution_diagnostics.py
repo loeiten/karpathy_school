@@ -8,9 +8,14 @@ import matplotlib.pyplot as plt
 import torch
 from makemore_agb.data_classes import BatchNormalizationParameters, ModelParams
 from makemore_agb.models import get_model_function
+from makemore_agb.module import Module
 from makemore_agb.predict import predict_neural_network
 from makemore_agb.preprocessing import get_dataset
-from makemore_agb.visualisation import plot_dead_neuron, plot_histogram
+from makemore_agb.visualisation import (
+    plot_activation_distribution_per_layer,
+    plot_dead_neuron,
+    plot_histogram,
+)
 
 from makemore_agb import DEVICE
 
@@ -33,6 +38,9 @@ def plot_initial_distributions(
         batch_normalize (bool): Whether or not to use batch normalization
         seed (int): The seed for the random number generator
         show (bool): Whether or not to show the plot
+
+    Raises:
+        ValueError: If unknown model_type is given
     """
     model_params = ModelParams(
         block_size=3,
@@ -85,6 +93,17 @@ def plot_initial_distributions(
             inspect_pre_activation_and_h=True,
         )
         plot_distributions_from_explicit_model(output=output, show=show)
+    elif model_type == "pytorch":
+        _ = predict_neural_network(
+            model_type=model_type,
+            model=model,
+            input_data=training_data[idxs],
+            batch_normalization_parameters=None,
+            inspect_pre_activation_and_h=False,
+        )
+        plot_distributions_from_pytorch_model(model=model, show=show)
+    else:
+        raise ValueError(f"Unknown model_type {model_type}")
 
 
 def plot_distributions_from_explicit_model(
@@ -119,6 +138,27 @@ def plot_distributions_from_explicit_model(
     )
     plot_histogram(tensor=h, tensor_name="h", ax=axes["h"])
     plot_dead_neuron(tensor=h, tensor_name="h", ax=axes["dead_neurons"], threshold=0.99)
+
+    if show:
+        plt.show()
+
+
+def plot_distributions_from_pytorch_model(
+    model: List[Module], show: bool = True
+) -> None:
+    """Plot the distributions from the explicit model.
+
+    Args:
+        model (List[Module]): The model
+        show (bool, optional): Whether or not to show the plot. Defaults to True.
+    """
+    # Create the figures
+    _, axes = plt.subplot_mosaic(
+        [["activations"]],
+        layout="constrained",
+    )
+
+    plot_activation_distribution_per_layer(model=model, ax=axes["activations"])
 
     if show:
         plt.show()
