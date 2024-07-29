@@ -1,6 +1,6 @@
 """Module for visualisation."""
 
-from typing import List
+from typing import Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -81,11 +81,11 @@ def plot_dead_neuron(
     ax.set_title(f"Dead neurons of {tensor_name}")
 
 
-def plot_activation_distribution_per_layer(model: List[Module], ax: Axes) -> None:
+def plot_activation_distribution_per_layer(model: Tuple[Module], ax: Axes) -> None:
     """Plot and report the distribution of the activation functions.
 
     Args:
-        model (List[Module]): The model to plot the activations from
+        model (Tuple[Module]): The model to plot the activations from
         ax (Axes): The axes to plot on
     """
     for layer_nr, layer in enumerate(model):

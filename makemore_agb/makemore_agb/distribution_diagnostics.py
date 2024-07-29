@@ -2,7 +2,7 @@
 
 import argparse
 import sys
-from typing import List, Literal
+from typing import List, Literal, Tuple
 
 import matplotlib.pyplot as plt
 import torch
@@ -101,7 +101,8 @@ def plot_initial_distributions(
             batch_normalization_parameters=None,
             inspect_pre_activation_and_h=False,
         )
-        plot_distributions_from_pytorch_model(model=model, show=show)
+        # We know that model must be of type Tuple[Module]
+        plot_distributions_from_pytorch_model(model=model, show=show)  # type: ignore
     else:
         raise ValueError(f"Unknown model_type {model_type}")
 
@@ -144,12 +145,12 @@ def plot_distributions_from_explicit_model(
 
 
 def plot_distributions_from_pytorch_model(
-    model: List[Module], show: bool = True
+    model: Tuple[Module], show: bool = True
 ) -> None:
     """Plot the distributions from the explicit model.
 
     Args:
-        model (List[Module]): The model
+        model (Tuple[Module]): The model
         show (bool, optional): Whether or not to show the plot. Defaults to True.
     """
     # Create the figures
