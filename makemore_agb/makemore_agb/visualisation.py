@@ -101,7 +101,7 @@ def plot_activation_distribution_per_layer(model: Tuple[Module], ax: Axes) -> No
                 f"Layer {layer_nr} ({layer.__class__.__name__}): "
                 f"Mean: {out.mean():+.2f}, "
                 f"Std: {out.std():.2f}, "
-                f"Saturated: {(out.abs() > 0.97).abs().mean()*100:.2f} %"
+                f"Saturated: {(out.abs() > 0.97).float().mean()*100:.2f} %"
             )
 
     ax.set_title("Activation distribution")
