@@ -93,8 +93,8 @@ def plot_activation_distribution_per_layer(model: Tuple[Module], ax: Axes) -> No
             out = layer.out
             hy, hx = torch.histogram(out, density=True)
             ax.plot(
-                hx,
-                hy,
+                hx[:-1].detach(),
+                hy.detach(),
                 label=f"Layer {layer_nr} ({layer.__class__.__name__})",
             )
             print(
