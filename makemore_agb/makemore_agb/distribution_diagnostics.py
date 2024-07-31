@@ -45,7 +45,7 @@ def plot_initial_distributions(
     model_params = ModelParams(
         block_size=3,
         embedding_size=10,
-        hidden_layer_neurons=200,
+        hidden_layer_neurons=200 if model_type == "explicit" else 100,
         seed=seed,
         good_initialization=good_initialization,
         batch_normalize=batch_normalize,
