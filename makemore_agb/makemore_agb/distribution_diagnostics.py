@@ -6,11 +6,16 @@ from typing import List, Literal, Tuple
 
 import matplotlib.pyplot as plt
 import torch
-from makemore_agb.data_classes import BatchNormalizationParameters, ModelParams
+from makemore_agb.data_classes import (
+    BatchNormalizationParameters,
+    ModelParams,
+    OptimizationParams,
+)
 from makemore_agb.models import get_model_function
 from makemore_agb.module import Module
 from makemore_agb.predict import predict_neural_network
 from makemore_agb.preprocessing import get_dataset
+from makemore_agb.train import train_neural_net_model
 from makemore_agb.visualisation import (
     plot_activation_distribution_per_layer,
     plot_dead_neuron,
@@ -94,12 +99,15 @@ def plot_initial_distributions(
         )
         plot_distributions_from_explicit_model(output=output, show=show)
     elif model_type == "pytorch":
-        _ = predict_neural_network(
+        _ = train_neural_net_model(
             model_type=model_type,
             model=model,
-            input_data=training_data[idxs],
+            dataset=dataset,
+            optimization_params=OptimizationParams(
+                n_mini_batches=1, mini_batches_per_data_capture=1, batch_size=32
+            ),
+            train_statistics=None,
             batch_normalization_parameters=None,
-            inspect_pre_activation_and_h=False,
         )
         # We know that model must be of type Tuple[Module]
         plot_distributions_from_pytorch_model(model=model, show=show)  # type: ignore
