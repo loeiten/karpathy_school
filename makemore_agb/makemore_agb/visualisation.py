@@ -81,17 +81,21 @@ def plot_dead_neuron(
     ax.set_title(f"Dead neurons of {tensor_name}")
 
 
-def plot_activation_distribution_per_layer(model: Tuple[Module], ax: Axes) -> None:
+def plot_activation_distribution_per_layer(
+    model: Tuple[Module], ax: Axes, use_gradients: bool = False
+) -> None:
     """Plot and report the distribution of the activation functions.
 
     Args:
         model (Tuple[Module]): The model to plot the activations from
         ax (Axes): The axes to plot on
+        use_gradients (bool, optional): Will use gradients instead of weights.
+            Defaults to False
     """
     for layer_nr, layer in enumerate(model):
         if isinstance(layer, Tanh):
-            out = layer.out
-            hy, hx = torch.histogram(out, density=True)
+            tensor = layer.out.grad if use_gradients else layer.out
+            hy, hx = torch.histogram(tensor, density=True)
             ax.plot(
                 hx[:-1].detach(),
                 hy.detach(),
@@ -99,12 +103,14 @@ def plot_activation_distribution_per_layer(model: Tuple[Module], ax: Axes) -> No
             )
             print(
                 f"Layer {layer_nr} ({layer.__class__.__name__}): "
-                f"Mean: {out.mean():+.2f}, "
-                f"Std: {out.std():.2f}, "
-                f"Saturated: {(out.abs() > 0.97).float().mean()*100:.2f} %"
+                f"Mean: {tensor.mean():+.2f}, "
+                f"Std: {tensor.std():.2f}, "
+                ""
+                if use_gradients
+                else f"Saturated: {(tensor.abs() > 0.97).float().mean()*100:.2f} %"
             )
 
-    ax.set_title("Activation distribution")
+    ax.set_title(f"{'Gradient' if use_gradients else 'Activation'} distribution")
     ax.set_ylabel("Frequency")
     ax.set_xlabel("Value")
     ax.legend(loc="best", fancybox=True)
