@@ -115,6 +115,11 @@ def train_neural_net_model(
                 "Modules not recognized"
             )
 
+        if model_type == "pytorch":
+            for layer in model:
+                # Create a leaf tensor of a the non-leaf tensors, so that it's
+                # possible to inspect the gradients
+                layer.out.retain_grad()
         # Reset the gradients
         for parameters in layered_parameters:
             parameters.grad = None

@@ -163,11 +163,16 @@ def plot_distributions_from_pytorch_model(
     """
     # Create the figures
     _, axes = plt.subplot_mosaic(
-        [["activations"]],
+        [["activations"], ["gradients"]],
         layout="constrained",
     )
 
-    plot_activation_distribution_per_layer(model=model, ax=axes["activations"])
+    plot_activation_distribution_per_layer(
+        model=model, ax=axes["activations"], use_gradients=False
+    )
+    plot_activation_distribution_per_layer(
+        model=model, ax=axes["gradients"], use_gradients=True
+    )
 
     if show:
         plt.show()
