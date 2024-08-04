@@ -92,6 +92,7 @@ def plot_activation_distribution_per_layer(
         use_gradients (bool, optional): Will use gradients instead of weights.
             Defaults to False
     """
+    print(f"Report for {'activations' if not use_gradients else 'gradients'}")
     for layer_nr, layer in enumerate(model):
         if isinstance(layer, Tanh):
             tensor = layer.out.grad if use_gradients else layer.out
@@ -101,13 +102,16 @@ def plot_activation_distribution_per_layer(
                 hy.detach(),
                 label=f"Layer {layer_nr} ({layer.__class__.__name__})",
             )
+            saturation_string = ""
+            if not use_gradients:
+                saturation_string = (
+                    f", Saturated: {(tensor.abs() > 0.97).float().mean()*100:.2f} %"
+                )
             print(
                 f"Layer {layer_nr} ({layer.__class__.__name__}): "
                 f"Mean: {tensor.mean():+.2f}, "
-                f"Std: {tensor.std():.2f}, "
-                ""
-                if use_gradients
-                else f"Saturated: {(tensor.abs() > 0.97).float().mean()*100:.2f} %"
+                f"Std: {tensor.std():.2f}"
+                f"{saturation_string}"
             )
 
     ax.set_title(f"{'Gradient' if use_gradients else 'Activation'} distribution")
