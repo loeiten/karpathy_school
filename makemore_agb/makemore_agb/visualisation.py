@@ -86,6 +86,20 @@ def plot_activation_distribution_per_layer(
 ) -> None:
     """Plot and report the distribution of the activation functions.
 
+    Note:
+    - If we don't have batch normalization
+      - And we have correct gain: Gradients looks good, but layer 1 has several
+        saturated neurons which will block the learning due to flat gradients in
+        this region
+      - Too small gain: Std dev is not maintained to be 1 anymore, it decreases
+        for each layer because of tanh (flattened distributions gives more
+        extreme values for tanh which gives bad learning)
+      - Too small gain and no tanh: We won't have non-linearities, so the
+        network only learns linear relationships, we also see that activations
+        and learning effects decreases the deeper we go into the network
+    - If we have batch normalization we don't have to do the balancing act of
+      setting the correct initialization
+
     Args:
         model (Tuple[Module]): The model to plot the activations from
         ax (Axes): The axes to plot on
