@@ -11,10 +11,12 @@ from makemore_agb.data_classes import (
     ModelParams,
     OptimizationParams,
 )
+from makemore_agb.linear import Linear
 from makemore_agb.models import get_model_function
 from makemore_agb.module import Module
 from makemore_agb.predict import predict_neural_network
 from makemore_agb.preprocessing import get_dataset
+from makemore_agb.tanh import Tanh
 from makemore_agb.train import train_neural_net_model
 from makemore_agb.visualisation import (
     plot_activation_distribution_per_layer,
@@ -163,15 +165,18 @@ def plot_distributions_from_pytorch_model(
     """
     # Create the figures
     _, axes = plt.subplot_mosaic(
-        [["activations"], ["gradients"]],
+        [["tanh_activations"], ["tanh_gradients"], ["linear_gradients"]],
         layout="constrained",
     )
 
     plot_activation_distribution_per_layer(
-        model=model, ax=axes["activations"], use_gradients=False
+        model=model, ax=axes["tanh_activations"], layer_type=Tanh, use_gradients=False
     )
     plot_activation_distribution_per_layer(
-        model=model, ax=axes["gradients"], use_gradients=True
+        model=model, ax=axes["tanh_gradients"], layer_type=Tanh, use_gradients=True
+    )
+    plot_activation_distribution_per_layer(
+        model=model, ax=axes["linear_gradients"], layer_type=Linear, use_gradients=True
     )
 
     if show:
