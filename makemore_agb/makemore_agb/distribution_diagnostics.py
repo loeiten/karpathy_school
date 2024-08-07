@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import torch
 from makemore_agb.data_classes import (
     BatchNormalizationParameters,
+    LayerType,
     ModelParams,
     OptimizationParams,
 )
@@ -170,13 +171,22 @@ def plot_distributions_from_pytorch_model(
     )
 
     plot_activation_distribution_per_layer(
-        model=model, ax=axes["tanh_activations"], layer_type=Tanh, use_gradients=False
+        model=model,
+        ax=axes["tanh_activations"],
+        layer_type=LayerType.TANH,
+        use_gradients=False,
     )
     plot_activation_distribution_per_layer(
-        model=model, ax=axes["tanh_gradients"], layer_type=Tanh, use_gradients=True
+        model=model,
+        ax=axes["tanh_gradients"],
+        layer_type=LayerType.TANH,
+        use_gradients=True,
     )
     plot_activation_distribution_per_layer(
-        model=model, ax=axes["linear_gradients"], layer_type=Linear, use_gradients=True
+        model=model,
+        ax=axes["linear_gradients"],
+        layer_type=LayerType.LINEAR,
+        use_gradients=True,
     )
 
     if show:

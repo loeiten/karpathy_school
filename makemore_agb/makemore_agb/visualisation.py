@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 import torch
-from makemore_agb.data_classes import TrainStatistics
+from makemore_agb.data_classes import LayerType, TrainStatistics
 from makemore_agb.linear import Linear
 from makemore_agb.module import Module
 from matplotlib.axes import Axes
@@ -82,7 +82,7 @@ def plot_dead_neuron(
 
 
 def plot_activation_distribution_per_layer(
-    model: Tuple[Module], ax: Axes, layer_type: Module, use_gradients: bool = False
+    model: Tuple[Module], ax: Axes, layer_type: LayerType, use_gradients: bool = False
 ) -> None:
     """Plot and report the distribution of the activation functions.
 
@@ -103,16 +103,16 @@ def plot_activation_distribution_per_layer(
     Args:
         model (Tuple[Module]): The model to plot the activations from
         ax (Axes): The axes to plot on
-        layer_type (Module): The layer type to plot
+        layer_type (LayerType): The layer type to plot
         use_gradients (bool, optional): Will use gradients instead of weights.
             Defaults to False
     """
     print(
         f"Report for {'activations' if not use_gradients else 'gradients'} of "
-        f"{layer_type.__name__}"
+        f"{layer_type.value}"
     )
     for layer_nr, layer in enumerate(model):
-        if isinstance(layer, layer_type):
+        if layer.__class__.__name__ == layer_type.value:  # type: ignore
             tensor = layer.out.grad if use_gradients else layer.out
             hy, hx = torch.histogram(tensor, density=True)
             ax.plot(
@@ -125,7 +125,7 @@ def plot_activation_distribution_per_layer(
                 additional_string = (
                     f", Saturated: {(tensor.abs() > 0.97).float().mean()*100:.2f} %"
                 )
-            if layer_type == Linear:
+            if layer_type == LayerType.LINEAR:
                 additional_string = (
                     ", gradient/weight std ratio: "
                     f"{layer.out.grad.std()/layer.out.std():.2e}"
@@ -138,7 +138,7 @@ def plot_activation_distribution_per_layer(
             )
 
     ax.set_title(
-        f"{layer_type.__name__} "
+        f"{layer_type.value} "
         f"{'gradient' if use_gradients else 'activation'} "
         "distribution"
     )

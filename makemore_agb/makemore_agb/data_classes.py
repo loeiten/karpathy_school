@@ -1,9 +1,15 @@
 """Module containing option classes."""
 
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import Callable, List
 
 import torch
+
+
+class LayerType(Enum):
+    TANH = "Tanh"
+    LINEAR = "Linear"
 
 
 @dataclass
