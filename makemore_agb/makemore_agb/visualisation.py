@@ -7,7 +7,6 @@ import numpy as np
 import seaborn as sns
 import torch
 from makemore_agb.data_classes import LayerType, TrainStatistics
-from makemore_agb.linear import Linear
 from makemore_agb.module import Module
 from matplotlib.axes import Axes
 
