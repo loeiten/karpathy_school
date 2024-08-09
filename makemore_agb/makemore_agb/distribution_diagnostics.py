@@ -63,14 +63,6 @@ def plot_initial_distributions(
 
     model = model_function(model_params)
     dataset = get_dataset(block_size=model_params.block_size)
-    training_data = dataset["training_input_data"]
-    idxs = torch.randint(
-        low=0,
-        high=training_data.shape[0],
-        size=(batch_size,),
-        generator=g,
-        device=DEVICE,
-    )
     if batch_normalize and model_type == "explicit":
         # These parameters will be used as batch norm parameters during inference
         # Initialized to zero as the mean and one as std as the initialization of w1
@@ -91,6 +83,14 @@ def plot_initial_distributions(
         batch_normalization_parameters = None
 
     if model_type == "explicit":
+        training_data = dataset["training_input_data"]
+        idxs = torch.randint(
+            low=0,
+            high=training_data.shape[0],
+            size=(batch_size,),
+            generator=g,
+            device=DEVICE,
+        )
         output = predict_neural_network(
             model_type=model_type,
             model=model,
@@ -164,7 +164,7 @@ def plot_distributions_from_pytorch_model(
     """
     # Create the figures
     _, axes = plt.subplot_mosaic(
-        [["tanh_activations"], ["tanh_gradients"], ["linear_gradients"]],
+        [["tanh_activations"], ["tanh_gradients"]],
         layout="constrained",
     )
 
@@ -178,12 +178,6 @@ def plot_distributions_from_pytorch_model(
         model=model,
         ax=axes["tanh_gradients"],
         layer_type=LayerType.TANH,
-        use_gradients=True,
-    )
-    plot_activation_distribution_per_layer(
-        model=model,
-        ax=axes["linear_gradients"],
-        layer_type=LayerType.LINEAR,
         use_gradients=True,
     )
 
