@@ -24,7 +24,7 @@ from makemore_agb import DATASET, DEVICE
 
 
 # Reducing the number of locals here will penalize the didactical purpose
-# pylint: disable-next=too-many-arguments,too-many-locals
+# pylint: disable-next=too-many-arguments,too-many-locals,too-complex,too-many-branches
 def train_neural_net_model(
     model_type: Literal["explicit", "pytorch"],
     model: Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]],
@@ -162,15 +162,27 @@ def train_neural_net_model(
                 f"{optimization_params.n_mini_batches:7d}: "
                 f"{loss.item():.4f}"
             )
-        
+
         # Update update-to-data-ratio
         if train_statistics is not None:
             with torch.no_grad():
                 train_statistics.update_to_data_ratio.append(
-                   ([((
-                       optimization_params.learning_rate(optimization_params.cur_step)*
-                       parameters.grad
-                       ).std() / parameters.data.std()).log10().item() for parameters in layered_parameters])
+                    (
+                        [
+                            (
+                                (
+                                    optimization_params.learning_rate(
+                                        optimization_params.cur_step
+                                    )
+                                    * parameters.grad
+                                ).std()
+                                / parameters.data.std()
+                            )
+                            .log10()
+                            .item()
+                            for parameters in layered_parameters
+                        ]
+                    )
                 )
 
     return model
