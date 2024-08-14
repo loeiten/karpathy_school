@@ -56,8 +56,6 @@ def plot_initial_distributions(
         good_initialization=good_initialization,
         batch_normalize=batch_normalize,
     )
-    batch_size = 32
-    g = torch.Generator(device=DEVICE).manual_seed(seed)
 
     model_function = get_model_function(model_type)
 
@@ -83,6 +81,8 @@ def plot_initial_distributions(
         batch_normalization_parameters = None
 
     if model_type == "explicit":
+        batch_size = 32
+        g = torch.Generator(device=DEVICE).manual_seed(seed)
         training_data = dataset["training_input_data"]
         idxs = torch.randint(
             low=0,
