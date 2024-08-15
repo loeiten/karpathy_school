@@ -1,12 +1,13 @@
 """Module for visualisation."""
 
-from typing import Tuple
+from typing import List, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 import torch
 from makemore_agb.data_classes import LayerType, TrainStatistics
+from makemore_agb.linear import Linear
 from makemore_agb.module import Module
 from matplotlib.axes import Axes
 
@@ -143,4 +144,27 @@ def plot_activation_distribution_per_layer(
     )
     ax.set_ylabel("Frequency")
     ax.set_xlabel("Value")
+    ax.legend(loc="best", fancybox=True)
+
+
+def plot_update_to_data_ratio(
+    model: Tuple[Module], update_ratio: List[List[float]], ax: Axes
+) -> None:
+    """Plot the update-to-data ratio.
+
+    Args:
+        model (Tuple[Module]): The model to plot the activations from
+        update_ratio (List[List[float]]): The update ratio
+        ax (Axes): The axes to plot on
+    """
+    for layer_nr, layer in enumerate(model):
+        if isinstance(layer, Linear):
+            ax.plot(
+                [update_ratio[i][layer_nr] for i in range(len(update_ratio))],
+                label=f"Layer {layer_nr} ({layer.__class__.__name__})",
+            )
+
+    ax.set_title("Update to data ratio")
+    ax.set_ylabel("Update-to-data-ratio")
+    ax.set_xlabel("Iteration")
     ax.legend(loc="best", fancybox=True)
