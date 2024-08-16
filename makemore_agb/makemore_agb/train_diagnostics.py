@@ -15,7 +15,10 @@ from makemore_agb.models import get_model_function
 from makemore_agb.module import Module
 from makemore_agb.preprocessing import get_dataset
 from makemore_agb.train import train_neural_net_model
-from makemore_agb.visualisation import plot_activation_distribution_per_layer
+from makemore_agb.visualisation import (
+    plot_activation_distribution_per_layer,
+    plot_update_to_data_ratio,
+)
 
 
 def plot_pytorch_train_distributions(
@@ -47,6 +50,7 @@ def plot_pytorch_train_distributions(
     model = model_function(model_params)
     dataset = get_dataset(block_size=model_params.block_size)
 
+    training_stats = TrainStatistics()
     _ = train_neural_net_model(
         model_type="pytorch",
         model=model,
@@ -54,20 +58,23 @@ def plot_pytorch_train_distributions(
         optimization_params=OptimizationParams(
             n_mini_batches=1000, mini_batches_per_data_capture=1000, batch_size=32
         ),
-        train_statistics=TrainStatistics(),
+        train_statistics=training_stats,
         batch_normalization_parameters=None,
     )
     # We know that model must be of type Tuple[Module]
-    plot_distributions_from_pytorch_model(model=model, show=show)  # type: ignore
+    plot_distributions_from_pytorch_model(
+        model=model, training_stats=training_stats, show=show  # type: ignore
+    )
 
 
 def plot_distributions_from_pytorch_model(
-    model: Tuple[Module], show: bool = True
+    model: Tuple[Module], training_stats: TrainStatistics, show: bool = True
 ) -> None:
     """Plot the distributions from the explicit model.
 
     Args:
         model (Tuple[Module]): The model
+        training_stats (TrainStatistics): The statistics of the training
         show (bool, optional): Whether or not to show the plot. Defaults to True.
     """
     # Create the figures
@@ -98,6 +105,11 @@ def plot_distributions_from_pytorch_model(
         ax=axes["linear_gradients"],
         layer_type=LayerType.LINEAR,
         use_gradients=True,
+    )
+    plot_update_to_data_ratio(
+        model=model,
+        update_ratio=training_stats.update_to_data_ratio,
+        ax=axes["update_to_data_ratio"],
     )
 
     if show:
