@@ -165,6 +165,6 @@ def plot_update_to_data_ratio(
             )
 
     ax.set_title("Update to data ratio")
-    ax.set_ylabel("Update-to-data-ratio")
+    ax.set_ylabel(r"$\log_{10}\frac{\sigma_{LR\cdot \nabla}}{W}$")
     ax.set_xlabel("Iteration")
     ax.legend(loc="best", fancybox=True)
