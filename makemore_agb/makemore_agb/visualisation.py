@@ -164,6 +164,8 @@ def plot_update_to_data_ratio(
                 label=f"Layer {layer_nr} ({layer.__class__.__name__})",
             )
 
+    ax.plot([0, len(update_ratio)], [-3, -3], "k", label=r"$10^{-3}$")
+
     ax.set_title("Update to data ratio")
     ax.set_ylabel(r"$\log_{10}\frac{\sigma_{LR\cdot \nabla}}{W}$")
     ax.set_xlabel("Iteration")
