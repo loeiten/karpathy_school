@@ -123,7 +123,7 @@ def plot_activation_distribution_per_layer(
             additional_string = ""
             if not use_gradients:
                 additional_string = (
-                    f", Saturated: {(tensor.abs() > 0.97).float().mean()*100:.2f} %"
+                    f", Saturated: {(tensor.abs() > 0.97).float().mean()*100:.2e} %"
                 )
             if layer_type == LayerType.LINEAR:
                 additional_string = (
@@ -132,8 +132,8 @@ def plot_activation_distribution_per_layer(
                 )
             print(
                 f"Layer {layer_nr} ({layer.__class__.__name__}): "
-                f"Mean: {tensor.mean():+.2f}, "
-                f"Std: {tensor.std():.2f}"
+                f"Mean: {tensor.mean():+.2e}, "
+                f"Std: {tensor.std():.2e}"
                 f"{additional_string}"
             )
 
