@@ -152,6 +152,12 @@ def plot_update_to_data_ratio(
 ) -> None:
     """Plot the update-to-data ratio.
 
+    Note:
+    - From experience the update-to-data should be around 1000th of the value of
+      the parameters
+    - If it's too low we have a too low learning rate
+    - If it's too high it would be difficult to find the minima
+
     Args:
         model (Tuple[Module]): The model to plot the activations from
         update_ratio (List[List[float]]): The update ratio
@@ -167,6 +173,6 @@ def plot_update_to_data_ratio(
     ax.plot([0, len(update_ratio)], [-3, -3], "k", label=r"$10^{-3}$")
 
     ax.set_title("Update to data ratio")
-    ax.set_ylabel(r"$\log_{10}\frac{\sigma_{LR\cdot \nabla}}{W}$")
+    ax.set_ylabel(r"$\log_{10}\frac{\sigma_{LR\cdot \nabla}}{\sigma_W}$")
     ax.set_xlabel("Iteration")
     ax.legend(loc="best", fancybox=True)
