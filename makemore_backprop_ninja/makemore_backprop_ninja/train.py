@@ -6,18 +6,18 @@ from typing import List, Literal, Optional, Tuple, Union
 
 import torch
 import torch.nn.functional as F
-from makemore_agb.data_classes import (
+from makemore_backprop_ninja.data_classes import (
     BatchNormalizationParameters,
     ModelParams,
     OptimizationParams,
     TrainStatistics,
 )
-from makemore_agb.evaluation import evaluate
-from makemore_agb.models import get_model_function
-from makemore_agb.module import Module
-from makemore_agb.predict import predict_neural_network
-from makemore_agb.preprocessing import get_dataset
-from makemore_agb.visualisation import plot_training
+from makemore_backprop_ninja.evaluation import evaluate
+from makemore_backprop_ninja.models import get_model_function
+from makemore_backprop_ninja.module import Module
+from makemore_backprop_ninja.predict import predict_neural_network
+from makemore_backprop_ninja.preprocessing import get_dataset
+from makemore_backprop_ninja.visualisation import plot_training
 from tqdm import tqdm
 
 from makemore_agb import DATASET, DEVICE

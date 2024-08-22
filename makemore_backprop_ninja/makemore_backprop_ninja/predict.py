@@ -3,8 +3,8 @@
 from typing import Literal, Optional, Tuple, Union
 
 import torch
-from makemore_agb.data_classes import BatchNormalizationParameters
-from makemore_agb.module import Module
+from makemore_backprop_ninja.data_classes import BatchNormalizationParameters
+from makemore_backprop_ninja.module import Module
 
 
 # Reducing the number of locals here will penalize the didactical purpose

@@ -5,16 +5,16 @@ import sys
 from typing import List, Literal, Optional, Tuple, Union
 
 import torch
-from makemore_agb.data_classes import (
+from makemore_backprop_ninja.data_classes import (
     BatchNormalizationParameters,
     ModelParams,
     OptimizationParams,
 )
-from makemore_agb.embedding import Embedding
-from makemore_agb.linear import Linear
-from makemore_agb.module import Module
-from makemore_agb.predict import predict_neural_network
-from makemore_agb.train import train
+from makemore_backprop_ninja.embedding import Embedding
+from makemore_backprop_ninja.linear import Linear
+from makemore_backprop_ninja.module import Module
+from makemore_backprop_ninja.predict import predict_neural_network
+from makemore_backprop_ninja.train import train
 
 from makemore_agb import DEVICE, INDEX_TO_TOKEN, TOKEN_TO_INDEX
 

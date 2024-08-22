@@ -1,14 +1,14 @@
 """Contains tests for the preprocessing module."""
 
 import torch
-from makemore_agb.preprocessing import (
+from makemore_backprop_ninja.preprocessing import (
     create_feature_and_labels,
     get_dataset,
     get_padded_data,
     pad_data,
     read_data,
 )
-from makemore_agb.utils.paths import get_data_path
+from makemore_backprop_ninja.utils.paths import get_data_path
 
 from makemore_agb import INDEX_TO_TOKEN
 

@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 import torch
-from makemore_agb.utils.paths import get_data_path
+from makemore_backprop_ninja.utils.paths import get_data_path
 
 from makemore_agb import DATASET, DEVICE, TOKEN_TO_INDEX
 

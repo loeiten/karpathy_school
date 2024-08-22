@@ -5,15 +5,15 @@ from typing import Literal
 
 import pytest
 import torch
-from makemore_agb.data_classes import (
+from makemore_backprop_ninja.data_classes import (
     BatchNormalizationParameters,
     ModelParams,
     OptimizationParams,
     TrainStatistics,
 )
-from makemore_agb.models import get_model_function
-from makemore_agb.preprocessing import get_dataset
-from makemore_agb.train import parse_args, train_neural_net_model
+from makemore_backprop_ninja.models import get_model_function
+from makemore_backprop_ninja.preprocessing import get_dataset
+from makemore_backprop_ninja.train import parse_args, train_neural_net_model
 
 from makemore_agb import DEVICE
 

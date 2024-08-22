@@ -3,12 +3,12 @@
 from typing import Callable, Literal, Tuple, Union
 
 import torch
-from makemore_agb.batchnorm1d import BatchNorm1d
-from makemore_agb.data_classes import ModelParams
-from makemore_agb.embedding import Embedding
-from makemore_agb.linear import Linear
-from makemore_agb.module import Module
-from makemore_agb.tanh import Tanh
+from makemore_backprop_ninja.batchnorm1d import BatchNorm1d
+from makemore_backprop_ninja.data_classes import ModelParams
+from makemore_backprop_ninja.embedding import Embedding
+from makemore_backprop_ninja.linear import Linear
+from makemore_backprop_ninja.module import Module
+from makemore_backprop_ninja.tanh import Tanh
 
 from makemore_agb import DEVICE, VOCAB_SIZE
 

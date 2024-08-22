@@ -4,9 +4,12 @@ from typing import Literal
 
 import pytest
 import torch
-from makemore_agb.data_classes import BatchNormalizationParameters, ModelParams
-from makemore_agb.inference import parse_args, run_inference
-from makemore_agb.models import get_model_function
+from makemore_backprop_ninja.data_classes import (
+    BatchNormalizationParameters,
+    ModelParams,
+)
+from makemore_backprop_ninja.inference import parse_args, run_inference
+from makemore_backprop_ninja.models import get_model_function
 
 from makemore_agb import DEVICE
 

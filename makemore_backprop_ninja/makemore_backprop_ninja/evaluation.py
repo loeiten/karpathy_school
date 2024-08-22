@@ -4,9 +4,9 @@ from typing import Literal, Optional, Tuple, Union
 
 import torch
 import torch.nn.functional as F
-from makemore_agb.data_classes import BatchNormalizationParameters
-from makemore_agb.module import Module
-from makemore_agb.predict import predict_neural_network
+from makemore_backprop_ninja.data_classes import BatchNormalizationParameters
+from makemore_backprop_ninja.module import Module
+from makemore_backprop_ninja.predict import predict_neural_network
 
 
 def evaluate(

@@ -5,17 +5,17 @@ import sys
 from typing import List, Tuple
 
 import matplotlib.pyplot as plt
-from makemore_agb.data_classes import (
+from makemore_backprop_ninja.data_classes import (
     LayerType,
     ModelParams,
     OptimizationParams,
     TrainStatistics,
 )
-from makemore_agb.models import get_model_function
-from makemore_agb.module import Module
-from makemore_agb.preprocessing import get_dataset
-from makemore_agb.train import train_neural_net_model
-from makemore_agb.visualisation import (
+from makemore_backprop_ninja.models import get_model_function
+from makemore_backprop_ninja.module import Module
+from makemore_backprop_ninja.preprocessing import get_dataset
+from makemore_backprop_ninja.train import train_neural_net_model
+from makemore_backprop_ninja.visualisation import (
     plot_activation_distribution_per_layer,
     plot_update_to_data_ratio,
 )

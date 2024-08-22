@@ -4,13 +4,13 @@ import typing
 
 import pytest
 import torch
-from makemore_agb.data_classes import ModelParams
-from makemore_agb.models import (
+from makemore_backprop_ninja.data_classes import ModelParams
+from makemore_backprop_ninja.models import (
     get_explicit_model,
     get_model_function,
     get_pytorch_model,
 )
-from makemore_agb.tanh import Tanh
+from makemore_backprop_ninja.tanh import Tanh
 
 from makemore_agb import VOCAB_SIZE
 

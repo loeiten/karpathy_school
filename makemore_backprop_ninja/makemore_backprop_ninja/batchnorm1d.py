@@ -3,7 +3,7 @@
 from typing import List, Optional
 
 import torch
-from makemore_agb.module import Module
+from makemore_backprop_ninja.module import Module
 
 
 # Reducing the number of attributes here will penalize the didactical purpose

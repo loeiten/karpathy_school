@@ -3,7 +3,10 @@
 from typing import Literal
 
 import pytest
-from makemore_agb.distribution_diagnostics import parse_args, plot_initial_distributions
+from makemore_backprop_ninja.distribution_diagnostics import (
+    parse_args,
+    plot_initial_distributions,
+)
 
 
 @pytest.mark.parametrize("batch_normalize", [True, False])
