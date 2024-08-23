@@ -20,7 +20,7 @@ def evaluate(
 
     Args:
         model_type (Literal["explicit", "pytorch"]): What model type to use
-        model (Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]) The model
+        model (Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]): The model
         input_data (torch.Tensor): The data to do the prediction on
         ground_truth (torch.Tensor): The ground truth of the predictions
         batch_normalization_parameters (Optional[BatchNormalizationParameters]):
