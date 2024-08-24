@@ -10,7 +10,7 @@ from makemore_backprop_ninja.preprocessing import (
 )
 from makemore_backprop_ninja.utils.paths import get_data_path
 
-from makemore_agb import INDEX_TO_TOKEN
+from makemore_backprop_ninja import INDEX_TO_TOKEN
 
 
 def test_read_data() -> None:

@@ -20,7 +20,7 @@ from makemore_backprop_ninja.preprocessing import get_dataset
 from makemore_backprop_ninja.visualisation import plot_training
 from tqdm import tqdm
 
-from makemore_agb import DATASET, DEVICE
+from makemore_backprop_ninja import DATASET, DEVICE
 
 
 # Reducing the number of locals here will penalize the didactical purpose

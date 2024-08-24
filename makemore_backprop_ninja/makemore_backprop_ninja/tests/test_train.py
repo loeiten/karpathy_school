@@ -15,7 +15,7 @@ from makemore_backprop_ninja.models import get_model_function
 from makemore_backprop_ninja.preprocessing import get_dataset
 from makemore_backprop_ninja.train import parse_args, train_neural_net_model
 
-from makemore_agb import DEVICE
+from makemore_backprop_ninja import DEVICE
 
 
 @pytest.mark.parametrize("batch_normalize", [True, False])

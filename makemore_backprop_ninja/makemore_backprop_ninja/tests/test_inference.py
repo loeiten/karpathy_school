@@ -11,7 +11,7 @@ from makemore_backprop_ninja.data_classes import (
 from makemore_backprop_ninja.inference import parse_args, run_inference
 from makemore_backprop_ninja.models import get_model_function
 
-from makemore_agb import DEVICE
+from makemore_backprop_ninja import DEVICE
 
 
 @pytest.mark.parametrize("batch_normalize", [True, False])

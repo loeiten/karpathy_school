@@ -10,7 +10,7 @@ from makemore_backprop_ninja.linear import Linear
 from makemore_backprop_ninja.module import Module
 from makemore_backprop_ninja.tanh import Tanh
 
-from makemore_agb import DEVICE, VOCAB_SIZE
+from makemore_backprop_ninja import DEVICE, VOCAB_SIZE
 
 
 def get_explicit_model(model_params: ModelParams) -> Tuple[torch.Tensor, ...]:

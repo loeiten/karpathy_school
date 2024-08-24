@@ -23,7 +23,7 @@ from makemore_backprop_ninja.visualisation import (
     plot_histogram,
 )
 
-from makemore_agb import DEVICE
+from makemore_backprop_ninja import DEVICE
 
 
 # Reducing the number of locals here will penalize the didactical purpose

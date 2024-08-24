@@ -6,7 +6,7 @@ from typing import List, Tuple
 import torch
 from makemore_backprop_ninja.utils.paths import get_data_path
 
-from makemore_agb import DATASET, DEVICE, TOKEN_TO_INDEX
+from makemore_backprop_ninja import DATASET, DEVICE, TOKEN_TO_INDEX
 
 
 def read_data(data_path: Path) -> Tuple[str, ...]:

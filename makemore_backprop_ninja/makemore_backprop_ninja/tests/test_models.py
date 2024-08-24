@@ -12,7 +12,7 @@ from makemore_backprop_ninja.models import (
 )
 from makemore_backprop_ninja.tanh import Tanh
 
-from makemore_agb import VOCAB_SIZE
+from makemore_backprop_ninja import VOCAB_SIZE
 
 
 @pytest.mark.parametrize(

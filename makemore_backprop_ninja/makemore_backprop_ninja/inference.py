@@ -16,7 +16,7 @@ from makemore_backprop_ninja.module import Module
 from makemore_backprop_ninja.predict import predict_neural_network
 from makemore_backprop_ninja.train import train
 
-from makemore_agb import DEVICE, INDEX_TO_TOKEN, TOKEN_TO_INDEX
+from makemore_backprop_ninja import DEVICE, INDEX_TO_TOKEN, TOKEN_TO_INDEX
 
 
 def run_inference(
