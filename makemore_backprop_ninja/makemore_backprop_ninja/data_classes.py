@@ -60,18 +60,12 @@ class ModelParams:
         embedding_size (int): The size of the embedding
         hidden_layer_neurons (int): The seed for the random number generator
         seed (int): The seed for the random number generator
-        good_initialization (bool): Whether or not to use an initialization
-            which has a good distribution of the initial weights
-        batch_normalize (bool): Whether or not to include batch normalization
-            parameters
     """
 
     block_size: int = 3
     embedding_size: int = 2
     hidden_layer_neurons: int = 100
     seed: int = 2147483647
-    good_initialization: bool = True
-    batch_normalize: bool = True
 
 
 @dataclass
