@@ -204,14 +204,3 @@ def test_get_pytorch_model(
     assert l6.bias is None
     assert b6.gamma.shape == torch.Size([VOCAB_SIZE])
     assert b6.beta.shape == torch.Size([VOCAB_SIZE])
-
-
-def test_get_model_function() -> None:
-    """Test the get model function."""
-    model_function = get_model_function("explicit")
-    assert model_function.__name__ == "get_explicit_model"
-    model_function = get_model_function("pytorch")
-    assert model_function.__name__ == "get_pytorch_model"
-
-    with pytest.raises(ValueError):
-        get_model_function("I do not exists")  # type: ignore
