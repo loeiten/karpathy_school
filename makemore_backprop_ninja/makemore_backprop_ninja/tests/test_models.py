@@ -1,16 +1,9 @@
 """Contains tests for the models module."""
 
-import typing
-
 import pytest
 import torch
 from makemore_backprop_ninja.data_classes import ModelParams
-from makemore_backprop_ninja.models import (
-    get_explicit_model,
-    get_model_function,
-    get_pytorch_model,
-)
-from makemore_backprop_ninja.tanh import Tanh
+from makemore_backprop_ninja.models import get_explicit_model
 
 from makemore_backprop_ninja import VOCAB_SIZE
 
