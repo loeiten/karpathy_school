@@ -10,9 +10,6 @@ from makemore_backprop_ninja.data_classes import (
     ModelParams,
     OptimizationParams,
 )
-from makemore_backprop_ninja.embedding import Embedding
-from makemore_backprop_ninja.linear import Linear
-from makemore_backprop_ninja.module import Module
 from makemore_backprop_ninja.predict import predict_neural_network
 from makemore_backprop_ninja.train import train
 
