@@ -17,7 +17,6 @@ from makemore_backprop_ninja import DEVICE, INDEX_TO_TOKEN, TOKEN_TO_INDEX
 
 
 def run_inference(
-    model_type: Literal["explicit", "pytorch"],
     model: Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]],
     n_samples: int = 20,
     batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
@@ -26,7 +25,6 @@ def run_inference(
     """Run inference on the model.
 
     Args:
-        model_type (Literal["explicit", "pytorch"]): What model type to use
         model (Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]): The model to
             run inference on.
         n_samples (int, optional): The number of inferences to run.
@@ -41,32 +39,10 @@ def run_inference(
     Returns:
         Tuple[str, ...]: The predictions
     """
-    if (
-        model_type == "explicit"
-        and isinstance(model[0], torch.Tensor)
-        and isinstance(model[1], torch.Tensor)
-    ):
-        # Obtain the embedding size from c
-        embedding_size = int(model[0].shape[-1])
-        # Obtain the block size from w1
-        block_size = int(model[1].shape[-2] / embedding_size)
-    elif (
-        model_type == "pytorch"
-        and isinstance(model[0], Embedding)
-        and isinstance(model[1], Linear)
-    ):
-        # Obtain the embedding size from c
-        embedding_size = int(model[0].weight.shape[-1])
-        # Obtain the block size from w1
-        block_size = int(model[1].weight.shape[-2] / embedding_size)
-        # Disable training
-        for layer in model:
-            if hasattr(layer, "training"):
-                layer.training = False
-    else:
-        raise TypeError(
-            f"{model_type=} with {type(model[0])=} and {type(model[1])=} not recognized"
-        )
+    # Obtain the embedding size from c
+    embedding_size = int(model[0].shape[-1])
+    # Obtain the block size from w1
+    block_size = int(model[1].shape[-2] / embedding_size)
 
     g = torch.Generator(device=DEVICE).manual_seed(seed)
     predictions: List[str] = []
@@ -79,7 +55,6 @@ def run_inference(
             # Note the [] to get the batch shape correct
             # Note the [0] as predict always returns a tuple
             logits = predict_neural_network(
-                model_type=model_type,
                 model=model,
                 input_data=torch.tensor([context]),
                 batch_normalization_parameters=batch_normalization_parameters,
@@ -126,13 +101,6 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
         help=("Whether or not to use batch normalization"),
         action="store_true",
     )
-    parser.add_argument(
-        "-t",
-        "--model-type",
-        type=str,
-        choices=("explicit", "pytorch"),
-        help="What model type to use",
-    )
 
     args = parser.parse_args(sys_args)
     return args
@@ -172,13 +140,11 @@ def main(sys_args: List[str]):
     else:
         batch_normalization_parameters = None
     model, _ = train(
-        model_type=args.model_type,
         model_params=model_params,
         optimization_params=optimization_params,
         batch_normalization_parameters=batch_normalization_parameters,
     )
     predictions = run_inference(
-        model_type=args.model_type,
         model=model,
         n_samples=args.n_predictions,
         batch_normalization_parameters=batch_normalization_parameters,
