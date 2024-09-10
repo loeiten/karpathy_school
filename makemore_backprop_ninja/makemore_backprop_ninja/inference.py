@@ -17,7 +17,7 @@ from makemore_backprop_ninja import DEVICE, INDEX_TO_TOKEN, TOKEN_TO_INDEX
 
 
 def run_inference(
-    model: Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]],
+    model: Tuple[torch.Tensor, ...],
     n_samples: int = 20,
     batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
     seed: int = 2147483647,
@@ -25,16 +25,12 @@ def run_inference(
     """Run inference on the model.
 
     Args:
-        model (Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]): The model to
-            run inference on.
+        model (Tuple[torch.Tensor, ...]): The model to run inference on.
         n_samples (int, optional): The number of inferences to run.
             Defaults to 20.
         batch_normalization_parameters (Optional[BatchNormalizationParameters]):
             If set: Contains the running mean and the running standard deviation
         seed (int, optional): The seed to use. Defaults to 2147483647.
-
-    Raises:
-        TypeError: If invalid model is given
 
     Returns:
         Tuple[str, ...]: The predictions
