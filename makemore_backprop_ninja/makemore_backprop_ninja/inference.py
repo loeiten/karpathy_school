@@ -2,7 +2,7 @@
 
 import argparse
 import sys
-from typing import List, Literal, Optional, Tuple, Union
+from typing import List, Optional, Tuple
 
 import torch
 from makemore_backprop_ninja.data_classes import (
