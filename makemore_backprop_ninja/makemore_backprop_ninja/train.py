@@ -14,7 +14,6 @@ from makemore_backprop_ninja.data_classes import (
 )
 from makemore_backprop_ninja.evaluation import evaluate
 from makemore_backprop_ninja.models import get_model_function
-from makemore_backprop_ninja.module import Module
 from makemore_backprop_ninja.predict import predict_neural_network
 from makemore_backprop_ninja.preprocessing import get_dataset
 from makemore_backprop_ninja.visualisation import plot_training
@@ -27,7 +26,7 @@ from makemore_backprop_ninja import DATASET, DEVICE
 # pylint: disable-next=too-many-arguments,too-many-locals,too-complex,too-many-branches
 def train_neural_net_model(
     model_type: Literal["explicit", "pytorch"],
-    model: Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]],
+    model: Tuple[torch.Tensor, ...],
     dataset: DATASET,
     optimization_params: Optional[OptimizationParams],
     seed: int = 2147483647,
@@ -38,8 +37,7 @@ def train_neural_net_model(
 
     Args:
         model_type (Literal["explicit", "pytorch"]): What model type to use
-        model (Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]): The model
-            (weights or Modules) to use
+        model (Tuple[torch.Tensor, ...]): The model to use
         dataset: DATASET
             Data containing the training and validation set
         optimization_params (Optional[OptimizationParams]): Optimization
@@ -101,19 +99,7 @@ def train_neural_net_model(
             train_statistics.training_step.append(optimization_params.cur_step)
 
         # Backward pass
-        layered_parameters: List[torch.Tensor] = []
-        if all(isinstance(layer, torch.Tensor) for layer in model):
-            # Mypy doesn't recognize that these are all Tensors
-            layered_parameters = model  # type: ignore
-        elif all(isinstance(layer, Module) for layer in model):
-            # Mypy doesn't recognize that these are all Modules
-            # type: ignore
-            layered_parameters = [p for layer in model for p in layer.parameters()]
-        else:
-            raise TypeError(
-                "Model where all the layers are neither Tensors nor "
-                "Modules not recognized"
-            )
+        layered_parameters = model
 
         if model_type == "pytorch":
             for layer in model:
