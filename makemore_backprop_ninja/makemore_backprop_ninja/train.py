@@ -25,7 +25,6 @@ from makemore_backprop_ninja import DATASET, DEVICE
 # Reducing the number of locals here will penalize the didactical purpose
 # pylint: disable-next=too-many-arguments,too-many-locals,too-complex,too-many-branches
 def train_neural_net_model(
-    model_type: Literal["explicit", "pytorch"],
     model: Tuple[torch.Tensor, ...],
     dataset: DATASET,
     optimization_params: Optional[OptimizationParams],
@@ -36,7 +35,6 @@ def train_neural_net_model(
     """Train the neural net model.
 
     Args:
-        model_type (Literal["explicit", "pytorch"]): What model type to use
         model (Tuple[torch.Tensor, ...]): The model to use
         dataset: DATASET
             Data containing the training and validation set
@@ -85,11 +83,10 @@ def train_neural_net_model(
         #       (batch_size, block_size)
         # Note the [0] as predict always returns a tuple
         logits = predict_neural_network(
-            model_type=model_type,
             model=model,
             input_data=dataset["training_input_data"][idxs],
             batch_normalization_parameters=batch_normalization_parameters,
-            training=(model_type == "explicit"),
+            training=True,
         )[0]
         loss = F.cross_entropy(logits, dataset["training_ground_truth"][idxs])
 
@@ -101,11 +98,6 @@ def train_neural_net_model(
         # Backward pass
         layered_parameters = model
 
-        if model_type == "pytorch":
-            for layer in model:
-                # Create a leaf tensor of a the non-leaf tensors, so that it's
-                # possible to inspect the gradients
-                layer.out.retain_grad()
         # Reset the gradients
         for parameters in layered_parameters:
             parameters.grad = None
@@ -122,7 +114,6 @@ def train_neural_net_model(
             if train_statistics is not None:
                 # Predict on the whole training set
                 cur_training_loss = evaluate(
-                    model_type=model_type,
                     model=model,
                     input_data=dataset["training_input_data"],
                     ground_truth=dataset["training_ground_truth"],
@@ -132,7 +123,6 @@ def train_neural_net_model(
                 train_statistics.eval_training_step.append(optimization_params.cur_step)
                 # Predict on evaluation set
                 cur_validation_loss = evaluate(
-                    model_type=model_type,
                     model=model,
                     input_data=dataset["validation_input_data"],
                     ground_truth=dataset["validation_ground_truth"],
