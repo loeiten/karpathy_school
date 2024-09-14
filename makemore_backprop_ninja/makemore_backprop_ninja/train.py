@@ -165,7 +165,6 @@ def train_neural_net_model(
 
 
 def train(
-    model_type: Literal["explicit", "pytorch"],
     model_params: ModelParams,
     optimization_params: OptimizationParams,
     seed: int = 2147483647,
@@ -174,7 +173,6 @@ def train(
     """Train the model.
 
     Args:
-        model_type (Literal["explicit", "pytorch"]): What model type to use
         model_params (ModelParams): The model parameters
         optimization_params (OptimizationParams): The optimization parameters
         seed (int): The seed for the random number generator
@@ -189,14 +187,12 @@ def train(
     dataset = get_dataset(block_size=model_params.block_size)
 
     # Obtain the model
-    model_function = get_model_function(model_type=model_type)
     model = model_function(model_params)
 
     train_statistics = TrainStatistics()
 
     # Train for one step
     model = train_neural_net_model(
-        model_type=model_type,
         model=model,
         dataset=dataset,
         optimization_params=optimization_params,
