@@ -208,7 +208,6 @@ def train(
 
 
 def train_and_plot(
-    model_type: Literal["explicit", "pytorch"],
     model_params: ModelParams,
     optimization_params: OptimizationParams,
     batch_normalize: bool = False,
@@ -216,7 +215,6 @@ def train_and_plot(
     """Train the model and plot the statistics.
 
     Args:
-        model_type (Literal["explicit", "pytorch"]): What model type to use
         model_params (ModelParams): The model parameters
         optimization_params (OptimizationParams): The optimization parameters
         batch_normalize (bool): Whether or not to use batch normalization
@@ -240,7 +238,6 @@ def train_and_plot(
     else:
         batch_normalization_parameters = None
     _, train_statistics = train(
-        model_type=model_type,
         model_params=model_params,
         optimization_params=optimization_params,
         batch_normalization_parameters=batch_normalization_parameters,
@@ -355,7 +352,6 @@ def main(sys_args: List[str]):
         batch_size=args.batch_size,
     )
     train_and_plot(
-        model_type=args.model_type,
         model_params=model_params,
         optimization_params=optimization_params,
         batch_normalize=args.batch_normalize,
