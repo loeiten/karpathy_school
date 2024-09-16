@@ -13,7 +13,7 @@ from makemore_backprop_ninja.data_classes import (
     TrainStatistics,
 )
 from makemore_backprop_ninja.evaluation import evaluate
-from makemore_backprop_ninja.models import get_model_function
+from makemore_backprop_ninja.models import get_explicit_model
 from makemore_backprop_ninja.predict import predict_neural_network
 from makemore_backprop_ninja.preprocessing import get_dataset
 from makemore_backprop_ninja.visualisation import plot_training
@@ -45,9 +45,6 @@ def train_neural_net_model(
             statistics of the training job
         batch_normalization_parameters (Optional[BatchNormalizationParameters]):
             If set: Contains the running mean and the running standard deviation
-
-    Raises:
-        TypeError: If wrong model type is given
 
     Returns:
         Tuple[torch.Tensor, ...]: The trained model
@@ -187,7 +184,7 @@ def train(
     dataset = get_dataset(block_size=model_params.block_size)
 
     # Obtain the model
-    model = model_function(model_params)
+    model = get_explicit_model(model_params)
 
     train_statistics = TrainStatistics()
 
@@ -321,13 +318,6 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
         "--batch-normalize",
         action="store_true",
         help="Whether or not to use batch normalization",
-    )
-    parser.add_argument(
-        "-t",
-        "--model-type",
-        type=str,
-        choices=("explicit", "pytorch"),
-        help="What model type to use",
     )
 
     args = parser.parse_args(sys_args)
