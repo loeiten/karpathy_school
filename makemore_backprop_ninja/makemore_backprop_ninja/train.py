@@ -2,7 +2,7 @@
 
 import argparse
 import sys
-from typing import List, Literal, Optional, Tuple, Union
+from typing import List, Optional, Tuple 
 
 import torch
 import torch.nn.functional as F
