@@ -10,7 +10,6 @@ from makemore_backprop_ninja.module import Module
 # Reducing the number of locals here will penalize the didactical purpose
 # pylint: disable-next=too-many-arguments
 def predict_neural_network(
-    model_type: Literal["explicit", "pytorch"],
     model: Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]],
     input_data: torch.Tensor,
     inspect_pre_activation_and_h: bool = False,
@@ -20,7 +19,6 @@ def predict_neural_network(
     """Predict the neural net model.
 
     Args:
-        model_type (Literal["explicit", "pytorch"]): What model type to use
         model (Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]): The model
             (weights or Modules) to use
         input_data (torch.Tensor): The data to run inference on.
@@ -40,34 +38,12 @@ def predict_neural_network(
     Returns:
         torch.Tensor: The achieved logits with shape (batch_size)
     """
-    if model_type == "explicit":
-        return predict_using_explicit_network(
-            model=model,
-            input_data=input_data,
-            inspect_pre_activation_and_h=inspect_pre_activation_and_h,
-            batch_normalization_parameters=batch_normalization_parameters,
-            training=training,
-        )
-    if model_type == "pytorch":
-        if inspect_pre_activation_and_h:
-            raise ValueError(
-                "Inspection of pre activation and h not possible using the "
-                "pytorch model"
-            )
-        if batch_normalization_parameters is not None:
-            raise ValueError("Batch normalization parameters are inherent in the layer")
-        if training:
-            raise ValueError(
-                "Training is inherent in the layers needing it and does not need "
-                "to be passed to the predictor"
-            )
-        return predict_using_pytorch_network(
-            model=model,
-            input_data=input_data,
-        )
-
-    raise NotImplementedError(
-        f"Model type {model_type} is not supported for prediction"
+    return predict_using_explicit_network(
+        model=model,
+        input_data=input_data,
+        inspect_pre_activation_and_h=inspect_pre_activation_and_h,
+        batch_normalization_parameters=batch_normalization_parameters,
+        training=training,
     )
 
 
