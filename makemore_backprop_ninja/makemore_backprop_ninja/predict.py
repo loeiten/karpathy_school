@@ -4,13 +4,12 @@ from typing import Literal, Optional, Tuple, Union
 
 import torch
 from makemore_backprop_ninja.data_classes import BatchNormalizationParameters
-from makemore_backprop_ninja.module import Module
 
 
 # Reducing the number of locals here will penalize the didactical purpose
 # pylint: disable-next=too-many-arguments
 def predict_neural_network(
-    model: Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]],
+    model: Tuple[torch.Tensor, ...],
     input_data: torch.Tensor,
     inspect_pre_activation_and_h: bool = False,
     batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
