@@ -13,38 +13,6 @@ def predict_neural_network(
     batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
     training: bool = False,
 ) -> Tuple[torch.Tensor, ...]:
-    """Predict the neural net model.
-
-    Args:
-        model (Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]): The model
-            (weights or Modules) to use
-        input_data (torch.Tensor): The data to run inference on.
-            This data has the shape (batch_size, block_size)
-        inspect_pre_activation_and_h (bool): Whether or not to output the
-            pre-activation and activation
-        batch_normalization_parameters (Optional[BatchNormalizationParameters]):
-            If set: Contains the running mean and the running standard deviation
-        training (bool): Flag to keep track of whether we're training or not
-
-    Returns:
-        torch.Tensor: The achieved logits with shape (batch_size)
-    """
-    return predict_using_explicit_network(
-        model=model,
-        input_data=input_data,
-        inspect_pre_activation_and_h=inspect_pre_activation_and_h,
-        batch_normalization_parameters=batch_normalization_parameters,
-        training=training,
-    )
-
-
-def predict_using_explicit_network(
-    model: Tuple[torch.Tensor, ...],
-    input_data: torch.Tensor,
-    inspect_pre_activation_and_h: bool = False,
-    batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
-    training: bool = False,
-) -> Tuple[torch.Tensor, ...]:
     """Predict using the explicit network model.
 
     Args:
