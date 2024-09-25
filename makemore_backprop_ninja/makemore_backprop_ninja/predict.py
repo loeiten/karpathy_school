@@ -1,6 +1,6 @@
 """Module to run inference on the model."""
 
-from typing import Literal, Optional, Tuple, Union
+from typing import Optional, Tuple
 
 import torch
 from makemore_backprop_ninja.data_classes import BatchNormalizationParameters
