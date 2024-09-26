@@ -15,16 +15,14 @@ from makemore_backprop_ninja import DEVICE
 
 
 @pytest.mark.parametrize("batch_normalize", [True, False])
-@pytest.mark.parametrize("model_type", ["explicit", "pytorch"])
 def test_run_inference(
-    batch_normalize: bool, model_type: Literal["explicit", "pytorch"]
+    batch_normalize: bool 
 ) -> None:
     """
     Test the run_inference function.
 
     Args:
         batch_normalize (bool): Whether or not to use batch normalization
-        model_type (Literal["explicit", "pytorch"]): What model type to use
     """
     # Obtain the model with default parameters
     hidden_layer_neurons = 100
@@ -34,9 +32,8 @@ def test_run_inference(
         hidden_layer_neurons=hidden_layer_neurons,
         batch_normalize=batch_normalize,
     )
-    model_function = get_model_function(model_type=model_type)
     model = model_function(model_params)
-    if batch_normalize and model_type == "explicit":
+    if batch_normalize:
         batch_normalization_parameters = BatchNormalizationParameters(
             running_mean=torch.zeros(
                 (1, hidden_layer_neurons),
@@ -49,11 +46,8 @@ def test_run_inference(
                 device=DEVICE,
             ),
         )
-    else:
-        batch_normalization_parameters = None
     # Run inference on the untrained model
     predictions = run_inference(
-        model_type=model_type,
         model=model,
         n_samples=2,
         batch_normalization_parameters=batch_normalization_parameters,
