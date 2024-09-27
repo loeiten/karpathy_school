@@ -9,15 +9,13 @@ from makemore_backprop_ninja.data_classes import (
     ModelParams,
 )
 from makemore_backprop_ninja.inference import parse_args, run_inference
-from makemore_backprop_ninja.models import get_model_function
+from makemore_backprop_ninja.models import get_explicit_model
 
 from makemore_backprop_ninja import DEVICE
 
 
 @pytest.mark.parametrize("batch_normalize", [True, False])
-def test_run_inference(
-    batch_normalize: bool 
-) -> None:
+def test_run_inference(batch_normalize: bool) -> None:
     """
     Test the run_inference function.
 
@@ -32,7 +30,7 @@ def test_run_inference(
         hidden_layer_neurons=hidden_layer_neurons,
         batch_normalize=batch_normalize,
     )
-    model = model_function(model_params)
+    model = get_explicit_model(model_params)
     if batch_normalize:
         batch_normalization_parameters = BatchNormalizationParameters(
             running_mean=torch.zeros(
