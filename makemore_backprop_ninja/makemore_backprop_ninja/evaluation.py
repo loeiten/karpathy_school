@@ -10,7 +10,6 @@ from makemore_backprop_ninja.predict import predict_neural_network
 
 
 def evaluate(
-    model_type: Literal["explicit", "pytorch"],
     model: Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]],
     input_data: torch.Tensor,
     ground_truth: torch.Tensor,
@@ -19,7 +18,6 @@ def evaluate(
     """Evaluate the on a given data set.
 
     Args:
-        model_type (Literal["explicit", "pytorch"]): What model type to use
         model (Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]): The model
         input_data (torch.Tensor): The data to do the prediction on
         ground_truth (torch.Tensor): The ground truth of the predictions
@@ -31,7 +29,6 @@ def evaluate(
     """
     # Note the [0] as predict always returns a tuple
     logits = predict_neural_network(
-        model_type=model_type,
         model=model,
         input_data=input_data,
         batch_normalization_parameters=batch_normalization_parameters,
