@@ -5,12 +5,11 @@ from typing import Literal, Optional, Tuple, Union
 import torch
 import torch.nn.functional as F
 from makemore_backprop_ninja.data_classes import BatchNormalizationParameters
-from makemore_backprop_ninja.module import Module
 from makemore_backprop_ninja.predict import predict_neural_network
 
 
 def evaluate(
-    model: Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]],
+    model: Tuple[torch.Tensor, ...],
     input_data: torch.Tensor,
     ground_truth: torch.Tensor,
     batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
@@ -18,7 +17,7 @@ def evaluate(
     """Evaluate the on a given data set.
 
     Args:
-        model (Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]): The model
+        model (Tuple[torch.Tensor, ...]): The model
         input_data (torch.Tensor): The data to do the prediction on
         ground_truth (torch.Tensor): The ground truth of the predictions
         batch_normalization_parameters (Optional[BatchNormalizationParameters]):
