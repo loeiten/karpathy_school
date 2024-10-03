@@ -1,6 +1,6 @@
 """Module for evaluation."""
 
-from typing import Literal, Optional, Tuple, Union
+from typing import Optional, Tuple
 
 import torch
 import torch.nn.functional as F
