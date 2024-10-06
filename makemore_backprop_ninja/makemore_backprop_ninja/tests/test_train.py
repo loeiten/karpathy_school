@@ -19,16 +19,12 @@ from makemore_backprop_ninja import DEVICE
 
 
 @pytest.mark.parametrize("batch_normalize", [True, False])
-@pytest.mark.parametrize("model_type", ["explicit", "pytorch"])
-def test_train_neural_net_model(
-    batch_normalize: bool, model_type: Literal["explicit", "pytorch"]
-) -> None:
+def test_train_neural_net_model(batch_normalize: bool) -> None:
     """
     Test the test_train_neural_net_model function.
 
     Args:
         batch_normalize (bool): Whether or not to use batch normalization
-        model_type (Literal["explicit", "pytorch"]): Model to use
     """
     model_params = ModelParams(
         block_size=3,
@@ -41,23 +37,19 @@ def test_train_neural_net_model(
     dataset = get_dataset(block_size=model_params.block_size)
 
     # Obtain the model
-    model_function = get_model_function(model_type=model_type)
     model = model_function(model_params)
-    if batch_normalize and model_type == "explicit":
-        batch_normalization_parameters = BatchNormalizationParameters(
-            running_mean=torch.zeros(
-                (1, model_params.hidden_layer_neurons),
-                requires_grad=False,
-                device=DEVICE,
-            ),
-            running_std=torch.ones(
-                (1, model_params.hidden_layer_neurons),
-                requires_grad=False,
-                device=DEVICE,
-            ),
-        )
-    else:
-        batch_normalization_parameters = None
+    batch_normalization_parameters = BatchNormalizationParameters(
+        running_mean=torch.zeros(
+            (1, model_params.hidden_layer_neurons),
+            requires_grad=False,
+            device=DEVICE,
+        ),
+        running_std=torch.ones(
+            (1, model_params.hidden_layer_neurons),
+            requires_grad=False,
+            device=DEVICE,
+        ),
+    )
 
     # Set the model options
     mini_batches_per_data_capture = 1
@@ -71,7 +63,6 @@ def test_train_neural_net_model(
 
     # Train for one step without train_statistics
     model = train_neural_net_model(
-        model_type=model_type,
         model=model,
         dataset=dataset,
         optimization_params=optimization_params,
@@ -82,7 +73,6 @@ def test_train_neural_net_model(
     # Add the train_statics
     train_statistics = TrainStatistics()
     model = train_neural_net_model(
-        model_type=model_type,
         model=model,
         dataset=dataset,
         optimization_params=optimization_params,
@@ -105,7 +95,6 @@ def test_train_neural_net_model(
 
     # Train for one step
     model = train_neural_net_model(
-        model_type=model_type,
         model=model,
         dataset=dataset,
         optimization_params=optimization_params,
