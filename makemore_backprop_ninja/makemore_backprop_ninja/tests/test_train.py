@@ -18,19 +18,14 @@ from makemore_backprop_ninja.train import parse_args, train_neural_net_model
 from makemore_backprop_ninja import DEVICE
 
 
-@pytest.mark.parametrize("batch_normalize", [True, False])
-def test_train_neural_net_model(batch_normalize: bool) -> None:
+def test_train_neural_net_model() -> None:
     """
     Test the test_train_neural_net_model function.
-
-    Args:
-        batch_normalize (bool): Whether or not to use batch normalization
     """
     model_params = ModelParams(
         block_size=3,
         embedding_size=2,
         hidden_layer_neurons=100,
-        batch_normalize=batch_normalize,
     )
 
     # Obtain the data
