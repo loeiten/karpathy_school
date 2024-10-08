@@ -11,7 +11,7 @@ from makemore_backprop_ninja.data_classes import (
     OptimizationParams,
     TrainStatistics,
 )
-from makemore_backprop_ninja.models import get_model_function
+from makemore_backprop_ninja.models import get_explicit_model
 from makemore_backprop_ninja.preprocessing import get_dataset
 from makemore_backprop_ninja.train import parse_args, train_neural_net_model
 
@@ -32,7 +32,7 @@ def test_train_neural_net_model() -> None:
     dataset = get_dataset(block_size=model_params.block_size)
 
     # Obtain the model
-    model = model_function(model_params)
+    model = get_explicit_model(model_params)
     batch_normalization_parameters = BatchNormalizationParameters(
         running_mean=torch.zeros(
             (1, model_params.hidden_layer_neurons),
