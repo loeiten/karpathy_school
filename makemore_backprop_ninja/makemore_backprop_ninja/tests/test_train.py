@@ -1,9 +1,7 @@
 """Contains tests for the train module."""
 
 from itertools import chain
-from typing import Literal
 
-import pytest
 import torch
 from makemore_backprop_ninja.data_classes import (
     BatchNormalizationParameters,
