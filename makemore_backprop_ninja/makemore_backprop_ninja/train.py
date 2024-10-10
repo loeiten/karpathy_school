@@ -2,7 +2,7 @@
 
 import argparse
 import sys
-from typing import List, Optional, Tuple 
+from typing import List, Optional, Tuple
 
 import torch
 import torch.nn.functional as F
@@ -16,7 +16,6 @@ from makemore_backprop_ninja.evaluation import evaluate
 from makemore_backprop_ninja.models import get_explicit_model
 from makemore_backprop_ninja.predict import predict_neural_network
 from makemore_backprop_ninja.preprocessing import get_dataset
-from makemore_backprop_ninja.visualisation import plot_training
 from tqdm import tqdm
 
 from makemore_backprop_ninja import DATASET, DEVICE
@@ -239,8 +238,6 @@ def train_and_plot(
         optimization_params=optimization_params,
         batch_normalization_parameters=batch_normalization_parameters,
     )
-
-    plot_training(train_statistics=train_statistics)
 
 
 def parse_args(sys_args: List[str]) -> argparse.Namespace:
