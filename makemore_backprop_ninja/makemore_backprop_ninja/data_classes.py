@@ -15,19 +15,6 @@ class LayerType(Enum):
 
 
 @dataclass
-class TrainStatistics:
-    """Class holding train statistics."""
-
-    training_loss: List[float] = field(default_factory=list)
-    training_step: List[int] = field(default_factory=list)
-    eval_training_loss: List[float] = field(default_factory=list)
-    eval_training_step: List[int] = field(default_factory=list)
-    eval_validation_loss: List[float] = field(default_factory=list)
-    eval_validation_step: List[int] = field(default_factory=list)
-    update_to_data_ratio: List[List[float]] = field(default_factory=list)
-
-
-@dataclass
 class OptimizationParams:
     """Class holding possible optimization option."""
 
