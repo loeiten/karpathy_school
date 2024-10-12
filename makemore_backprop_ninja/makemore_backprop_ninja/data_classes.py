@@ -1,8 +1,8 @@
 """Module containing option classes."""
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
-from typing import Callable, List
+from typing import Callable
 
 import torch
 
