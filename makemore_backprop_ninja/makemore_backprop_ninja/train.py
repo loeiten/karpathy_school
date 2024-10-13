@@ -10,9 +10,7 @@ from makemore_backprop_ninja.data_classes import (
     BatchNormalizationParameters,
     ModelParams,
     OptimizationParams,
-    TrainStatistics,
 )
-from makemore_backprop_ninja.evaluation import evaluate
 from makemore_backprop_ninja.models import get_explicit_model
 from makemore_backprop_ninja.predict import predict_neural_network
 from makemore_backprop_ninja.preprocessing import get_dataset
@@ -28,7 +26,6 @@ def train_neural_net_model(
     dataset: DATASET,
     optimization_params: Optional[OptimizationParams],
     seed: int = 2147483647,
-    train_statistics: Optional[TrainStatistics] = None,
     batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
 ) -> Tuple[torch.Tensor, ...]:
     """Train the neural net model.
@@ -40,8 +37,6 @@ def train_neural_net_model(
         optimization_params (Optional[OptimizationParams]): Optimization
             options
         seed (int): The seed for the random number generator
-        train_statistics (Optional[TrainStatistics]): Class to capture the
-            statistics of the training job
         batch_normalization_parameters (Optional[BatchNormalizationParameters]):
             If set: Contains the running mean and the running standard deviation
 
@@ -86,11 +81,6 @@ def train_neural_net_model(
         )[0]
         loss = F.cross_entropy(logits, dataset["training_ground_truth"][idxs])
 
-        # Append loss and iteration
-        if train_statistics is not None:
-            train_statistics.training_loss.append(loss.item())
-            train_statistics.training_step.append(optimization_params.cur_step)
-
         # Backward pass
         layered_parameters = model
 
@@ -107,55 +97,11 @@ def train_neural_net_model(
             )
 
         if i % optimization_params.mini_batches_per_data_capture == 0:
-            if train_statistics is not None:
-                # Predict on the whole training set
-                cur_training_loss = evaluate(
-                    model=model,
-                    input_data=dataset["training_input_data"],
-                    ground_truth=dataset["training_ground_truth"],
-                    batch_normalization_parameters=batch_normalization_parameters,
-                )
-                train_statistics.eval_training_loss.append(cur_training_loss)
-                train_statistics.eval_training_step.append(optimization_params.cur_step)
-                # Predict on evaluation set
-                cur_validation_loss = evaluate(
-                    model=model,
-                    input_data=dataset["validation_input_data"],
-                    ground_truth=dataset["validation_ground_truth"],
-                    batch_normalization_parameters=batch_normalization_parameters,
-                )
-                train_statistics.eval_validation_loss.append(cur_validation_loss)
-                train_statistics.eval_validation_step.append(
-                    optimization_params.cur_step
-                )
-
             print(
                 f"{optimization_params.cur_step:7d}/"
                 f"{optimization_params.n_mini_batches:7d}: "
                 f"{loss.item():.4f}"
             )
-
-        # Update update-to-data-ratio
-        if train_statistics is not None:
-            with torch.no_grad():
-                train_statistics.update_to_data_ratio.append(
-                    (
-                        [
-                            (
-                                (
-                                    optimization_params.learning_rate(
-                                        optimization_params.cur_step
-                                    )
-                                    * parameters.grad
-                                ).std()
-                                / parameters.data.std()
-                            )
-                            .log10()
-                            .item()
-                            for parameters in layered_parameters
-                        ]
-                    )
-                )
 
     return model
 
@@ -165,7 +111,7 @@ def train(
     optimization_params: OptimizationParams,
     seed: int = 2147483647,
     batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
-) -> Tuple[Tuple[torch.Tensor, ...], TrainStatistics]:
+) -> Tuple[torch.Tensor, ...]:
     """Train the model.
 
     Args:
@@ -177,7 +123,6 @@ def train(
 
     Returns:
         Tuple[torch.Tensor, ...]: The model
-        TrainStatistics: Statistics from the training
     """
     # Obtain the data
     dataset = get_dataset(block_size=model_params.block_size)
@@ -185,22 +130,16 @@ def train(
     # Obtain the model
     model = get_explicit_model(model_params)
 
-    train_statistics = TrainStatistics()
-
     # Train for one step
     model = train_neural_net_model(
         model=model,
         dataset=dataset,
         optimization_params=optimization_params,
         seed=seed,
-        train_statistics=train_statistics,
         batch_normalization_parameters=batch_normalization_parameters,
     )
 
-    print(f"Final train loss: {train_statistics.eval_training_loss[-1]:.3f}")
-    print(f"Final validation loss: {train_statistics.eval_validation_loss[-1]:.3f}")
-
-    return model, train_statistics
+    return model
 
 
 def train_and_plot(
@@ -233,7 +172,7 @@ def train_and_plot(
         )
     else:
         batch_normalization_parameters = None
-    _, train_statistics = train(
+    _ = train(
         model_params=model_params,
         optimization_params=optimization_params,
         batch_normalization_parameters=batch_normalization_parameters,
