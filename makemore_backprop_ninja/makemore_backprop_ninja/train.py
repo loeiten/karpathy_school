@@ -11,6 +11,7 @@ from makemore_backprop_ninja.data_classes import (
     ModelParams,
     OptimizationParams,
 )
+from makemore_backprop_ninja.evaluation import evaluate
 from makemore_backprop_ninja.models import get_explicit_model
 from makemore_backprop_ninja.predict import predict_neural_network
 from makemore_backprop_ninja.preprocessing import get_dataset
@@ -102,6 +103,24 @@ def train_neural_net_model(
                 f"{optimization_params.n_mini_batches:7d}: "
                 f"{loss.item():.4f}"
             )
+
+    # Predict on the whole training set
+    training_loss = evaluate(
+        model=model,
+        input_data=dataset["training_input_data"],
+        ground_truth=dataset["training_ground_truth"],
+        batch_normalization_parameters=batch_normalization_parameters,
+    )
+    # Predict on evaluation set
+    validation_loss = evaluate(
+        model=model,
+        input_data=dataset["validation_input_data"],
+        ground_truth=dataset["validation_ground_truth"],
+        batch_normalization_parameters=batch_normalization_parameters,
+    )
+
+    print(f"Final train loss: {training_loss:.3f}")
+    print(f"Final validation loss: {validation_loss:.3f}")
 
     return model
 
