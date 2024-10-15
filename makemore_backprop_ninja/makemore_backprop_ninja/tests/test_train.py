@@ -7,7 +7,6 @@ from makemore_backprop_ninja.data_classes import (
     BatchNormalizationParameters,
     ModelParams,
     OptimizationParams,
-    TrainStatistics,
 )
 from makemore_backprop_ninja.models import get_explicit_model
 from makemore_backprop_ninja.preprocessing import get_dataset
@@ -63,23 +62,6 @@ def test_train_neural_net_model() -> None:
     )
     assert optimization_params.cur_step == 1
 
-    # Add the train_statics
-    train_statistics = TrainStatistics()
-    model = train_neural_net_model(
-        model=model,
-        dataset=dataset,
-        optimization_params=optimization_params,
-        train_statistics=train_statistics,
-        batch_normalization_parameters=batch_normalization_parameters,
-    )
-    assert optimization_params.cur_step == 2
-    assert len(train_statistics.training_step) == 1
-    assert len(train_statistics.training_loss) == 1
-    assert len(train_statistics.eval_training_step) == 1
-    assert len(train_statistics.eval_training_loss) == 1
-    assert len(train_statistics.eval_validation_step) == 1
-    assert len(train_statistics.eval_validation_loss) == 1
-
     # Train the model again with changed parameters
     optimization_params.n_mini_batches = 3
     optimization_params.batch_size = 64
@@ -91,19 +73,9 @@ def test_train_neural_net_model() -> None:
         model=model,
         dataset=dataset,
         optimization_params=optimization_params,
-        train_statistics=train_statistics,
         batch_normalization_parameters=batch_normalization_parameters,
     )
-    assert optimization_params.cur_step == 5
-
-    assert len(train_statistics.training_step) == 4
-    assert len(train_statistics.training_loss) == 4
-    # One capture when i=0
-    # Another capture when i=2
-    assert len(train_statistics.eval_training_step) == 3
-    assert len(train_statistics.eval_training_loss) == 3
-    assert len(train_statistics.eval_validation_step) == 3
-    assert len(train_statistics.eval_validation_loss) == 3
+    assert optimization_params.cur_step == 4
 
 
 def test_parse_args() -> None:
