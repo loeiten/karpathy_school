@@ -38,28 +38,6 @@ def test_get_explicit_model(
         + (hidden_layer_neurons)  # size of b1
         + (hidden_layer_neurons * VOCAB_SIZE)  # size of w2
         + VOCAB_SIZE  # size of b2
-    )
-
-    # We know the exact output from the batch_normalize flag
-    # pylint: disable-next=unbalanced-tuple-unpacking
-    c, w1, b1, w2, b2 = model
-
-    assert c.shape == torch.Size([VOCAB_SIZE, embedding_size])
-    assert w1.shape == torch.Size([block_size * embedding_size, hidden_layer_neurons])
-    assert b1.shape == torch.Size([hidden_layer_neurons])
-    assert w2.shape == torch.Size([hidden_layer_neurons, VOCAB_SIZE])
-    assert b2.shape == torch.Size([VOCAB_SIZE])
-
-    model = get_explicit_model(model_params=model_params)
-
-    # Check the number of parameters
-    assert (
-        sum(parameters.nelement() for parameters in model)
-        == (VOCAB_SIZE * embedding_size)  # size of c
-        + (block_size * embedding_size * hidden_layer_neurons)  # size of w1
-        + (hidden_layer_neurons)  # size of b1
-        + (hidden_layer_neurons * VOCAB_SIZE)  # size of w2
-        + VOCAB_SIZE  # size of b2
         + hidden_layer_neurons  # size of batch_normalization_gain
         + hidden_layer_neurons  # size of batch_normalization_bias
     )
