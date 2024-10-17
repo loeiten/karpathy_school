@@ -42,6 +42,8 @@ def test_get_explicit_model(
         + hidden_layer_neurons  # size of batch_normalization_bias
     )
 
+    # We know the exact dimension
+    # pylint: disable-next=unbalanced-tuple-unpacking
     c, w1, b1, w2, b2, batch_normalization_gain, batch_normalization_bias = model
 
     assert c.shape == torch.Size([VOCAB_SIZE, embedding_size])
