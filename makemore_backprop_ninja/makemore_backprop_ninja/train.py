@@ -73,13 +73,12 @@ def train_neural_net_model(
         #       training data
         #       The size of training_input_data[idxs] is therefore
         #       (batch_size, block_size)
-        # Note the [0] as predict always returns a tuple
         logits = predict_neural_network(
             model=model,
             input_data=dataset["training_input_data"][idxs],
             batch_normalization_parameters=batch_normalization_parameters,
             training=True,
-        )[0]
+        )
         loss = F.cross_entropy(logits, dataset["training_ground_truth"][idxs])
 
         # Backward pass
