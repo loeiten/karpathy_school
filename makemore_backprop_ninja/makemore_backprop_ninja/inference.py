@@ -18,18 +18,18 @@ from makemore_backprop_ninja import DEVICE, INDEX_TO_TOKEN, TOKEN_TO_INDEX
 
 def run_inference(
     model: Tuple[torch.Tensor, ...],
+    batch_normalization_parameters: BatchNormalizationParameters,
     n_samples: int = 20,
-    batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
     seed: int = 2147483647,
 ) -> Tuple[str, ...]:
     """Run inference on the model.
 
     Args:
         model (Tuple[torch.Tensor, ...]): The model to run inference on.
+        batch_normalization_parameters (Optional[BatchNormalizationParameters]):
+            Contains the running mean and the running standard deviation
         n_samples (int, optional): The number of inferences to run.
             Defaults to 20.
-        batch_normalization_parameters (Optional[BatchNormalizationParameters]):
-            If set: Contains the running mean and the running standard deviation
         seed (int, optional): The seed to use. Defaults to 2147483647.
 
     Returns:
@@ -89,12 +89,6 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
         default=20,
         help=("Number of names to predict"),
     )
-    parser.add_argument(
-        "-m",
-        "--batch-normalize",
-        help=("Whether or not to use batch normalization"),
-        action="store_true",
-    )
 
     args = parser.parse_args(sys_args)
     return args
@@ -115,24 +109,21 @@ def main(sys_args: List[str]):
         n_mini_batches=200_000,
         mini_batches_per_data_capture=1_000,
     )
-    if args.batch_normalize:
-        # These parameters will be used as batch norm parameters during inference
-        # Initialized to zero as the mean and one as std as the initialization of w1
-        # and b1 is so that h_pre_activation is roughly gaussian
-        batch_normalization_parameters = BatchNormalizationParameters(
-            running_mean=torch.zeros(
-                (1, model_params.hidden_layer_neurons),
-                requires_grad=False,
-                device=DEVICE,
-            ),
-            running_std=torch.ones(
-                (1, model_params.hidden_layer_neurons),
-                requires_grad=False,
-                device=DEVICE,
-            ),
-        )
-    else:
-        batch_normalization_parameters = None
+    # These parameters will be used as batch norm parameters during inference
+    # Initialized to zero as the mean and one as std as the initialization of w1
+    # and b1 is so that h_pre_activation is roughly gaussian
+    batch_normalization_parameters = BatchNormalizationParameters(
+        running_mean=torch.zeros(
+            (1, model_params.hidden_layer_neurons),
+            requires_grad=False,
+            device=DEVICE,
+        ),
+        running_std=torch.ones(
+            (1, model_params.hidden_layer_neurons),
+            requires_grad=False,
+            device=DEVICE,
+        ),
+    )
     model = train(
         model_params=model_params,
         optimization_params=optimization_params,
