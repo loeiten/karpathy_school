@@ -50,8 +50,8 @@ def run_inference(
         while True:
             logits = predict_neural_network(
                 model=model,
-                input_data=torch.tensor([context]),
                 batch_normalization_parameters=batch_normalization_parameters,
+                input_data=torch.tensor([context]),
                 training=False,
             )
             probs = torch.softmax(logits, dim=1)
