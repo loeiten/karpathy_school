@@ -1,6 +1,6 @@
 """Module for evaluation."""
 
-from typing import Optional, Tuple
+from typing import Tuple
 
 import torch
 import torch.nn.functional as F
@@ -10,17 +10,17 @@ from makemore_backprop_ninja.predict import predict_neural_network
 
 def evaluate(
     model: Tuple[torch.Tensor, ...],
-    batch_normalization_parameters: BatchNormalizationParameters,
     input_data: torch.Tensor,
+    batch_normalization_parameters: BatchNormalizationParameters,
     ground_truth: torch.Tensor,
 ) -> float:
     """Evaluate the on a given data set.
 
     Args:
         model (Tuple[torch.Tensor, ...]): The model
+        input_data (torch.Tensor): The data to do the prediction on
         batch_normalization_parameters (Optional[BatchNormalizationParameters]):
             If set: Contains the running mean and the running standard deviation
-        input_data (torch.Tensor): The data to do the prediction on
         ground_truth (torch.Tensor): The ground truth of the predictions
 
     Returns:
