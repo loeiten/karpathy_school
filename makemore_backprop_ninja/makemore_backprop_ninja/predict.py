@@ -20,7 +20,7 @@ def predict_neural_network(
         model (Tuple[torch.Tensor, ...]): The model (weights) to use
         input_data (torch.Tensor): The data to run inference on.
             This data has the shape (batch_size, block_size)
-        batch_normalization_parameters (Optional[BatchNormalizationParameters]):
+        batch_normalization_parameters (BatchNormalizationParameters):
             Contains the running mean and the running standard deviation
         training (bool): Flag to keep track of whether we're training or not
 

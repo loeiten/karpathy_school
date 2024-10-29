@@ -26,7 +26,7 @@ def run_inference(
 
     Args:
         model (Tuple[torch.Tensor, ...]): The model to run inference on.
-        batch_normalization_parameters (Optional[BatchNormalizationParameters]):
+        batch_normalization_parameters (BatchNormalizationParameters):
             Contains the running mean and the running standard deviation
         n_samples (int, optional): The number of inferences to run.
             Defaults to 20.
