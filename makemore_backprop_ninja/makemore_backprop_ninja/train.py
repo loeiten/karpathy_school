@@ -24,22 +24,22 @@ from makemore_backprop_ninja import DATASET, DEVICE
 # pylint: disable-next=too-many-arguments,too-many-locals,too-complex,too-many-branches
 def train_neural_net_model(
     model: Tuple[torch.Tensor, ...],
+    batch_normalization_parameters: BatchNormalizationParameters,
     dataset: DATASET,
     optimization_params: Optional[OptimizationParams],
     seed: int = 2147483647,
-    batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
 ) -> Tuple[torch.Tensor, ...]:
     """Train the neural net model.
 
     Args:
         model (Tuple[torch.Tensor, ...]): The model to use
+        batch_normalization_parameters (Optional[BatchNormalizationParameters]):
+            Contains the running mean and the running standard deviation
         dataset: DATASET
             Data containing the training and validation set
         optimization_params (Optional[OptimizationParams]): Optimization
             options
         seed (int): The seed for the random number generator
-        batch_normalization_parameters (Optional[BatchNormalizationParameters]):
-            If set: Contains the running mean and the running standard deviation
 
     Returns:
         Tuple[torch.Tensor, ...]: The trained model
