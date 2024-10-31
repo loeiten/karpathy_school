@@ -33,7 +33,7 @@ def train_neural_net_model(
 
     Args:
         model (Tuple[torch.Tensor, ...]): The model to use
-        batch_normalization_parameters (Optional[BatchNormalizationParameters]):
+        batch_normalization_parameters (BatchNormalizationParameters):
             Contains the running mean and the running standard deviation
         dataset: DATASET
             Data containing the training and validation set
@@ -127,17 +127,17 @@ def train_neural_net_model(
 def train(
     model_params: ModelParams,
     optimization_params: OptimizationParams,
+    batch_normalization_parameters: BatchNormalizationParameters,
     seed: int = 2147483647,
-    batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
 ) -> Tuple[torch.Tensor, ...]:
     """Train the model.
 
     Args:
         model_params (ModelParams): The model parameters
         optimization_params (OptimizationParams): The optimization parameters
+        batch_normalization_parameters (BatchNormalizationParameters):
+            Contains the running mean and the running standard deviation
         seed (int): The seed for the random number generator
-        batch_normalization_parameters (Optional[BatchNormalizationParameters]):
-            If set: Contains the running mean and the running standard deviation
 
     Returns:
         Tuple[torch.Tensor, ...]: The model
@@ -152,9 +152,9 @@ def train(
     model = train_neural_net_model(
         model=model,
         dataset=dataset,
+        batch_normalization_parameters=batch_normalization_parameters,
         optimization_params=optimization_params,
         seed=seed,
-        batch_normalization_parameters=batch_normalization_parameters,
     )
 
     return model
