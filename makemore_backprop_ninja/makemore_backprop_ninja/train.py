@@ -267,12 +267,6 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
         default=default_optimization_params.batch_size,
         help="Number of examples per batch",
     )
-    parser.add_argument(
-        "-m",
-        "--batch-normalize",
-        action="store_true",
-        help="Whether or not to use batch normalization",
-    )
 
     args = parser.parse_args(sys_args)
     return args
@@ -298,7 +292,6 @@ def main(sys_args: List[str]):
     train_and_plot(
         model_params=model_params,
         optimization_params=optimization_params,
-        batch_normalize=args.batch_normalize,
     )
 
 
