@@ -160,41 +160,37 @@ def train(
     return model
 
 
-def train_and_plot(
+def train_model(
     model_params: ModelParams,
     optimization_params: OptimizationParams,
-    batch_normalize: bool = False,
 ) -> None:
-    """Train the model and plot the statistics.
+    """Train the model.
 
     Args:
         model_params (ModelParams): The model parameters
         optimization_params (OptimizationParams): The optimization parameters
-        batch_normalize (bool): Whether or not to use batch normalization
     """
-    if batch_normalize:
-        # These parameters will be used as batch norm parameters during inference
-        # Initialized to zero as the mean and one as std as the initialization of w1
-        # and b1 is so that h_pre_activation is roughly gaussian
-        batch_normalization_parameters = BatchNormalizationParameters(
-            running_mean=torch.zeros(
-                (1, model_params.hidden_layer_neurons),
-                requires_grad=False,
-                device=DEVICE,
-            ),
-            running_std=torch.ones(
-                (1, model_params.hidden_layer_neurons),
-                requires_grad=False,
-                device=DEVICE,
-            ),
-        )
-    else:
-        batch_normalization_parameters = None
+    # These parameters will be used as batch norm parameters during inference
+    # Initialized to zero as the mean and one as std as the initialization of w1
+    # and b1 is so that h_pre_activation is roughly gaussian
+    batch_normalization_parameters = BatchNormalizationParameters(
+        running_mean=torch.zeros(
+            (1, model_params.hidden_layer_neurons),
+            requires_grad=False,
+            device=DEVICE,
+        ),
+        running_std=torch.ones(
+            (1, model_params.hidden_layer_neurons),
+            requires_grad=False,
+            device=DEVICE,
+        ),
+    )
     _ = train(
         model_params=model_params,
         optimization_params=optimization_params,
         batch_normalization_parameters=batch_normalization_parameters,
     )
+    print("Training done!")
 
 
 def parse_args(sys_args: List[str]) -> argparse.Namespace:
@@ -289,7 +285,7 @@ def main(sys_args: List[str]):
         mini_batches_per_data_capture=args.mini_batches_per_data_capture,
         batch_size=args.batch_size,
     )
-    train_and_plot(
+    train_model(
         model_params=model_params,
         optimization_params=optimization_params,
     )
