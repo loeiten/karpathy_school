@@ -20,7 +20,7 @@ def evaluate(
         model (Tuple[torch.Tensor, ...]): The model
         input_data (torch.Tensor): The data to do the prediction on
         batch_normalization_parameters (BatchNormalizationParameters):
-            If set: Contains the running mean and the running standard deviation
+            Contains the running mean and the running standard deviation
         ground_truth (torch.Tensor): The ground truth of the predictions
 
     Returns:
