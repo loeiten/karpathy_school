@@ -73,7 +73,7 @@ def predict_neural_network(
         # step during the training, but having a running updates in the
         # direction of the current mean and stddev
         batch_normalization_mean = h_pre_activation.mean(0, keepdim=True)
-        batch_normalization_std = h_pre_activation.std(0, keepdim=True)
+        batch_normalization_var = h_pre_activation.var(0, keepdim=True)
 
         with torch.no_grad():
             # Here we use a momentum of 0.001
@@ -88,16 +88,18 @@ def predict_neural_network(
             )
             batch_normalization_parameters.running_std = (
                 0.999 * batch_normalization_parameters.running_std
-                + 0.001 * batch_normalization_std
+                + 0.001 * (batch_normalization_var) ** 0.5
             )
     else:
         batch_normalization_mean = batch_normalization_parameters.running_mean
-        batch_normalization_std = batch_normalization_parameters.running_std
+        batch_normalization_var = batch_normalization_parameters.running_std**2
+
+    inv_batch_normalization_std = (batch_normalization_var + 1e-5) ** 0.5
 
     h_pre_activation = (
         batch_normalization_gain
         * (h_pre_activation - batch_normalization_mean)
-        / batch_normalization_std
+        * inv_batch_normalization_std
     ) + batch_normalization_bias
 
     h = torch.tanh(h_pre_activation)
