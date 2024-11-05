@@ -95,11 +95,12 @@ def predict_neural_network(
         batch_normalization_var = batch_normalization_parameters.running_std**2
 
     inv_batch_normalization_std = (batch_normalization_var + 1e-5) ** 0.5
+    batch_normalization_raw = (
+        h_pre_activation - batch_normalization_mean
+    ) * inv_batch_normalization_std
 
     h_pre_activation = (
-        batch_normalization_gain
-        * (h_pre_activation - batch_normalization_mean)
-        * inv_batch_normalization_std
+        batch_normalization_gain * batch_normalization_raw
     ) + batch_normalization_bias
 
     h = torch.tanh(h_pre_activation)
