@@ -8,13 +8,13 @@ from makemore_backprop_ninja.data_classes import BatchNormalizationParameters
 
 # Reducing the number of locals here will penalize the didactical purpose
 # pylint: disable-next=too-many-locals
-def predict_neural_network(
+def predict_condensed_neural_network(
     model: Tuple[torch.Tensor, ...],
     input_data: torch.Tensor,
     batch_normalization_parameters: BatchNormalizationParameters,
     training: bool = False,
 ) -> Tuple[torch.Tensor, ...]:
-    """Predict using the explicit network model.
+    """Predict using the condensed network model.
 
     Args:
         model (Tuple[torch.Tensor, ...]): The model (weights) to use

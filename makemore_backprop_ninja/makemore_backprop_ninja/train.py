@@ -13,7 +13,7 @@ from makemore_backprop_ninja.data_classes import (
 )
 from makemore_backprop_ninja.evaluation import evaluate
 from makemore_backprop_ninja.models import get_explicit_model
-from makemore_backprop_ninja.predict import predict_neural_network
+from makemore_backprop_ninja.predict import predict_condensed_neural_network
 from makemore_backprop_ninja.preprocessing import get_dataset
 from tqdm import tqdm
 
@@ -73,7 +73,7 @@ def train_neural_net_model(
         #       training data
         #       The size of training_input_data[idxs] is therefore
         #       (batch_size, block_size)
-        logits = predict_neural_network(
+        logits = predict_condensed_neural_network(
             model=model,
             input_data=dataset["training_input_data"][idxs],
             batch_normalization_parameters=batch_normalization_parameters,

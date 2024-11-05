@@ -5,7 +5,7 @@ from typing import Tuple
 import torch
 import torch.nn.functional as F
 from makemore_backprop_ninja.data_classes import BatchNormalizationParameters
-from makemore_backprop_ninja.predict import predict_neural_network
+from makemore_backprop_ninja.predict import predict_condensed_neural_network
 
 
 def evaluate(
@@ -26,7 +26,7 @@ def evaluate(
     Returns:
         float: The loss
     """
-    logits = predict_neural_network(
+    logits = predict_condensed_neural_network(
         model=model,
         input_data=input_data,
         batch_normalization_parameters=batch_normalization_parameters,

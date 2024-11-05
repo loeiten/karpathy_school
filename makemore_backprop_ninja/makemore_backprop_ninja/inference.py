@@ -10,7 +10,7 @@ from makemore_backprop_ninja.data_classes import (
     ModelParams,
     OptimizationParams,
 )
-from makemore_backprop_ninja.predict import predict_neural_network
+from makemore_backprop_ninja.predict import predict_condensed_neural_network
 from makemore_backprop_ninja.train import train
 
 from makemore_backprop_ninja import DEVICE, INDEX_TO_TOKEN, TOKEN_TO_INDEX
@@ -48,7 +48,7 @@ def run_inference(
         context = [TOKEN_TO_INDEX["."]] * block_size  # Initialize with stop characters
 
         while True:
-            logits = predict_neural_network(
+            logits = predict_condensed_neural_network(
                 model=model,
                 batch_normalization_parameters=batch_normalization_parameters,
                 input_data=torch.tensor([context]),
