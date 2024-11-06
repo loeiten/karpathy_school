@@ -1,4 +1,4 @@
-"""Module to run inference on the model."""
+"""Module to run predict on the model."""
 
 from typing import Literal, Optional, Tuple, Union
 
