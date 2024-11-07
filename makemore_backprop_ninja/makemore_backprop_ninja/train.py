@@ -13,7 +13,7 @@ from makemore_backprop_ninja.data_classes import (
 )
 from makemore_backprop_ninja.evaluation import evaluate
 from makemore_backprop_ninja.models import get_explicit_model
-from makemore_backprop_ninja.predict import predict_condensed_neural_network
+from makemore_backprop_ninja.predict import predict_neural_network
 from makemore_backprop_ninja.preprocessing import get_dataset
 from tqdm import tqdm
 
@@ -28,6 +28,7 @@ def train_neural_net_model(
     dataset: DATASET,
     optimization_params: Optional[OptimizationParams],
     seed: int = 2147483647,
+    use_functional: bool = True,
 ) -> Tuple[torch.Tensor, ...]:
     """Train the neural net model.
 
@@ -40,6 +41,9 @@ def train_neural_net_model(
         optimization_params (Optional[OptimizationParams]): Optimization
             options
         seed (int): The seed for the random number generator
+        use_functional (bool): Whether or not to use the functional version of
+            the cross entropy.
+            If False, the hand-written version will be used
 
     Returns:
         Tuple[torch.Tensor, ...]: The trained model
@@ -73,13 +77,29 @@ def train_neural_net_model(
         #       training data
         #       The size of training_input_data[idxs] is therefore
         #       (batch_size, block_size)
-        logits = predict_condensed_neural_network(
+        logits = predict_neural_network(
             model=model,
             input_data=dataset["training_input_data"][idxs],
             batch_normalization_parameters=batch_normalization_parameters,
             training=True,
         )
-        loss = F.cross_entropy(logits, dataset["training_ground_truth"][idxs])
+        if use_functional:
+            loss = F.cross_entropy(logits, dataset["training_ground_truth"][idxs])
+        else:
+            # The written out version of the cross entropy
+            logit_maxes = logits.max(1, keepdim=True).values
+            # Normalize the logits for numerical stability
+            normalized_logits = logits - logit_maxes
+            counts = normalized_logits.exp()
+            counts_sum = counts.sum(1, keepdims=True)
+            # (1.0/counts_sum) doesn't give the exact values
+            counts_sum_inv = counts_sum**-1
+            probabilities = counts * counts_sum_inv
+            log_probabilities = probabilities.log()
+            batch_size = idxs.size(dim=0)
+            loss = -log_probabilities[
+                range(batch_size), dataset["training_ground_truth"][idxs]
+            ].mean()
 
         # Backward pass
         layered_parameters = model
