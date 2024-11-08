@@ -13,7 +13,7 @@ def predict_neural_network(
     input_data: torch.Tensor,
     batch_normalization_parameters: BatchNormalizationParameters,
     training: bool = False,
-) -> Tuple[torch.Tensor, ...]:
+) -> torch.Tensor:
     """Predict using the network.
 
     Args:
