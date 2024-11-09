@@ -27,8 +27,8 @@ def train_neural_net_model(
     batch_normalization_parameters: BatchNormalizationParameters,
     dataset: DATASET,
     optimization_params: Optional[OptimizationParams],
-    seed: int = 2147483647,
     use_functional: bool = True,
+    seed: int = 2147483647,
 ) -> Tuple[torch.Tensor, ...]:
     """Train the neural net model.
 
@@ -40,10 +40,10 @@ def train_neural_net_model(
             Data containing the training and validation set
         optimization_params (Optional[OptimizationParams]): Optimization
             options
-        seed (int): The seed for the random number generator
         use_functional (bool): Whether or not to use the functional version of
             the cross entropy.
             If False, the hand-written version will be used
+        seed (int): The seed for the random number generator
 
     Returns:
         Tuple[torch.Tensor, ...]: The trained model
@@ -148,6 +148,7 @@ def train(
     model_params: ModelParams,
     optimization_params: OptimizationParams,
     batch_normalization_parameters: BatchNormalizationParameters,
+    use_functional: bool = True,
     seed: int = 2147483647,
 ) -> Tuple[torch.Tensor, ...]:
     """Train the model.
@@ -157,7 +158,11 @@ def train(
         optimization_params (OptimizationParams): The optimization parameters
         batch_normalization_parameters (BatchNormalizationParameters):
             Contains the running mean and the running standard deviation
+        use_functional (bool): Whether or not to use the functional version of
+            the cross entropy.
+            If False, the hand-written version will be used
         seed (int): The seed for the random number generator
+
 
     Returns:
         Tuple[torch.Tensor, ...]: The model
@@ -174,6 +179,7 @@ def train(
         dataset=dataset,
         batch_normalization_parameters=batch_normalization_parameters,
         optimization_params=optimization_params,
+        use_functional=use_functional,
         seed=seed,
     )
 

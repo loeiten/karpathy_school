@@ -2,6 +2,7 @@
 
 from itertools import chain
 
+import pytest
 import torch
 from makemore_backprop_ninja.data_classes import (
     BatchNormalizationParameters,
@@ -15,9 +16,15 @@ from makemore_backprop_ninja.train import parse_args, train_neural_net_model
 from makemore_backprop_ninja import DEVICE
 
 
-def test_train_neural_net_model() -> None:
+@pytest.mark.parametrize("use_functional", [True, False])
+def test_train_neural_net_model(use_functional: bool) -> None:
     """
     Test the test_train_neural_net_model function.
+
+    Args:
+        use_functional (bool): Whether or not to use the functional version of
+            the cross entropy.
+            If False, the hand-written version will be used
     """
     model_params = ModelParams(
         block_size=3,
@@ -59,6 +66,7 @@ def test_train_neural_net_model() -> None:
         dataset=dataset,
         optimization_params=optimization_params,
         batch_normalization_parameters=batch_normalization_parameters,
+        use_functional=use_functional,
     )
     assert optimization_params.cur_step == 1
 
@@ -74,6 +82,7 @@ def test_train_neural_net_model() -> None:
         dataset=dataset,
         optimization_params=optimization_params,
         batch_normalization_parameters=batch_normalization_parameters,
+        use_functional=use_functional,
     )
     assert optimization_params.cur_step == 4
 
