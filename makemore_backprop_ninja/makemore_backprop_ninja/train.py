@@ -189,12 +189,16 @@ def train(
 def train_model(
     model_params: ModelParams,
     optimization_params: OptimizationParams,
+    use_functional: bool,
 ) -> None:
     """Train the model.
 
     Args:
         model_params (ModelParams): The model parameters
         optimization_params (OptimizationParams): The optimization parameters
+        use_functional (bool): Whether or not to use the functional version of
+            the cross entropy.
+            If False, the hand-written version will be used
     """
     # These parameters will be used as batch norm parameters during inference
     # Initialized to zero as the mean and one as std as the initialization of w1
@@ -215,6 +219,7 @@ def train_model(
         model_params=model_params,
         optimization_params=optimization_params,
         batch_normalization_parameters=batch_normalization_parameters,
+        use_functional=use_functional,
     )
     print("Training done!")
 
@@ -289,6 +294,14 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
         default=default_optimization_params.batch_size,
         help="Number of examples per batch",
     )
+    parser.add_argument(
+        "-u",
+        "--use-functional",
+        type=bool,
+        required=False,
+        default=True,
+        help="Whether or not to use the functional version of the cross entropy.",
+    )
 
     args = parser.parse_args(sys_args)
     return args
@@ -314,6 +327,7 @@ def main(sys_args: List[str]):
     train_model(
         model_params=model_params,
         optimization_params=optimization_params,
+        use_functional=args.use_functional,
     )
 
 
