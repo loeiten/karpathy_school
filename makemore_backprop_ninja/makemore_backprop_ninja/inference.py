@@ -89,6 +89,14 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
         default=20,
         help=("Number of names to predict"),
     )
+    parser.add_argument(
+        "-u",
+        "--use-functional",
+        type=bool,
+        required=False,
+        default=True,
+        help="Whether or not to use the functional version of the cross entropy.",
+    )
 
     args = parser.parse_args(sys_args)
     return args
@@ -128,6 +136,7 @@ def main(sys_args: List[str]):
         model_params=model_params,
         optimization_params=optimization_params,
         batch_normalization_parameters=batch_normalization_parameters,
+        use_functional=args.use_functional,
     )
     predictions = run_inference(
         model=model,

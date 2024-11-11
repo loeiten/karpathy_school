@@ -163,7 +163,6 @@ def train(
             If False, the hand-written version will be used
         seed (int): The seed for the random number generator
 
-
     Returns:
         Tuple[torch.Tensor, ...]: The model
     """
