@@ -118,6 +118,8 @@ def train_neural_net_model(
         # Reset the gradients
         for parameters in layered_parameters:
             parameters.grad = None
+        for tensor in loss_variables.values():
+            tensor.retain_grad()
         loss.backward()
 
         # Update the weights
