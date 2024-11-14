@@ -120,9 +120,12 @@ def train_neural_net_model(
             parameters.grad = None
         for tensor in loss_variables.values():
             tensor.retain_grad()
+        # FIXME: Implement manual backprop
         loss.backward()
 
         # Update the weights
+        # FIXME: As we do not do loss.backward(), we must set parameters.grad
+        #        manually
         for parameters in layered_parameters:
             parameters.data += (
                 -optimization_params.learning_rate(optimization_params.cur_step)
