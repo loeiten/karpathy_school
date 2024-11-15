@@ -121,11 +121,11 @@ def train_neural_net_model(
         for tensor in loss_variables.values():
             tensor.retain_grad()
         # FIXME: Implement manual backprop
-        loss.backward()
+        manual_backprop(model=model, loss_variables=loss_variables)
+        # FIXME: Remove this
+        # loss.backward()
 
         # Update the weights
-        # FIXME: As we do not do loss.backward(), we must set parameters.grad
-        #        manually
         for parameters in layered_parameters:
             parameters.data += (
                 -optimization_params.learning_rate(optimization_params.cur_step)
@@ -158,6 +158,21 @@ def train_neural_net_model(
     print(f"Final validation loss: {validation_loss:.3f}")
 
     return model
+
+
+def manual_backprop(
+    model: Tuple[torch.Tensor, ...], loss_variables: Dict[str, torch.Tensor]
+) -> None:
+    """Do the manual back propagation, and set the gradients to the parameters.
+
+    Args:
+        model (Tuple[torch.Tensor,...]): The weights of the model
+        loss_variables (Dict[str, torch.Tensor]): The variables used in the loss
+            function.
+    """
+    # FIXME: As we do not do loss.backward(), we must set parameters.grad
+    #        manually
+    pass
 
 
 def train(
