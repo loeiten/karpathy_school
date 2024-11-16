@@ -77,40 +77,39 @@ def train_neural_net_model(
         #       training data
         #       The size of training_input_data[idxs] is therefore
         #       (batch_size, block_size)
-        loss_variables: Dict[str, torch.Tensor] = {}
-        loss_variables["logits"] = predict_neural_network(
+        logits = predict_neural_network(
             model=model,
             input_data=dataset["training_input_data"][idxs],
             batch_normalization_parameters=batch_normalization_parameters,
             training=True,
         )
+        loss_variables: Dict[str, torch.Tensor] = {}
+        loss_variables["logits"] = logits
         if use_functional:
-            loss = F.cross_entropy(
-                loss_variables["logits"], dataset["training_ground_truth"][idxs]
-            )
+            loss = F.cross_entropy(logits, dataset["training_ground_truth"][idxs])
         else:
             # The written out version of the cross entropy
-            loss_variables["logit_maxes"] = (
-                loss_variables["logits"].max(1, keepdim=True).values
-            )
+            logits_maxes = logits.max(1, keepdim=True).values
             # Normalize the logits for numerical stability
-            loss_variables["normalized_logits"] = (
-                loss_variables["logits"] - loss_variables["logit_maxes"]
-            )
-            loss_variables["counts"] = loss_variables["normalized_logits"].exp()
-            loss_variables["counts_sum"] = loss_variables["counts"].sum(
-                1, keepdims=True
-            )
+            normalized_logits = logits - logits_maxes
+            counts = normalized_logits.exp()
+            counts_sum = counts.sum(1, keepdims=True)
             # (1.0/counts_sum) doesn't give the exact values
-            loss_variables["counts_sum_inv"] = loss_variables["counts_sum"] ** -1
-            loss_variables["probabilities"] = (
-                loss_variables["counts"] * loss_variables["counts_sum_inv"]
-            )
-            loss_variables["log_probabilities"] = loss_variables["probabilities"].log()
+            counts_sum_inv = counts_sum**-1
+            probabilities = counts * counts_sum_inv
+            log_probabilities = probabilities.log()
             batch_size = idxs.size(dim=0)
-            loss = -loss_variables["log_probabilities"][
+            loss = -log_probabilities[
                 range(batch_size), dataset["training_ground_truth"][idxs]
             ].mean()
+            loss_variables["logits"] = logits
+            loss_variables["logits_maxes"] = logits_maxes
+            loss_variables["normalized_logits"] = normalized_logits
+            loss_variables["counts"] = counts
+            loss_variables["counts_sum"] = counts_sum
+            loss_variables["counts_sum_inv"] = counts_sum_inv
+            loss_variables["probabilities"] = probabilities
+            loss_variables["log_probabilities"] = log_probabilities
 
         # Backward pass
         layered_parameters = model
@@ -120,10 +119,7 @@ def train_neural_net_model(
             parameters.grad = None
         for tensor in loss_variables.values():
             tensor.retain_grad()
-        # FIXME: Implement manual backprop
         manual_backprop(model=model, loss_variables=loss_variables)
-        # FIXME: Remove this
-        # loss.backward()
 
         # Update the weights
         for parameters in layered_parameters:
@@ -170,6 +166,17 @@ def manual_backprop(
         loss_variables (Dict[str, torch.Tensor]): The variables used in the loss
             function.
     """
+    # Alias
+    (
+        c,
+        w1,
+        b1,
+        w2,
+        b2,
+        batch_normalization_gain,
+        batch_normalization_bias,
+    ) = model
+
     # FIXME: As we do not do loss.backward(), we must set parameters.grad
     #        manually
     pass
