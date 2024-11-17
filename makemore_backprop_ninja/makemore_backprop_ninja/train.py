@@ -102,7 +102,8 @@ def train_neural_net_model(
             loss = -log_probabilities[
                 range(batch_size), dataset["training_ground_truth"][idxs]
             ].mean()
-            loss_variables["logits"] = logits
+
+            # Add variables to dictionary for better variable handling
             loss_variables["logits_maxes"] = logits_maxes
             loss_variables["normalized_logits"] = normalized_logits
             loss_variables["counts"] = counts
@@ -117,8 +118,11 @@ def train_neural_net_model(
         # Reset the gradients
         for parameters in layered_parameters:
             parameters.grad = None
+        # As we will not do loss.backward() we need to retain the gradients
         for tensor in loss_variables.values():
             tensor.retain_grad()
+
+        # Do the back propagation
         manual_backprop(model=model, loss_variables=loss_variables)
 
         # Update the weights
@@ -156,6 +160,8 @@ def train_neural_net_model(
     return model
 
 
+# Reducing the number of locals here will penalize the didactical purpose
+# pylint: disable-next=too-many-locals
 def manual_backprop(
     model: Tuple[torch.Tensor, ...], loss_variables: Dict[str, torch.Tensor]
 ) -> None:
@@ -177,9 +183,51 @@ def manual_backprop(
         batch_normalization_bias,
     ) = model
 
-    # FIXME: As we do not do loss.backward(), we must set parameters.grad
-    #        manually
-    pass
+    logits = loss_variables["logits"]
+    logits_maxes = loss_variables["logits_maxes"]
+    normalized_logits = loss_variables["normalized_logits"]
+    counts = loss_variables["counts"]
+    counts_sum = loss_variables["counts_sum"]
+    counts_sum_inv = loss_variables["counts_sum_inv"]
+    probabilities = loss_variables["probabilities"]
+    log_probabilities = loss_variables["log_probabilities"]
+
+    # Calculate the gradients
+    # Calculate the derivatives of the cross entropy
+    dl_d_log_probabilities = torch.zeros_like(log_probabilities)
+    dl_d_probabilities = torch.zeros_like(probabilities)
+    dl_d_counts_sum_inv = torch.zeros_like(counts_sum_inv)
+    dl_d_counts_sum = torch.zeros_like(counts_sum)
+    dl_d_counts = torch.zeros_like(counts)
+    dl_d_normalized_logits = torch.zeros_like(normalized_logits)
+    dl_d_logits_maxes = torch.zeros_like(logits_maxes)
+    dl_d_logits = torch.zeros_like(logits)
+    # Calculate the derivatives of the second layer
+    dl_dw2 = torch.zeros_like(w2)
+    dl_db2 = torch.zeros_like(b2)
+    # Calculate the derivatives of the batch norm layer (of the first layer)
+    dl_dbatch_normalization_gain = torch.zeros_like(batch_normalization_gain)
+    dl_dbatch_normalization_bias = torch.zeros_like(batch_normalization_bias)
+    # Calculate the derivatives of the first layer
+    dl_dw1 = torch.zeros_like(w1)
+    dl_db1 = torch.zeros_like(b1)
+    # Calculate the derivatives of the embedding layer
+    dl_dc = torch.zeros_like(c)
+
+    # Attach the gradients to the variables
+    # NOTE: The loss "layer" is only needed to calculate the gradients of the
+    #       second layer
+    # Gradients of the second layer
+    w2.grad = dl_dw2
+    b2.grad = dl_db2
+    # Gradients of the batch norm layer
+    batch_normalization_gain.grad = dl_dbatch_normalization_gain
+    batch_normalization_bias.grad = dl_dbatch_normalization_bias
+    # Gradients of the first layer
+    w1.grad = dl_dw1
+    b1.grad = dl_db1
+    # Gradients of the embedding layer
+    c.grad = dl_dc
 
 
 def train(
