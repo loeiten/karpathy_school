@@ -60,7 +60,7 @@ def predict_neural_network(
     #       this pre activation layer.
     #       It's therefore wasteful to use this add operation when we're using
     #       batch normalization
-    h_pre_activation = (concatenated_embedding @ w1) + b1
+    h_pre_batch_norm = (concatenated_embedding @ w1) + b1
 
     if training:
         # Note that batch normalization couples the batch together
@@ -72,8 +72,24 @@ def predict_neural_network(
         # One could take the mean and std over the whole data set as a final
         # step during the training, but having a running updates in the
         # direction of the current mean and stddev
-        batch_normalization_mean = h_pre_activation.mean(0, keepdim=True)
-        batch_normalization_var = h_pre_activation.var(0, keepdim=True)
+        batch_size = c.size(dim=0)
+        # Mean
+        batch_normalization_mean = (1 / batch_size) * (
+            h_pre_batch_norm.sum(0, keepdim=True)
+        )
+        # Variance
+        batch_normalization_diff = h_pre_batch_norm - batch_normalization_mean
+        batch_normalization_diff_squared = batch_normalization_diff**2
+        # NOTE: Bessel's correction
+        batch_normalization_var = (
+            1 / (batch_size - 1)
+        ) * batch_normalization_diff_squared.sum(0, keepdim=True)
+        inv_batch_normalization_std = (batch_normalization_var + 1e-5) ** -0.5
+        batch_normalization_raw = batch_normalization_diff * inv_batch_normalization_std
+
+        h_pre_activation = (
+            batch_normalization_gain * batch_normalization_raw
+        ) + batch_normalization_bias
 
         with torch.no_grad():
             # Here we use a momentum of 0.001
@@ -90,18 +106,16 @@ def predict_neural_network(
                 0.999 * batch_normalization_parameters.running_std
                 + 0.001 * (batch_normalization_var) ** 0.5
             )
+
     else:
         batch_normalization_mean = batch_normalization_parameters.running_mean
-        batch_normalization_var = batch_normalization_parameters.running_std**2
+        batch_normalization_std = batch_normalization_parameters.running_std
 
-    inv_batch_normalization_std = (batch_normalization_var + 1e-5) ** 0.5
-    batch_normalization_raw = (
-        h_pre_activation - batch_normalization_mean
-    ) * inv_batch_normalization_std
-
-    h_pre_activation = (
-        batch_normalization_gain * batch_normalization_raw
-    ) + batch_normalization_bias
+        h_pre_activation = (
+            batch_normalization_gain
+            * (h_pre_activation - batch_normalization_mean)
+            / batch_normalization_std
+        ) + batch_normalization_bias
 
     h = torch.tanh(h_pre_activation)
     # The logits will have dimension (batch_size, VOCAB_SIZE)
