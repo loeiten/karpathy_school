@@ -136,6 +136,8 @@ def predict_using_explicit_network(
     #       this pre activation layer.
     #       It's therefore wasteful to use this add operation when we're using
     #       batch normalization
+    # NOTE: This works as h_pre_activation when there is no batch normalization
+    #       When we have batch normalization, this is really h_pre_batch_norm
     h_pre_activation = (concatenated_embedding @ w1) + b1
 
     if batch_normalization_parameters is not None:
@@ -171,6 +173,8 @@ def predict_using_explicit_network(
             batch_normalization_mean = batch_normalization_parameters.running_mean
             batch_normalization_std = batch_normalization_parameters.running_std
 
+        # NOTE: We are here overwriting h_pre_activation, which is really
+        #       h_pre_batch_norm
         h_pre_activation = (
             batch_normalization_gain
             * (h_pre_activation - batch_normalization_mean)
