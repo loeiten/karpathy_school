@@ -1,6 +1,6 @@
 """Module to run predict on the model."""
 
-from typing import Tuple
+from typing import Dict, Tuple
 
 import torch
 from makemore_backprop_ninja.data_classes import BatchNormalizationParameters
@@ -62,6 +62,11 @@ def predict_neural_network(
     #       batch normalization
     h_pre_batch_norm = (concatenated_embedding @ w1) + b1
 
+    intermediate_variables: Dict[str, torch.Tensor] = {}
+    intermediate_variables["embedding"] = embedding
+    intermediate_variables["concatenated_embedding"] = concatenated_embedding
+    intermediate_variables["h_pre_batch_norm"] = h_pre_batch_norm
+
     if training:
         # Note that batch normalization couples the batch together
         # That is: The activation is no longer a function of the example itself,
@@ -91,6 +96,17 @@ def predict_neural_network(
             batch_normalization_gain * batch_normalization_raw
         ) + batch_normalization_bias
 
+        intermediate_variables["batch_normalization_mean"] = batch_normalization_mean
+        intermediate_variables["batch_normalization_diff"] = batch_normalization_diff
+        intermediate_variables["batch_normalization_diff_squared"] = (
+            batch_normalization_diff_squared
+        )
+        intermediate_variables["batch_normalization_var"] = inv_batch_normalization_std
+        intermediate_variables["inv_batch_normalization_std"] = (
+            inv_batch_normalization_std
+        )
+        intermediate_variables["batch_normalization_raw"] = batch_normalization_raw
+
         with torch.no_grad():
             # Here we use a momentum of 0.001
             # We expect that for large batches the mean and std ar going to
@@ -113,12 +129,15 @@ def predict_neural_network(
 
         h_pre_activation = (
             batch_normalization_gain
-            * (h_pre_activation - batch_normalization_mean)
+            * (h_pre_batch_norm - batch_normalization_mean)
             / batch_normalization_std
         ) + batch_normalization_bias
 
     h = torch.tanh(h_pre_activation)
     # The logits will have dimension (batch_size, VOCAB_SIZE)
     logits = h @ w2 + b2
+
+    intermediate_variables["h_pre_activation"] = h_pre_activation
+    intermediate_variables["h"] = h
 
     return logits
