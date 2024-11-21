@@ -13,7 +13,7 @@ def predict_neural_network(
     input_data: torch.Tensor,
     batch_normalization_parameters: BatchNormalizationParameters,
     training: bool = False,
-) -> torch.Tensor:
+) -> Tuple[torch.Tensor, Dict[str, torch.Tensor]]:
     """Predict using the network.
 
     Args:
@@ -140,4 +140,4 @@ def predict_neural_network(
     intermediate_variables["h_pre_activation"] = h_pre_activation
     intermediate_variables["h"] = h
 
-    return logits
+    return logits, intermediate_variables

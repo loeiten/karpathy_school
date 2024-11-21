@@ -48,7 +48,7 @@ def run_inference(
         context = [TOKEN_TO_INDEX["."]] * block_size  # Initialize with stop characters
 
         while True:
-            logits = predict_neural_network(
+            logits, _ = predict_neural_network(
                 model=model,
                 batch_normalization_parameters=batch_normalization_parameters,
                 input_data=torch.tensor([context]),

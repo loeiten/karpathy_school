@@ -26,7 +26,7 @@ def evaluate(
     Returns:
         float: The loss
     """
-    logits = predict_neural_network(
+    logits, _ = predict_neural_network(
         model=model,
         input_data=input_data,
         batch_normalization_parameters=batch_normalization_parameters,

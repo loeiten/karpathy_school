@@ -77,7 +77,7 @@ def train_neural_net_model(
         #       training data
         #       The size of training_input_data[idxs] is therefore
         #       (batch_size, block_size)
-        logits = predict_neural_network(
+        logits, intermediate_variables = predict_neural_network(
             model=model,
             input_data=dataset["training_input_data"][idxs],
             batch_normalization_parameters=batch_normalization_parameters,
