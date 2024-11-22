@@ -83,8 +83,7 @@ def train_neural_net_model(
             batch_normalization_parameters=batch_normalization_parameters,
             training=True,
         )
-        loss_variables: Dict[str, torch.Tensor] = {}
-        loss_variables["logits"] = logits
+        intermediate_variables["logits"] = logits
         if use_functional:
             loss = F.cross_entropy(logits, dataset["training_ground_truth"][idxs])
         else:
@@ -104,13 +103,13 @@ def train_neural_net_model(
             ].mean()
 
             # Add variables to dictionary for better variable handling
-            loss_variables["logits_maxes"] = logits_maxes
-            loss_variables["normalized_logits"] = normalized_logits
-            loss_variables["counts"] = counts
-            loss_variables["counts_sum"] = counts_sum
-            loss_variables["counts_sum_inv"] = counts_sum_inv
-            loss_variables["probabilities"] = probabilities
-            loss_variables["log_probabilities"] = log_probabilities
+            intermediate_variables["logits_maxes"] = logits_maxes
+            intermediate_variables["normalized_logits"] = normalized_logits
+            intermediate_variables["counts"] = counts
+            intermediate_variables["counts_sum"] = counts_sum
+            intermediate_variables["counts_sum_inv"] = counts_sum_inv
+            intermediate_variables["probabilities"] = probabilities
+            intermediate_variables["log_probabilities"] = log_probabilities
 
         # Backward pass
         layered_parameters = model
@@ -119,11 +118,11 @@ def train_neural_net_model(
         for parameters in layered_parameters:
             parameters.grad = None
         # As we will not do loss.backward() we need to retain the gradients
-        for tensor in loss_variables.values():
+        for tensor in intermediate_variables.values():
             tensor.retain_grad()
 
         # Do the back propagation
-        manual_backprop(model=model, loss_variables=loss_variables)
+        manual_backprop(model=model, intermediate_variables=intermediate_variables)
 
         # Update the weights
         for parameters in layered_parameters:
@@ -163,14 +162,14 @@ def train_neural_net_model(
 # Reducing the number of locals here will penalize the didactical purpose
 # pylint: disable-next=too-many-locals
 def manual_backprop(
-    model: Tuple[torch.Tensor, ...], loss_variables: Dict[str, torch.Tensor]
+    model: Tuple[torch.Tensor, ...], intermediate_variables: Dict[str, torch.Tensor]
 ) -> None:
     """Do the manual back propagation, and set the gradients to the parameters.
 
     Args:
         model (Tuple[torch.Tensor,...]): The weights of the model
-        loss_variables (Dict[str, torch.Tensor]): The variables used in the loss
-            function.
+        intermediate_variables (Dict[str, torch.Tensor]): The intermediate
+            variables (i.e. those which are not part of model parameters).
     """
     # Alias
     (
@@ -183,14 +182,14 @@ def manual_backprop(
         batch_normalization_bias,
     ) = model
 
-    logits = loss_variables["logits"]
-    logits_maxes = loss_variables["logits_maxes"]
-    normalized_logits = loss_variables["normalized_logits"]
-    counts = loss_variables["counts"]
-    counts_sum = loss_variables["counts_sum"]
-    counts_sum_inv = loss_variables["counts_sum_inv"]
-    probabilities = loss_variables["probabilities"]
-    log_probabilities = loss_variables["log_probabilities"]
+    logits = intermediate_variables["logits"]
+    logits_maxes = intermediate_variables["logits_maxes"]
+    normalized_logits = intermediate_variables["normalized_logits"]
+    counts = intermediate_variables["counts"]
+    counts_sum = intermediate_variables["counts_sum"]
+    counts_sum_inv = intermediate_variables["counts_sum_inv"]
+    probabilities = intermediate_variables["probabilities"]
+    log_probabilities = intermediate_variables["log_probabilities"]
 
     # Calculate the gradients
     # Calculate the derivatives of the cross entropy
@@ -215,8 +214,9 @@ def manual_backprop(
     dl_dc = torch.zeros_like(c)
 
     # Attach the gradients to the variables
-    # NOTE: The loss "layer" is only needed to calculate the gradients of the
-    #       second layer
+    # NOTE: Only the gradients of the model variables are needed.
+    #       The gradients of the intermediate variables are only needed for
+    #       calculating the gradients of the model weights
     # Gradients of the second layer
     w2.grad = dl_dw2
     b2.grad = dl_db2
