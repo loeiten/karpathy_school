@@ -101,7 +101,7 @@ def predict_neural_network(
         intermediate_variables["batch_normalization_diff_squared"] = (
             batch_normalization_diff_squared
         )
-        intermediate_variables["batch_normalization_var"] = inv_batch_normalization_std
+        intermediate_variables["batch_normalization_var"] = batch_normalization_var
         intermediate_variables["inv_batch_normalization_std"] = (
             inv_batch_normalization_std
         )

@@ -171,7 +171,7 @@ def manual_backprop(
         intermediate_variables (Dict[str, torch.Tensor]): The intermediate
             variables (i.e. those which are not part of model parameters).
     """
-    # Alias
+    # Alias for the model weights
     (
         c,
         w1,
@@ -181,7 +181,21 @@ def manual_backprop(
         batch_normalization_gain,
         batch_normalization_bias,
     ) = model
-
+    # Intermediate variables from predict
+    embedding = intermediate_variables["embedding"]
+    concatenated_embedding = intermediate_variables["concatenated_embedding"]
+    h_pre_batch_norm = intermediate_variables["h_pre_batch_norm"]
+    batch_normalization_mean = intermediate_variables["batch_normalization_mean"]
+    batch_normalization_diff = intermediate_variables["batch_normalization_diff"]
+    batch_normalization_diff_squared = intermediate_variables[
+        "batch_normalization_diff_squared"
+    ]
+    batch_normalization_var = intermediate_variables["batch_normalization_var"]
+    inv_batch_normalization_std = intermediate_variables["inv_batch_normalization_std"]
+    batch_normalization_raw = intermediate_variables["batch_normalization_raw"]
+    h_pre_activation = intermediate_variables["h_pre_activation"]
+    h = intermediate_variables["h"]
+    # Intermediate variables from loss
     logits = intermediate_variables["logits"]
     logits_maxes = intermediate_variables["logits_maxes"]
     normalized_logits = intermediate_variables["normalized_logits"]
@@ -202,15 +216,28 @@ def manual_backprop(
     dl_d_logits_maxes = torch.zeros_like(logits_maxes)
     dl_d_logits = torch.zeros_like(logits)
     # Calculate the derivatives of the second layer
+    dl_dh = torch.zeros_like(h)
+    dl_dh_pre_activation = torch.zeros_like(h_pre_activation)
     dl_dw2 = torch.zeros_like(w2)
     dl_db2 = torch.zeros_like(b2)
     # Calculate the derivatives of the batch norm layer (of the first layer)
+    dl_dbatch_normalization_raw = torch.zeros_like(batch_normalization_raw)
+    dl_dinv_batch_normalization_std = torch.zeros_like(inv_batch_normalization_std)
+    dl_dbatch_normalization_var = torch.zeros_like(batch_normalization_var)
+    dl_dbatch_normalization_diff_squared = torch.zeros_like(
+        batch_normalization_diff_squared
+    )
+    dl_dbatch_normalization_diff = torch.zeros_like(batch_normalization_diff)
+    dl_dbatch_normalization_mean = torch.zeros_like(batch_normalization_mean)
+    dl_dh_pre_batch_norm = torch.zeros_like(h_pre_batch_norm)
     dl_dbatch_normalization_gain = torch.zeros_like(batch_normalization_gain)
     dl_dbatch_normalization_bias = torch.zeros_like(batch_normalization_bias)
     # Calculate the derivatives of the first layer
     dl_dw1 = torch.zeros_like(w1)
     dl_db1 = torch.zeros_like(b1)
     # Calculate the derivatives of the embedding layer
+    dl_dconcatenated_embedding = torch.zeros_like(concatenated_embedding)
+    dl_dembedding = torch.zeros_like(embedding)
     dl_dc = torch.zeros_like(c)
 
     # Attach the gradients to the variables
