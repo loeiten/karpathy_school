@@ -26,6 +26,7 @@ def predict_neural_network(
 
     Returns:
         torch.Tensor: The achieved logits with shape (batch_size)
+        Dict[str, torch.Tensor]: Dictionary of intermediate tensors
     """
     # Alias
     (
