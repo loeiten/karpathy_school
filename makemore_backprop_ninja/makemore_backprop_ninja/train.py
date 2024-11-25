@@ -122,7 +122,10 @@ def train_neural_net_model(
             tensor.retain_grad()
 
         # Do the back propagation
-        manual_backprop(model=model, intermediate_variables=intermediate_variables)
+        gradients = manual_backprop(
+            model=model, intermediate_variables=intermediate_variables
+        )
+        attach_gradients(model=model, gradients=gradients)
 
         # Update the weights
         for parameters in layered_parameters:
@@ -240,21 +243,45 @@ def manual_backprop(
     dl_dembedding = torch.zeros_like(embedding)
     dl_dc = torch.zeros_like(c)
 
+    gradients: Dict[str, torch.Tensor] = {}
+
+    return gradients
+
+
+def attach_gradients(
+    model: Tuple[torch.Tensor,...], gradients: Dict[str, torch.Tensor]
+) -> None:
+    """Attach gradients from the manual back-propagation to the model.
+
+    Args:
+        model (Tuple[torch.Tensor,...]): Model weights
+        gradients (Dict[str, torch.Tensor]): The gradients
+    """
+    # Alias for the model weights
+    (
+        c,
+        w1,
+        b1,
+        w2,
+        b2,
+        batch_normalization_gain,
+        batch_normalization_bias,
+    ) = model
     # Attach the gradients to the variables
     # NOTE: Only the gradients of the model variables are needed.
     #       The gradients of the intermediate variables are only needed for
     #       calculating the gradients of the model weights
     # Gradients of the second layer
-    w2.grad = dl_dw2
-    b2.grad = dl_db2
+    w2.grad = gradients["dl_dw2"]
+    b2.grad = gradients["dl_db2"]
     # Gradients of the batch norm layer
-    batch_normalization_gain.grad = dl_dbatch_normalization_gain
-    batch_normalization_bias.grad = dl_dbatch_normalization_bias
+    batch_normalization_gain.grad = gradients["dl_dbatch_normalization_gain"]
+    batch_normalization_bias.grad = gradients["dl_dbatch_normalization_bias"]
     # Gradients of the first layer
-    w1.grad = dl_dw1
-    b1.grad = dl_db1
+    w1.grad = gradients["dl_dw1"]
+    b1.grad = gradients["dl_db1"]
     # Gradients of the embedding layer
-    c.grad = dl_dc
+    c.grad = gradients["dl_dc"]
 
 
 def train(
