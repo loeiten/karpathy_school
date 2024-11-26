@@ -163,16 +163,19 @@ def train_neural_net_model(
 
 
 # Reducing the number of locals here will penalize the didactical purpose
-# pylint: disable-next=too-many-locals
+# pylint: disable-next=too-many-locals,too-many-statements
 def manual_backprop(
     model: Tuple[torch.Tensor, ...], intermediate_variables: Dict[str, torch.Tensor]
-) -> None:
+) -> Dict[str, torch.Tensor]:
     """Do the manual back propagation, and set the gradients to the parameters.
 
     Args:
         model (Tuple[torch.Tensor,...]): The weights of the model
         intermediate_variables (Dict[str, torch.Tensor]): The intermediate
             variables (i.e. those which are not part of model parameters).
+
+    Returns:
+        A map of the gradients
     """
     # Alias for the model weights
     (
@@ -244,12 +247,40 @@ def manual_backprop(
     dl_dc = torch.zeros_like(c)
 
     gradients: Dict[str, torch.Tensor] = {}
+    gradients["dl_d_log_probabilities"] = dl_d_log_probabilities
+    gradients["dl_d_probabilities"] = dl_d_probabilities
+    gradients["dl_d_counts_sum_inv"] = dl_d_counts_sum_inv
+    gradients["dl_d_counts_sum"] = dl_d_counts_sum
+    gradients["dl_d_counts"] = dl_d_counts
+    gradients["dl_d_normalized_logits"] = dl_d_normalized_logits
+    gradients["dl_d_logits_maxes"] = dl_d_logits_maxes
+    gradients["dl_d_logits"] = dl_d_logits
+    gradients["dl_dh"] = dl_dh
+    gradients["dl_dh_pre_activation"] = dl_dh_pre_activation
+    gradients["dl_dw2"] = dl_dw2
+    gradients["dl_db2"] = dl_db2
+    gradients["dl_dbatch_normalization_raw"] = dl_dbatch_normalization_raw
+    gradients["dl_dinv_batch_normalization_std"] = dl_dinv_batch_normalization_std
+    gradients["dl_dbatch_normalization_var"] = dl_dbatch_normalization_var
+    gradients["dl_dbatch_normalization_diff_squared"] = (
+        dl_dbatch_normalization_diff_squared
+    )
+    gradients["dl_dbatch_normalization_diff"] = dl_dbatch_normalization_diff
+    gradients["dl_dbatch_normalization_mean"] = dl_dbatch_normalization_mean
+    gradients["dl_dh_pre_batch_norm"] = dl_dh_pre_batch_norm
+    gradients["dl_dbatch_normalization_gain"] = dl_dbatch_normalization_gain
+    gradients["dl_dbatch_normalization_bias"] = dl_dbatch_normalization_bias
+    gradients["dl_dw1"] = dl_dw1
+    gradients["dl_db1"] = dl_db1
+    gradients["dl_dconcatenated_embedding"] = dl_dconcatenated_embedding
+    gradients["dl_dembedding"] = dl_dembedding
+    gradients["dl_dc"] = dl_dc
 
     return gradients
 
 
 def attach_gradients(
-    model: Tuple[torch.Tensor,...], gradients: Dict[str, torch.Tensor]
+    model: Tuple[torch.Tensor, ...], gradients: Dict[str, torch.Tensor]
 ) -> None:
     """Attach gradients from the manual back-propagation to the model.
 
