@@ -315,6 +315,28 @@ def attach_gradients(
     c.grad = gradients["dl_dc"]
 
 
+def compare_manual_gradient_with_real(
+    name: str, manually_calculated: torch.Tensor, tensor: torch.Tensor
+) -> None:
+    """
+    Compare the manually calculated gradient with the one calculated using autograd.
+
+    Args:
+        name (str): Name of the tensor
+        manually_calculated (torch.Tensor): The manually calculated gradient
+        tensor (torch.Tensor): The tensor to check
+    """
+    exact = torch.all(manually_calculated == tensor.grad).item()
+    approximate = torch.allclose(manually_calculated, tensor.grad)
+    max_diff = (manually_calculated - tensor.grad).abs().max().item()
+    print(
+        f"{name:15s} | "
+        f"exact: {str(exact):5s} | "
+        f"approximate {str(approximate):5s} | "
+        f"max difference: {max_diff}"
+    )
+
+
 def train(
     model_params: ModelParams,
     optimization_params: OptimizationParams,
