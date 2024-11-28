@@ -125,6 +125,15 @@ def train_neural_net_model(
         gradients = manual_backprop(
             model=model, intermediate_variables=intermediate_variables
         )
+        # Do the actual backprop in order to compare
+        loss.backward()
+        if i % optimization_params.mini_batches_per_data_capture == 0:
+            # FIXME: You are here
+            compare_gradients(
+                model=model,
+                intermediate_variables=intermediate_variables,
+                gradients=gradients,
+            )
         attach_gradients(model=model, gradients=gradients)
 
         # Update the weights
@@ -313,6 +322,12 @@ def attach_gradients(
     b1.grad = gradients["dl_db1"]
     # Gradients of the embedding layer
     c.grad = gradients["dl_dc"]
+
+
+def compare_gradients():
+    # FIXME:
+    # compare_manual_gradient_with_real()
+    pass
 
 
 def compare_manual_gradient_with_real(
