@@ -128,7 +128,6 @@ def train_neural_net_model(
         # Do the actual backprop in order to compare
         loss.backward()
         if i % optimization_params.mini_batches_per_data_capture == 0:
-            # FIXME: You are here
             compare_gradients(
                 model=model,
                 intermediate_variables=intermediate_variables,
@@ -324,10 +323,39 @@ def attach_gradients(
     c.grad = gradients["dl_dc"]
 
 
-def compare_gradients():
-    # FIXME:
-    # compare_manual_gradient_with_real()
-    pass
+def compare_gradients(
+    model: torch.Tensor,
+    intermediate_variables: Dict[str, torch.Tensor],
+    gradients: Dict[str, torch.Tensor],
+):
+    # Make a model dict for easier comparison
+    model_dict: Dict[str, torch.Tensor] = {}
+    (
+        model_dict["c"],
+        model_dict["w1"],
+        model_dict["b1"],
+        model_dict["w2"],
+        model_dict["b2"],
+        model_dict["batch_normalization_gain"],
+        model_dict["batch_normalization_bias"],
+    ) = model
+    print("Comparing model weights:")
+    print("-" * 80)
+    for variable_name in model_dict.keys():
+        compare_manual_gradient_with_real(
+            name=variable_name,
+            manually_calculated=gradients[f"dl_d{variable_name}"],
+            tensor=model_dict["variable_name"],
+        )
+
+    print("Comparing intermediate variables:")
+    print("-" * 80)
+    for variable_name in intermediate_variables.keys():
+        compare_manual_gradient_with_real(
+            name=variable_name,
+            manually_calculated=gradients[f"dl_d{variable_name}"],
+            tensor=intermediate_variables["variable_name"],
+        )
 
 
 def compare_manual_gradient_with_real(
