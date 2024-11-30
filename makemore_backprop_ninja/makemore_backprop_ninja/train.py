@@ -328,6 +328,15 @@ def compare_gradients(
     intermediate_variables: Dict[str, torch.Tensor],
     gradients: Dict[str, torch.Tensor],
 ):
+    """
+    Compare the manually calculated gradients with the ones generated from autograd.
+
+    Args:
+        model (torch.Tensor): The model weights
+        intermediate_variables (Dict[str, torch.Tensor]): The intermediate
+            variables
+        gradients (Dict[str, torch.Tensor]): The manually calculated gradients
+    """
     # Make a model dict for easier comparison
     model_dict: Dict[str, torch.Tensor] = {}
     (
