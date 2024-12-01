@@ -350,11 +350,11 @@ def compare_gradients(
     ) = model
     print("Comparing model weights:")
     print("-" * 80)
-    for variable_name in model_dict.keys():
+    for variable_name, tensor in model_dict.items():
         compare_manual_gradient_with_real(
             name=variable_name,
             manually_calculated=gradients[f"dl_d{variable_name}"],
-            tensor=model_dict["variable_name"],
+            tensor=tensor,
         )
 
     print("Comparing intermediate variables:")
