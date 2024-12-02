@@ -351,7 +351,7 @@ def compare_gradients(
     print("Comparing model weights:")
     print("-" * 80)
     for variable_name, tensor in model_dict.items():
-        compare_manual_gradient_with_real(
+        compare_single_gradient(
             name=variable_name,
             manually_calculated=gradients[f"dl_d{variable_name}"],
             tensor=tensor,
@@ -360,14 +360,14 @@ def compare_gradients(
     print("Comparing intermediate variables:")
     print("-" * 80)
     for variable_name in intermediate_variables.keys():
-        compare_manual_gradient_with_real(
+        compare_single_gradient(
             name=variable_name,
             manually_calculated=gradients[f"dl_d{variable_name}"],
             tensor=intermediate_variables["variable_name"],
         )
 
 
-def compare_manual_gradient_with_real(
+def compare_single_gradient(
     name: str, manually_calculated: torch.Tensor, tensor: torch.Tensor
 ) -> None:
     """
