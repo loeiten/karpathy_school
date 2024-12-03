@@ -357,13 +357,13 @@ def compare_gradients(
             tensor=tensor,
         )
 
-    print("Comparing intermediate variables:")
+    print("\nComparing intermediate variables:")
     print("-" * 80)
     for variable_name in intermediate_variables.keys():
         compare_single_gradient(
             name=variable_name,
             manually_calculated=gradients[f"dl_d{variable_name}"],
-            tensor=intermediate_variables["variable_name"],
+            tensor=intermediate_variables[variable_name],
         )
 
 
@@ -382,7 +382,7 @@ def compare_single_gradient(
     approximate = torch.allclose(manually_calculated, tensor.grad)
     max_diff = (manually_calculated - tensor.grad).abs().max().item()
     print(
-        f"{name:15s} | "
+        f"{name:32s} | "
         f"exact: {str(exact):5s} | "
         f"approximate {str(approximate):5s} | "
         f"max difference: {max_diff}"
