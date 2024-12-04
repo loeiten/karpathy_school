@@ -230,29 +230,29 @@ def manual_backprop(
     dl_d_logits_maxes = torch.zeros_like(logits_maxes)
     dl_d_logits = torch.zeros_like(logits)
     # Calculate the derivatives of the second layer
-    dl_dh = torch.zeros_like(h)
-    dl_dh_pre_activation = torch.zeros_like(h_pre_activation)
-    dl_dw2 = torch.zeros_like(w2)
-    dl_db2 = torch.zeros_like(b2)
+    dl_d_h = torch.zeros_like(h)
+    dl_d_h_pre_activation = torch.zeros_like(h_pre_activation)
+    dl_d_w2 = torch.zeros_like(w2)
+    dl_d_b2 = torch.zeros_like(b2)
     # Calculate the derivatives of the batch norm layer (of the first layer)
-    dl_dbatch_normalization_raw = torch.zeros_like(batch_normalization_raw)
-    dl_dinv_batch_normalization_std = torch.zeros_like(inv_batch_normalization_std)
-    dl_dbatch_normalization_var = torch.zeros_like(batch_normalization_var)
-    dl_dbatch_normalization_diff_squared = torch.zeros_like(
+    dl_d_batch_normalization_raw = torch.zeros_like(batch_normalization_raw)
+    dl_d_inv_batch_normalization_std = torch.zeros_like(inv_batch_normalization_std)
+    dl_d_batch_normalization_var = torch.zeros_like(batch_normalization_var)
+    dl_d_batch_normalization_diff_squared = torch.zeros_like(
         batch_normalization_diff_squared
     )
-    dl_dbatch_normalization_diff = torch.zeros_like(batch_normalization_diff)
-    dl_dbatch_normalization_mean = torch.zeros_like(batch_normalization_mean)
-    dl_dh_pre_batch_norm = torch.zeros_like(h_pre_batch_norm)
-    dl_dbatch_normalization_gain = torch.zeros_like(batch_normalization_gain)
-    dl_dbatch_normalization_bias = torch.zeros_like(batch_normalization_bias)
+    dl_d_batch_normalization_diff = torch.zeros_like(batch_normalization_diff)
+    dl_d_batch_normalization_mean = torch.zeros_like(batch_normalization_mean)
+    dl_d_h_pre_batch_norm = torch.zeros_like(h_pre_batch_norm)
+    dl_d_batch_normalization_gain = torch.zeros_like(batch_normalization_gain)
+    dl_d_batch_normalization_bias = torch.zeros_like(batch_normalization_bias)
     # Calculate the derivatives of the first layer
-    dl_dw1 = torch.zeros_like(w1)
-    dl_db1 = torch.zeros_like(b1)
+    dl_d_w1 = torch.zeros_like(w1)
+    dl_d_b1 = torch.zeros_like(b1)
     # Calculate the derivatives of the embedding layer
-    dl_dconcatenated_embedding = torch.zeros_like(concatenated_embedding)
-    dl_dembedding = torch.zeros_like(embedding)
-    dl_dc = torch.zeros_like(c)
+    dl_d_concatenated_embedding = torch.zeros_like(concatenated_embedding)
+    dl_d_embedding = torch.zeros_like(embedding)
+    dl_d_c = torch.zeros_like(c)
 
     gradients: Dict[str, torch.Tensor] = {}
     gradients["dl_d_log_probabilities"] = dl_d_log_probabilities
@@ -263,26 +263,26 @@ def manual_backprop(
     gradients["dl_d_normalized_logits"] = dl_d_normalized_logits
     gradients["dl_d_logits_maxes"] = dl_d_logits_maxes
     gradients["dl_d_logits"] = dl_d_logits
-    gradients["dl_dh"] = dl_dh
-    gradients["dl_dh_pre_activation"] = dl_dh_pre_activation
-    gradients["dl_dw2"] = dl_dw2
-    gradients["dl_db2"] = dl_db2
-    gradients["dl_dbatch_normalization_raw"] = dl_dbatch_normalization_raw
-    gradients["dl_dinv_batch_normalization_std"] = dl_dinv_batch_normalization_std
-    gradients["dl_dbatch_normalization_var"] = dl_dbatch_normalization_var
-    gradients["dl_dbatch_normalization_diff_squared"] = (
-        dl_dbatch_normalization_diff_squared
+    gradients["dl_d_h"] = dl_d_h
+    gradients["dl_d_h_pre_activation"] = dl_d_h_pre_activation
+    gradients["dl_d_w2"] = dl_d_w2
+    gradients["dl_d_b2"] = dl_d_b2
+    gradients["dl_d_batch_normalization_raw"] = dl_d_batch_normalization_raw
+    gradients["dl_d_inv_batch_normalization_std"] = dl_d_inv_batch_normalization_std
+    gradients["dl_d_batch_normalization_var"] = dl_d_batch_normalization_var
+    gradients["dl_d_batch_normalization_diff_squared"] = (
+        dl_d_batch_normalization_diff_squared
     )
-    gradients["dl_dbatch_normalization_diff"] = dl_dbatch_normalization_diff
-    gradients["dl_dbatch_normalization_mean"] = dl_dbatch_normalization_mean
-    gradients["dl_dh_pre_batch_norm"] = dl_dh_pre_batch_norm
-    gradients["dl_dbatch_normalization_gain"] = dl_dbatch_normalization_gain
-    gradients["dl_dbatch_normalization_bias"] = dl_dbatch_normalization_bias
-    gradients["dl_dw1"] = dl_dw1
-    gradients["dl_db1"] = dl_db1
-    gradients["dl_dconcatenated_embedding"] = dl_dconcatenated_embedding
-    gradients["dl_dembedding"] = dl_dembedding
-    gradients["dl_dc"] = dl_dc
+    gradients["dl_d_batch_normalization_diff"] = dl_d_batch_normalization_diff
+    gradients["dl_d_batch_normalization_mean"] = dl_d_batch_normalization_mean
+    gradients["dl_d_h_pre_batch_norm"] = dl_d_h_pre_batch_norm
+    gradients["dl_d_batch_normalization_gain"] = dl_d_batch_normalization_gain
+    gradients["dl_d_batch_normalization_bias"] = dl_d_batch_normalization_bias
+    gradients["dl_d_w1"] = dl_d_w1
+    gradients["dl_d_b1"] = dl_d_b1
+    gradients["dl_d_concatenated_embedding"] = dl_d_concatenated_embedding
+    gradients["dl_d_embedding"] = dl_d_embedding
+    gradients["dl_d_c"] = dl_d_c
 
     return gradients
 
@@ -311,16 +311,16 @@ def attach_gradients(
     #       The gradients of the intermediate variables are only needed for
     #       calculating the gradients of the model weights
     # Gradients of the second layer
-    w2.grad = gradients["dl_dw2"]
-    b2.grad = gradients["dl_db2"]
+    w2.grad = gradients["dl_d_w2"]
+    b2.grad = gradients["dl_d_b2"]
     # Gradients of the batch norm layer
-    batch_normalization_gain.grad = gradients["dl_dbatch_normalization_gain"]
-    batch_normalization_bias.grad = gradients["dl_dbatch_normalization_bias"]
+    batch_normalization_gain.grad = gradients["dl_d_batch_normalization_gain"]
+    batch_normalization_bias.grad = gradients["dl_d_batch_normalization_bias"]
     # Gradients of the first layer
-    w1.grad = gradients["dl_dw1"]
-    b1.grad = gradients["dl_db1"]
+    w1.grad = gradients["dl_d_w1"]
+    b1.grad = gradients["dl_d_b1"]
     # Gradients of the embedding layer
-    c.grad = gradients["dl_dc"]
+    c.grad = gradients["dl_d_c"]
 
 
 def compare_gradients(
@@ -353,7 +353,7 @@ def compare_gradients(
     for variable_name, tensor in model_dict.items():
         compare_single_gradient(
             name=variable_name,
-            manually_calculated=gradients[f"dl_d{variable_name}"],
+            manually_calculated=gradients[f"dl_d_{variable_name}"],
             tensor=tensor,
         )
 
@@ -362,7 +362,7 @@ def compare_gradients(
     for variable_name in intermediate_variables.keys():
         compare_single_gradient(
             name=variable_name,
-            manually_calculated=gradients[f"dl_d{variable_name}"],
+            manually_calculated=gradients[f"dl_d_{variable_name}"],
             tensor=intermediate_variables[variable_name],
         )
 
