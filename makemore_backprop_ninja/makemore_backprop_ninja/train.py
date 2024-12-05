@@ -221,6 +221,25 @@ def manual_backprop(
 
     # Calculate the gradients
     # Calculate the derivatives of the cross entropy
+    #
+    # The cross-entropy between two probability distributions p and q measures
+    # the average number of bits needed to identify an event drawn from the set
+    # when the coding scheme used for the set is optimized for an estimated
+    # probability distribution q, rather than the true distribution p.
+    # It reads
+    # H(p,q) = sum_x p(x) * log(q(x))
+    # https://en.wikipedia.org/wiki/Cross-entropy
+    #
+    # In our case the true distribution is a one-hot encoding
+    # This means that only one of the characters in the vocabulary (classes)
+    # have the probability of 1, and the rest have probability of 0
+    # Because of this we can use the sparse entropy definition used by PyTorch
+    # https://pytorch.org/docs/main/generated/torch.nn.CrossEntropyLoss.html#torch.nn.CrossEntropyLoss
+    # Note that in knowledge distillation we use the outputs of the teacher
+    # model as the target for the student model
+    # In this case we can no longer use the torch.nn.CrossEntropyLoss, and we
+    # need to use a custom implementation like
+    # https://pytorch.org/tutorials/beginner/knowledge_distillation_tutorial.html
     dl_d_log_probabilities = torch.zeros_like(log_probabilities)
     dl_d_probabilities = torch.zeros_like(probabilities)
     dl_d_counts_sum_inv = torch.zeros_like(counts_sum_inv)
