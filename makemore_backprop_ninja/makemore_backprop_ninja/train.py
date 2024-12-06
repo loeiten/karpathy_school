@@ -87,6 +87,9 @@ def train_neural_net_model(
         if use_functional:
             loss = F.cross_entropy(logits, dataset["training_ground_truth"][idxs])
         else:
+            # NOTE: The logits have shape (batch_size, VOCAB_SIZE)
+            #       Since we have keepdim=True, this shape will be maintained
+            #       for all the following tensors
             # The written out version of the cross entropy
             logits_maxes = logits.max(1, keepdim=True).values
             # Normalize the logits for numerical stability
@@ -98,6 +101,11 @@ def train_neural_net_model(
             probabilities = counts * counts_sum_inv
             log_probabilities = probabilities.log()
             batch_size = idxs.size(dim=0)
+            # The first index picks the row (a batch)
+            # For the picked row, the second index picks an element for the
+            # first index (a character is picked from the batch)
+            # This is equivalent to sparse cross-entropy
+            # See note in manual_backprop for more details
             loss = -log_probabilities[
                 range(batch_size), dataset["training_ground_truth"][idxs]
             ].mean()
@@ -240,6 +248,14 @@ def manual_backprop(
     # In this case we can no longer use the torch.nn.CrossEntropyLoss, and we
     # need to use a custom implementation like
     # https://pytorch.org/tutorials/beginner/knowledge_distillation_tutorial.html
+    #
+    # Note that the loss function gives a loss for each batch
+    # These batch are then reduced (default using mean)
+    # In other words L : R^{N x C} => R
+    # Where N is the batch size and C is the number of classes possible to
+    # predict
+    # Furthermore, the "gradient" is a mapping from f : R => R^{N x C}
+    # Each row contains a batch, and each column describes a possible class
     dl_d_log_probabilities = torch.zeros_like(log_probabilities)
     dl_d_probabilities = torch.zeros_like(probabilities)
     dl_d_counts_sum_inv = torch.zeros_like(counts_sum_inv)
