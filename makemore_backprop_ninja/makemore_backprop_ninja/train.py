@@ -256,6 +256,21 @@ def manual_backprop(
     # predict
     # Furthermore, the "gradient" is a mapping from f : R => R^{N x C}
     # Each row contains a batch, and each column describes a possible class
+    # We want to know how each of the elements in the N x C matrix is
+    # contributing to the loss
+    # Intuitively, as most elements in the non-sparse cross entropy will be zero,
+    # (as it will be multiplied with 0 probability)
+    # these will not contribute to the loss
+    # Sticking to the PyTorch nomenclature, call the ground truth y and the
+    # prediction x, we will only take the derivative w.r.t the predictions
+    # There will be one prediction per element, i.e. x = x(n,c) where n is a
+    # specific batch and c a specific class
+    # I.e. for each element we will take the derivative dl_d_x_nc
+    # The loss function with the reduction can be written as
+    # - 1/N sum_N sum_C y_nc * x_nc
+    # Most y_nc's will be zeros, the rest will be ones, hence the
+    # "surviving terms" can be written as
+    # dl_d_x_nc (- 1/N 1 * x_nc) = - 1/N
     dl_d_log_probabilities = torch.zeros_like(log_probabilities)
     dl_d_probabilities = torch.zeros_like(probabilities)
     dl_d_counts_sum_inv = torch.zeros_like(counts_sum_inv)
