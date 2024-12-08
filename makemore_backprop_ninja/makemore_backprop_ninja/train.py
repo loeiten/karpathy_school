@@ -106,9 +106,8 @@ def train_neural_net_model(
             # first index (a character is picked from the batch)
             # This is equivalent to sparse cross-entropy
             # See note in manual_backprop for more details
-            loss = -log_probabilities[
-                range(batch_size), dataset["training_ground_truth"][idxs]
-            ].mean()
+            targets = dataset["training_ground_truth"][idxs]
+            loss = -log_probabilities[range(batch_size), targets].mean()
 
             # Add variables to dictionary for better variable handling
             intermediate_variables["logits_maxes"] = logits_maxes
