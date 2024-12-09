@@ -130,7 +130,7 @@ def train_neural_net_model(
 
         # Do the back propagation
         gradients = manual_backprop(
-            model=model, intermediate_variables=intermediate_variables
+            model=model, intermediate_variables=intermediate_variables, targets=targets
         )
         # Do the actual backprop in order to compare
         loss.backward()
@@ -180,7 +180,9 @@ def train_neural_net_model(
 # Reducing the number of locals here will penalize the didactical purpose
 # pylint: disable-next=too-many-locals,too-many-statements
 def manual_backprop(
-    model: Tuple[torch.Tensor, ...], intermediate_variables: Dict[str, torch.Tensor]
+    model: Tuple[torch.Tensor, ...],
+    intermediate_variables: Dict[str, torch.Tensor],
+    targets: torch.Tensor,
 ) -> Dict[str, torch.Tensor]:
     """Do the manual back propagation, and set the gradients to the parameters.
 
@@ -188,6 +190,8 @@ def manual_backprop(
         model (Tuple[torch.Tensor,...]): The weights of the model
         intermediate_variables (Dict[str, torch.Tensor]): The intermediate
             variables (i.e. those which are not part of model parameters).
+        targets(torch.Tensor): The targets
+            Needed to compute the log_prob gradients
 
     Returns:
         A map of the gradients
@@ -271,6 +275,8 @@ def manual_backprop(
     # "surviving terms" can be written as
     # dl_d_x_nc (- 1/N 1 * x_nc) = - 1/N
     dl_d_log_probabilities = torch.zeros_like(log_probabilities)
+    batch_size = c.size(dim=1)
+    dl_d_log_probabilities[range(batch_size), targets] = -(1.0 / batch_size)
     dl_d_probabilities = torch.zeros_like(probabilities)
     dl_d_counts_sum_inv = torch.zeros_like(counts_sum_inv)
     dl_d_counts_sum = torch.zeros_like(counts_sum)
