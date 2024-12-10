@@ -275,7 +275,7 @@ def manual_backprop(
     # "surviving terms" can be written as
     # dl_d_x_nc (- 1/N 1 * x_nc) = - 1/N
     dl_d_log_probabilities = torch.zeros_like(log_probabilities)
-    batch_size = c.size(dim=1)
+    batch_size = embedding.size(dim=0)
     dl_d_log_probabilities[range(batch_size), targets] = -(1.0 / batch_size)
     dl_d_probabilities = torch.zeros_like(probabilities)
     dl_d_counts_sum_inv = torch.zeros_like(counts_sum_inv)

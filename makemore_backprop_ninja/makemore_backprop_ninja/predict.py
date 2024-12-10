@@ -78,7 +78,7 @@ def predict_neural_network(
         # One could take the mean and std over the whole data set as a final
         # step during the training, but having a running updates in the
         # direction of the current mean and stddev
-        batch_size = c.size(dim=0)
+        batch_size = embedding.size(dim=0)
         # Mean
         batch_normalization_mean = (1 / batch_size) * (
             h_pre_batch_norm.sum(0, keepdim=True)
