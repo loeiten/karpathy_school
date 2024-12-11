@@ -45,6 +45,7 @@ def predict_neural_network(
     #       block_size characters
     #       The dimension of emb is therefore
     #       (batch_size, block_size, embedding_size)
+    # NOTE: This is where the batch size enters the model
     embedding = c[input_data]
     # The block needs to be concatenated before multiplying it with the
     # weight
