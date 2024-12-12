@@ -84,8 +84,9 @@ def train_neural_net_model(
             training=True,
         )
         intermediate_variables["logits"] = logits
+        targets = dataset["training_ground_truth"][idxs]
         if use_functional:
-            loss = F.cross_entropy(logits, dataset["training_ground_truth"][idxs])
+            loss = F.cross_entropy(logits, targets)
         else:
             # NOTE: The logits have shape (batch_size, VOCAB_SIZE)
             #       Since we have keepdim=True, this shape will be maintained
@@ -106,7 +107,6 @@ def train_neural_net_model(
             # first index (a character is picked from the batch)
             # This is equivalent to sparse cross-entropy
             # See note in manual_backprop for more details
-            targets = dataset["training_ground_truth"][idxs]
             loss = -log_probabilities[range(batch_size), targets].mean()
 
             # Add variables to dictionary for better variable handling
