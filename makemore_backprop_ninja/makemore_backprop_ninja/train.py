@@ -101,12 +101,12 @@ def train_neural_net_model(
             counts_sum_inv = counts_sum**-1
             probabilities = counts * counts_sum_inv
             log_probabilities = probabilities.log()
-            batch_size = idxs.size(dim=0)
             # The first index picks the row (a batch)
             # For the picked row, the second index picks an element for the
             # first index (a character is picked from the batch)
             # This is equivalent to sparse cross-entropy
             # See note in manual_backprop for more details
+            batch_size = idxs.size(dim=0)
             loss = -log_probabilities[range(batch_size), targets].mean()
 
             # Add variables to dictionary for better variable handling
@@ -277,7 +277,8 @@ def manual_backprop(
     dl_d_log_probabilities = torch.zeros_like(log_probabilities)
     batch_size = embedding.size(dim=0)
     dl_d_log_probabilities[range(batch_size), targets] = -(1.0 / batch_size)
-    dl_d_probabilities = torch.zeros_like(probabilities)
+    # d log(f(x))/dx = (1/x)*df(x)/dx
+    dl_d_probabilities = (1.0 / probabilities) * dl_d_log_probabilities
     dl_d_counts_sum_inv = torch.zeros_like(counts_sum_inv)
     dl_d_counts_sum = torch.zeros_like(counts_sum)
     dl_d_counts = torch.zeros_like(counts)
@@ -442,6 +443,8 @@ def compare_single_gradient(
         f"approximate {str(approximate):5s} | "
         f"max difference: {max_diff}"
     )
+
+    return approximate
 
 
 def train(
