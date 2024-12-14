@@ -393,6 +393,7 @@ def compare_gradients(
             variables
         gradients (Dict[str, torch.Tensor]): The manually calculated gradients
     """
+    approximate_bool_list = []
     # Make a model dict for easier comparison
     model_dict: Dict[str, torch.Tensor] = {}
     (
@@ -407,25 +408,32 @@ def compare_gradients(
     print("Comparing model weights:")
     print("-" * 80)
     for variable_name, tensor in model_dict.items():
-        compare_single_gradient(
-            name=variable_name,
-            manually_calculated=gradients[f"dl_d_{variable_name}"],
-            tensor=tensor,
+        approximate_bool_list.append(
+            compare_single_gradient(
+                name=variable_name,
+                manually_calculated=gradients[f"dl_d_{variable_name}"],
+                tensor=tensor,
+            )
         )
 
     print("\nComparing intermediate variables:")
     print("-" * 80)
     for variable_name in intermediate_variables.keys():
-        compare_single_gradient(
-            name=variable_name,
-            manually_calculated=gradients[f"dl_d_{variable_name}"],
-            tensor=intermediate_variables[variable_name],
+        approximate_bool_list.append(
+            compare_single_gradient(
+                name=variable_name,
+                manually_calculated=gradients[f"dl_d_{variable_name}"],
+                tensor=intermediate_variables[variable_name],
+            )
         )
+
+    if not approximate_bool_list.all() == True:
+        raise RuntimeError("Some of the gradients are off, see output above for debug")
 
 
 def compare_single_gradient(
     name: str, manually_calculated: torch.Tensor, tensor: torch.Tensor
-) -> None:
+) -> bool:
     """
     Compare the manually calculated gradient with the one calculated using autograd.
 
@@ -433,6 +441,9 @@ def compare_single_gradient(
         name (str): Name of the tensor
         manually_calculated (torch.Tensor): The manually calculated gradient
         tensor (torch.Tensor): The tensor to check
+
+    Returns:
+        bool: Whether the tensor is approximately equal
     """
     exact = torch.all(manually_calculated == tensor.grad).item()
     approximate = torch.allclose(manually_calculated, tensor.grad)
