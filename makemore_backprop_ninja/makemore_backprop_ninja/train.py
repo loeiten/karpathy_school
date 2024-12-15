@@ -387,6 +387,9 @@ def compare_gradients(
     """
     Compare the manually calculated gradients with the ones generated from autograd.
 
+    Raises:
+        RuntimeError: In case not all the tensors are approximately equal
+
     Args:
         model (torch.Tensor): The model weights
         intermediate_variables (Dict[str, torch.Tensor]): The intermediate
@@ -427,7 +430,7 @@ def compare_gradients(
             )
         )
 
-    if not approximate_bool_list.all() == True:
+    if not all(approximate_bool_list):
         raise RuntimeError("Some of the gradients are off, see output above for debug")
 
 
