@@ -277,7 +277,9 @@ def manual_backprop(
     dl_d_log_probabilities = torch.zeros_like(log_probabilities)
     batch_size = embedding.size(dim=0)
     dl_d_log_probabilities[range(batch_size), targets] = -(1.0 / batch_size)
-    # d log(f(x))/dx = (1/x)*df(x)/dx
+    # dl/d(probs) = dl/d(log(probs)) * d(log(probs))/d(probs)
+    # From above, we calculated dl/d(log(probs)), and
+    # d log(x)/dx = (1/x)
     dl_d_probabilities = (1.0 / probabilities) * dl_d_log_probabilities
     dl_d_counts_sum_inv = torch.zeros_like(counts_sum_inv)
     dl_d_counts_sum = torch.zeros_like(counts_sum)
