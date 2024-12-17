@@ -265,15 +265,19 @@ def manual_backprop(
     # (as it will be multiplied with 0 probability)
     # these will not contribute to the loss
     # Sticking to the PyTorch nomenclature, call the ground truth y and the
-    # prediction x, we will only take the derivative w.r.t the predictions
+    # prediction x, we want to take the derivative w.r.t the predictions x
     # There will be one prediction per element, i.e. x = x(n,c) where n is a
     # specific batch and c a specific class
-    # I.e. for each element we will take the derivative dl_d_x_nc
+    # To make the calculation simple for ourselves we've chopped the expression,
+    # so that we don't need to take the derivative of x(n,c) directly
+    # Instead, we will take the derivative w.r.t to the immediate variable
+    # logprobs(x(n,c))
+    # I.e. for each element we will take the derivative dl/d(logprobs(x(n,c)))
     # The loss function with the reduction can be written as
-    # - 1/N sum_N sum_C y_nc * x_nc
+    # - 1/N sum_N sum_C y_nc * logprobs(x(n,c))
     # Most y_nc's will be zeros, the rest will be ones, hence the
     # "surviving terms" can be written as
-    # dl_d_x_nc (- 1/N 1 * x_nc) = - 1/N
+    # d/d(logprobs(x(n,c))) (- 1/N 1 * logprobs(x(n,c)) = - 1/N
     dl_d_log_probabilities = torch.zeros_like(log_probabilities)
     batch_size = embedding.size(dim=0)
     dl_d_log_probabilities[range(batch_size), targets] = -(1.0 / batch_size)
