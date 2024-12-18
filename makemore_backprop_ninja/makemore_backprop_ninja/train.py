@@ -285,7 +285,38 @@ def manual_backprop(
     # From above, we calculated dl/d(log(probs)), and
     # d log(x)/dx = (1/x)
     dl_d_probabilities = (1.0 / probabilities) * dl_d_log_probabilities
-    dl_d_counts_sum_inv = torch.zeros_like(counts_sum_inv)
+    # dl/d(counts_sum_inv) = dl/d(probs) * d(probs)/d(counts_sum_inv)
+    # We have dl/d(probs) from above
+    # Further, we have that
+    # probs = counts * counts_sum_inv
+    # so
+    # d probs/ d counts_sum_inv = counts
+    # However, counts has dimension (N,C) and counts_sum_inv has dimension (N, 1)
+    # because we summed over the C dimension in the counts_sum variable
+    # Broadcasting rules
+    # https://pytorch.org/docs/stable/notes/broadcasting.html
+    # https://numpy.org/doc/stable/user/basics.broadcasting.html
+    # tells us that count_sums_inv dimension 1 will be broadcasted
+    # With an example, lets probs : R^{2x2} and counts_sum_inv : R^{2x1}
+    # probs =
+    # [[a_00, a_01],
+    #  [a_10, a_11]]
+    # counts_sum_inv =
+    # [[b_00],
+    #  [b_10]]
+    # counts_sum_inv will be stretched in the direction of dimension 1 and become
+    # counts_sum_inv =
+    # [[b_00, b_00],
+    #  [b_10, b_10]]
+    # as the multiplication is element-wise, we get
+    # probs*counts_sum_inv =
+    # [[a_00*b_00, a_01*b_00],
+    #  [a_10*b_10, a_11*b_10]]
+    # Since counts_sum_inv is replicated we must accumulate the gradient
+    # (recall from micrograd when the same value was an input to several other
+    #  nodes)
+    # We will therefore sum the gradient over the columns
+    dl_d_counts_sum_inv = (counts * dl_d_probabilities).sum(dim=1, keepdim=True)
     dl_d_counts_sum = torch.zeros_like(counts_sum)
     dl_d_counts = torch.zeros_like(counts)
     dl_d_normalized_logits = torch.zeros_like(normalized_logits)
