@@ -88,14 +88,16 @@ def train_neural_net_model(
         if use_functional:
             loss = F.cross_entropy(logits, targets)
         else:
-            # NOTE: The logits have shape (batch_size, VOCAB_SIZE)
-            #       Since we have keepdim=True, this shape will be maintained
-            #       for all the following tensors
             # The written out version of the cross entropy
+            # NOTE: The logits have shape (batch_size, VOCAB_SIZE)
+            #       Taking the max across dim 1 will give the shape
+            #       (1, VOCAB_SIZE)
             logits_maxes = logits.max(1, keepdim=True).values
             # Normalize the logits for numerical stability
             normalized_logits = logits - logits_maxes
             counts = normalized_logits.exp()
+            # NOTE: With the sum, we go from (batch_size, VOCAB_SIZE) to
+            #       (batch_size, 1)
             counts_sum = counts.sum(1, keepdims=True)
             # (1.0/counts_sum) doesn't give the exact values
             counts_sum_inv = counts_sum**-1
