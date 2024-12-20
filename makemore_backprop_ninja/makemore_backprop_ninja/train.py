@@ -319,6 +319,17 @@ def manual_backprop(
     #  nodes)
     # We will therefore sum the gradient over the columns
     dl_d_counts_sum_inv = (counts * dl_d_probabilities).sum(dim=1, keepdim=True)
+    # counts appears twice
+    # 1. probabilities = counts * counts_sum_inv
+    # 2. counts_sum = counts.sum(1, keepsdim=True)
+    # We must therefore accumulate the gradients
+    # 1. dl/d(counts) = dl/d(probabilities) * d(probabilities)/d(counts)
+    #    dl/d(counts) = dl/d(probabilities) * counts_sum_inv
+    # 2. dl/d(counts) = dl/d(counts_sum) * d(counts_sum)/d(counts)
+    # However, we don't know dl/d(counts_sum yet, but it can be calculated
+    # Do let's calculate that first
+    # 3. dl/d(counts_sum) = dl/d(counts_sum_inv) * d(counts_sum_inv)/d(counts_sum)
+    # dl/d(counts_sum) = dl / dx * dx / d(counts_sum)
     dl_d_counts_sum = torch.zeros_like(counts_sum)
     dl_d_counts = torch.zeros_like(counts)
     dl_d_normalized_logits = torch.zeros_like(normalized_logits)
