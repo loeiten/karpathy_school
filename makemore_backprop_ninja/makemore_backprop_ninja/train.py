@@ -325,6 +325,9 @@ def manual_backprop(
     # We must therefore accumulate the gradients
     # 1. dl/d(counts) = dl/d(probabilities) * d(probabilities)/d(counts)
     #    dl/d(counts) = dl/d(probabilities) * counts_sum_inv
+    #    counts_sum_inv has dimension (N,1)
+    #    dl/d(probabilities) has dimension (N,C)
+    #    counts_sum_inv will therefore be stretched in the C dimension
     # 2. dl/d(counts) = dl/d(counts_sum) * d(counts_sum)/d(counts)
     # However, we don't know dl/d(counts_sum yet, but it can be calculated
     # Do let's calculate that first
