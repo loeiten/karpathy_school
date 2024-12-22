@@ -332,7 +332,8 @@ def manual_backprop(
     # However, we don't know dl/d(counts_sum yet, but it can be calculated
     # Do let's calculate that first
     # 3. dl/d(counts_sum) = dl/d(counts_sum_inv) * d(counts_sum_inv)/d(counts_sum)
-    # dl/d(counts_sum) = dl / dx * dx / d(counts_sum)
+    #    Since d/dx (1/x) = -1/(x^2), we get
+    #    dl/d(counts_sum) = dl/d(counts_sum_inv) * (-1/counts^2)
     dl_d_counts_sum = torch.zeros_like(counts_sum)
     dl_d_counts = torch.zeros_like(counts)
     dl_d_normalized_logits = torch.zeros_like(normalized_logits)
