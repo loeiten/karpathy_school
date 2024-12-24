@@ -329,7 +329,7 @@ def manual_backprop(
     #    dl/d(probabilities) has dimension (N,C)
     #    counts_sum_inv will therefore be stretched in the C dimension
     # 2. dl/d(counts) = dl/d(counts_sum) * d(counts_sum)/d(counts)
-    # However, we don't know dl/d(counts_sum yet, but it can be calculated
+    # However, we don't know dl/d(counts_sum) yet, but it can be calculated
     # Do let's calculate that first
     # 3. dl/d(counts_sum) = dl/d(counts_sum_inv) * d(counts_sum_inv)/d(counts_sum)
     #    Since d/dx (1/x) = -1/(x^2), we get
