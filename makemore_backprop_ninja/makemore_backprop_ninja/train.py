@@ -335,10 +335,10 @@ def manual_backprop(
     # Since d/dx (1/x) = -1/(x^2), we get
     # dl/d(counts_sum) = dl/d(counts_sum_inv) * (-1/counts^2)
     dl_d_counts_sum = dl_d_counts_sum_inv * (-counts_sum**(-2))
-    dl_d_counts = torch.zeros_like(counts)
-    dl_d_normalized_logits = torch.zeros_like(normalized_logits)
-    dl_d_logits_maxes = torch.zeros_like(logits_maxes)
-    dl_d_logits = torch.zeros_like(logits)
+    # Ok, we now have all we need to calculate dl/d(counts)
+    # Let's start with the point 1 above
+    # 1. dl/d(counts) = dl/d(probabilities) * counts_sum_inv
+    #    With broadcasting of counts_sum_inv
     # Calculate the derivatives of the second layer
     dl_d_h = torch.zeros_like(h)
     dl_d_h_pre_activation = torch.zeros_like(h_pre_activation)
