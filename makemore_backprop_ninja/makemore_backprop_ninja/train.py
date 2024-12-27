@@ -339,6 +339,7 @@ def manual_backprop(
     # Let's start with the point 1 above
     # 1. dl/d(counts) = dl/d(probabilities) * counts_sum_inv
     #    With broadcasting of counts_sum_inv
+    dl_d_counts = dl_d_probabilities * counts_sum_inv
     # Calculate the derivatives of the second layer
     dl_d_h = torch.zeros_like(h)
     dl_d_h_pre_activation = torch.zeros_like(h_pre_activation)
