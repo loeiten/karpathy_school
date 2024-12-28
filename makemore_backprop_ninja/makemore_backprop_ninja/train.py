@@ -340,6 +340,47 @@ def manual_backprop(
     # 1. dl/d(counts) = dl/d(probabilities) * counts_sum_inv
     #    With broadcasting of counts_sum_inv
     dl_d_counts = dl_d_probabilities * counts_sum_inv
+    # Let's continue with point 2
+    # Using the information above, we have
+    # dl/d(counts) = dl/d(counts_sum) * d(counts_sum)/d(counts)
+    #
+    # Now we need to figure out d(counts_sum)/d(counts)
+    # Consider a 2x3 matrix we have
+    # counts = 
+    # [[counts_00, counts_01, counts_02],
+    #  [counts_10, counts_11, counts_12]]
+    # counts_sum = 
+    # [[counts_00+counts_01+counts_02],
+    #  [counts_10+counts_11+counts_12]]
+    # i.e.
+    # counts_sum_0 = counts_00+counts_01+counts_02
+    # counts_sum_1 = counts_10+counts_11+counts_12
+    # We observe that counts_sum_i only depend on sum_j(counts_ij) 
+    # (that is the rows)
+    # In other words, d(counts_sum_i)/d(counts_ij) can be written
+    # d(counts_sum_0)/d(counts_00) = 1
+    # d(counts_sum_0)/d(counts_01) = 1
+    # d(counts_sum_0)/d(counts_02) = 1
+    # d(counts_sum_0)/d(counts_10) = 0
+    # d(counts_sum_0)/d(counts_11) = 0
+    # d(counts_sum_0)/d(counts_12) = 0
+    # d(counts_sum_1)/d(counts_00) = 0
+    # d(counts_sum_1)/d(counts_01) = 0
+    # d(counts_sum_1)/d(counts_02) = 0
+    # d(counts_sum_1)/d(counts_10) = 1
+    # d(counts_sum_1)/d(counts_11) = 1
+    # d(counts_sum_1)/d(counts_12) = 1
+    # so
+    # d(counts_sum)/d(counts) = 
+    # [[d(counts_sum_0)/d(counts_00) + d(counts_sum_1)/d(counts_00), 
+    #   d(counts_sum_0)/d(counts_01) + d(counts_sum_1)/d(counts_01), 
+    #   d(counts_sum_0)/d(counts_02) + d(counts_sum_1)/d(counts_02)],
+    #  [d(counts_sum_0)/d(counts_10) + d(counts_sum_1)/d(counts_10), 
+    #   d(counts_sum_0)/d(counts_11) + d(counts_sum_1)/d(counts_11), 
+    #   d(counts_sum_0)/d(counts_12) + d(counts_sum_1)/d(counts_12)]]]
+    # I.e. we just get a matrix of ones
+    # We must also remember to use += as we have two expressions using counts
+    # as described above
     # Calculate the derivatives of the second layer
     dl_d_h = torch.zeros_like(h)
     dl_d_h_pre_activation = torch.zeros_like(h_pre_activation)
