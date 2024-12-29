@@ -344,6 +344,13 @@ def manual_backprop(
     # Using the information above, we have
     # dl/d(counts) = dl/d(counts_sum) * d(counts_sum)/d(counts)
     #
+    # counts is of shape of (N, C)
+    # =>
+    # dl/d(counts) is of shape of (N, C)
+    # and
+    # d(counts_sum)/d(counts) must also be of shape of (N, C)
+    #
+    #
     # Now we need to figure out d(counts_sum)/d(counts)
     # Consider a 2x3 matrix we have
     # counts = 
