@@ -350,7 +350,6 @@ def manual_backprop(
     # and
     # d(counts_sum)/d(counts) must also be of shape of (N, C)
     #
-    #
     # Now we need to figure out d(counts_sum)/d(counts)
     # Consider a 2x3 matrix we have
     # counts = 
