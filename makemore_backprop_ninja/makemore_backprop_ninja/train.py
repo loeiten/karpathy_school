@@ -387,6 +387,7 @@ def manual_backprop(
     # I.e. we just get a matrix of ones
     # We must also remember to use += as we have two expressions using counts
     # as described above
+    dl_d_counts += torch.ones_like(counts)*dl_d_counts_sum
     # Calculate the derivatives of the second layer
     dl_d_h = torch.zeros_like(h)
     dl_d_h_pre_activation = torch.zeros_like(h_pre_activation)
