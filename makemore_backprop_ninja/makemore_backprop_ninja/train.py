@@ -388,6 +388,11 @@ def manual_backprop(
     # We must also remember to use += as we have two expressions using counts
     # as described above
     dl_d_counts += torch.ones_like(counts)*dl_d_counts_sum
+    # dl/d(normalized_logits) = dl/d(counts) * d(counts)/d(normalized_logits)
+    # We know dl/d(counts) from above, and we have that
+    # counts = exp(normalized_logits)
+    # d/dx exp(x) = exp(x)
+    # so
     # Calculate the derivatives of the second layer
     dl_d_h = torch.zeros_like(h)
     dl_d_h_pre_activation = torch.zeros_like(h_pre_activation)
