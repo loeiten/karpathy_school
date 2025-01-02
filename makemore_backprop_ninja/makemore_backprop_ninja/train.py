@@ -393,6 +393,7 @@ def manual_backprop(
     # counts = exp(normalized_logits)
     # d/dx exp(x) = exp(x)
     # so
+    dl_d_normalized_logits = dl_d_counts * counts
     # Calculate the derivatives of the second layer
     dl_d_h = torch.zeros_like(h)
     dl_d_h_pre_activation = torch.zeros_like(h_pre_activation)
