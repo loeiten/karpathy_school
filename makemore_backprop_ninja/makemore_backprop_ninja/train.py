@@ -394,6 +394,14 @@ def manual_backprop(
     # d/dx exp(x) = exp(x)
     # so
     dl_d_normalized_logits = dl_d_counts * counts
+    # dl/d(logits_maxes) 
+    # = dl/d(normalized_logits) * d(normalized_logits)/d(logits_maxes)
+    # We know dl/d(logits_maxes) from above and
+    # normalized_logits = logits - logits_maxes
+    # and
+    # d/dx (y-x) = -1
+    # However, logits_maxes have the shape (1, C), whilst normalized_logits has
+    # shape (N, C)
     # Calculate the derivatives of the second layer
     dl_d_h = torch.zeros_like(h)
     dl_d_h_pre_activation = torch.zeros_like(h_pre_activation)
