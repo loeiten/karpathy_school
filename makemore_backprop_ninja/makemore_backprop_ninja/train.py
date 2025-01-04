@@ -402,6 +402,17 @@ def manual_backprop(
     # d/dx (y-x) = -1
     # However, logits_maxes have the shape (1, C), whilst normalized_logits has
     # shape (N, C)
+    # Assuming a 2x2 matrix, we have due to broadcasting
+    #
+    # [[normalized_logits_00, normalized_logits_01],                                         
+    #  [normalized_logits_10, normalized_logits_11]]                                         
+    # =
+    # [[logits_00, logits_01],                                         
+    #  [logits_10, logits_11]]                                         
+    # -
+    # [[logits_maxes_0, logits_maxes_0],                                         
+    #  [logits_maxes_1, logits_maxes_0]]                                         
+    #
     # Calculate the derivatives of the second layer
     dl_d_h = torch.zeros_like(h)
     dl_d_h_pre_activation = torch.zeros_like(h_pre_activation)
