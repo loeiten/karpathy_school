@@ -413,6 +413,10 @@ def manual_backprop(
     # [[logits_maxes_0, logits_maxes_0],                                         
     #  [logits_maxes_1, logits_maxes_0]]                                         
     #
+    # We know that dl_d_logits_maxes must have the same shape as logits_maxes
+    # (1, N) and we see that there are several dependencies of the same index
+    # of logits_maxes, hence, we must accumulate the gradients
+    # NOTE: We clone to ensure there are no inplace operations
     # Calculate the derivatives of the second layer
     dl_d_h = torch.zeros_like(h)
     dl_d_h_pre_activation = torch.zeros_like(h_pre_activation)
