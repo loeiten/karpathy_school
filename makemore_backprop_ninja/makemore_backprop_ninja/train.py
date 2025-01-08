@@ -419,6 +419,12 @@ def manual_backprop(
     # NOTE: We clone to ensure there are no inplace operations
     dl_d_normalized_logits_clone = dl_d_normalized_logits.clone()
     dl_d_logits_maxes = -dl_d_normalized_logits.sum(1, keepdim=True)
+    # dl/d(logits) = dl/d(logits_maxes) * d(logit_maxes)/d(logits)
+    #
+    # dl/d(logits) = dl/d(normalized_logits) * d(normalized_logits)/d(logits)
+    # where
+    # d(normalized_logits)/d(logits) = d(logits)/d(logits) - d(logits_maxes)/d(logits)
+    #
     dl_d_logits = torch.ones_like(logits)*dl_d_logits_maxes
     dl_d_logits = dl_d_normalized_logits_clone + (F.one_hot(logits.max(1).indices, num_classes=logits.shape[1]))*dl_d_logits_maxes
     # Calculate the derivatives of the second layer
