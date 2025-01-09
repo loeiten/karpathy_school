@@ -425,6 +425,19 @@ def manual_backprop(
     # where
     # d(normalized_logits)/d(logits) = d(logits)/d(logits) - d(logits_maxes)/d(logits)
     #
+    # logits of shape (N, C)
+    # logits.max(1, keepdims=True) has the dimension of (1, C)
+    # so we have a broadcast operation
+    #
+    # d(normalized_logits)/d(logits) =
+    # [[1, 1],                                         
+    #  [1, 1]]                                         
+    # -
+    # [[d(max_j(logits_0j))/d(logits_00), d(max_j(logits_1j))/d(logits_01)],                                         
+    #  [d(max_j(logits_0j))/d(logits_10), d(max_j(logits_1j))/d(logits_11)]]                                         
+    #
+    # where d(max_x(logits_ix))/d(logits_ij) only is one at the maximums, and
+    # zero elsewhere
     dl_d_logits = torch.ones_like(logits)*dl_d_logits_maxes
     dl_d_logits = dl_d_normalized_logits_clone + (F.one_hot(logits.max(1).indices, num_classes=logits.shape[1]))*dl_d_logits_maxes
     # Calculate the derivatives of the second layer
