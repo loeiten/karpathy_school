@@ -438,6 +438,18 @@ def manual_backprop(
     #
     # where d(max_x(logits_ix))/d(logits_ij) only is one at the maximums, and
     # zero elsewhere
+    #
+    # logits appear in the following expressions
+    # normalized_logits = logits - logits_maxes
+    # logits_maxes = logits.max(1, keepdim=True)
+    # 
+    # logits_maxes_i = max_j(logits_ij)
+    #
+    # Combining:
+    # dl/d(logits) = dl/d(logits_maxes) * d(logit_maxes)/d(logits) + dl/d(normalized_logits) * d(normalized_logits)/d(logits)
+    # dl/d(logits) = dl/d(logits_maxes) * d(logit_maxes)/d(logits) + (d(logits)/d(logits) - d(logits_maxes)/d(logits)) * d(normalized_logits)/d(logits)
+
+    # dl_d_logits = (dl_d_normalized_logits_clone + F.one_hot(logits.max(1).indices, num_classes=logits.shape[1]))*dl_d_logits_maxes
     dl_d_logits = torch.ones_like(logits)*dl_d_logits_maxes
     dl_d_logits = dl_d_normalized_logits_clone + (F.one_hot(logits.max(1).indices, num_classes=logits.shape[1]))*dl_d_logits_maxes
     # Calculate the derivatives of the second layer
