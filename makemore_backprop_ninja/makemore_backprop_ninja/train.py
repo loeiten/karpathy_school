@@ -451,6 +451,7 @@ def manual_backprop(
 
     # dl_d_logits = (dl_d_normalized_logits_clone + F.one_hot(logits.max(1).indices, num_classes=logits.shape[1]))*dl_d_logits_maxes
     dl_d_logits = torch.ones_like(logits)*dl_d_logits_maxes
+    # FIXME: YOU ARE HERE: NOT THE DIFFERENCE WITH THE CHAIN, IF MUL BOTH EQUAL TO ABOVE
     dl_d_logits = dl_d_normalized_logits_clone + (F.one_hot(logits.max(1).indices, num_classes=logits.shape[1]))*dl_d_logits_maxes
     # Calculate the derivatives of the second layer
     dl_d_h = torch.zeros_like(h)
