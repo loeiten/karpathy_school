@@ -243,43 +243,75 @@ def manual_backprop(
     # H(p,q) = sum_x p(x) * log(q(x))
     # https://en.wikipedia.org/wiki/Cross-entropy
     #
-    # In our case the true distribution is a one-hot encoding
+    # In our case the ground truth is a one-hot encoding
     # This means that only one of the characters in the vocabulary (classes)
     # have the probability of 1, and the rest have probability of 0
     # Because of this we can use the sparse entropy definition used by PyTorch
     # https://pytorch.org/docs/main/generated/torch.nn.CrossEntropyLoss.html#torch.nn.CrossEntropyLoss
-    # Note that in knowledge distillation we use the outputs of the teacher
-    # model as the target for the student model
-    # In this case we can no longer use the torch.nn.CrossEntropyLoss, and we
+    #
+    # Note that the ground truth needs not to be one-hot encoded in all cases.
+    # It can be a distribution like we have in knowledge distillation.
+    # There we use the outputs of the teacher model as the target for the student 
+    # model
+    # In that case we can no longer use the torch.nn.CrossEntropyLoss, and we
     # need to use a custom implementation like
     # https://pytorch.org/tutorials/beginner/knowledge_distillation_tutorial.html
     #
-    # Note that the loss function gives a loss for each batch
-    # These batch are then reduced (default using mean)
-    # In other words L : R^{N x C} => R
+    # The loss function gives a loss for each batch
+    # These losses are then reduced (default using mean)
+    # In other words l : R^{N x C} => R
     # Where N is the batch size and C is the number of classes possible to
     # predict
-    # Furthermore, the "gradient" is a mapping from f : R => R^{N x C}
+    #
+    # Sticking to the PyTorch nomenclature, we call the ground truth y and the
+    # prediction x, we see that the loss function with the reduction can be 
+    # written as
+    #
+    # l = - \frac{1}{N} \sum_{n=1}^{N} \sum_{c=1}^{C} y_{nc} \log(\mathbb{P}(x_{nc}))
+    #
+    # Notice that there will be one prediction per element, i.e. x = x(n,c) 
+    # where n is a specific batch and c a specific class
+    # We are interested in understanding how each of the elements in the N x C
+    # matrix is contributing to the loss.
+    # I.e. the "gradient" will be a mapping from f : R => R^{N x C}
     # Each row contains a batch, and each column describes a possible class
-    # We want to know how each of the elements in the N x C matrix is
-    # contributing to the loss
-    # Intuitively, as most elements in the non-sparse cross entropy will be zero,
-    # (as it will be multiplied with 0 probability)
-    # these will not contribute to the loss
-    # Sticking to the PyTorch nomenclature, call the ground truth y and the
-    # prediction x, we want to take the derivative w.r.t the predictions x
-    # There will be one prediction per element, i.e. x = x(n,c) where n is a
-    # specific batch and c a specific class
+    #
     # To make the calculation simple for ourselves we've chopped the expression,
-    # so that we don't need to take the derivative of x(n,c) directly
+    # so that we don't need to take the derivative of x_{nc} directly
     # Instead, we will take the derivative w.r.t to the immediate variable
-    # logprobs(x(n,c))
-    # I.e. for each element we will take the derivative dl/d(logprobs(x(n,c)))
-    # The loss function with the reduction can be written as
-    # - 1/N sum_N sum_C y_nc * logprobs(x(n,c))
-    # Most y_nc's will be zeros, the rest will be ones, hence the
-    # "surviving terms" can be written as
-    # d/d(logprobs(x(n,c))) (- 1/N 1 * logprobs(x(n,c)) = - 1/N
+    # \log(\mathbb{P}(x_{nc}))
+    # 
+    # Let us store the total derivative of \log(\mathbb{P}(x_{nc})) in a tensor
+    # T. I.e. for each element we want to calculate
+    #
+    # T_{nc} = \frac{dl}{d\log(\mathbb{P}(x_{nc}))}
+    #
+    # Notice that there will only be one surviving term per element as
+    #
+    # \frac{\partial \log(\mathbb{P}(x_{ij})}{\partial \log(\mathbb{P}(x_{kl})} 
+    # = \delta_ij \delta_kl
+    #
+    # If we denote 
+    #
+    # u_{nc} =\log(\mathbb{P}(x_{nc})} 
+    #
+    # We get that
+    #
+    # \frac{dl}{d\log(\mathbb{P}(x_{nc}))} 
+    # = \frac{\partial l}{\partial u_{nc}} \frac{\partial u_{nc}}{\partial \log(\mathbb{P}(x_{nc})}}
+    #
+    # where
+    #
+    # \frac{\partial u_{nc}}{\partial \log(\mathbb{P}(x_{nc})}} = 1 
+    # 
+    # and
+    #
+    # \frac{\partial l}{\partial u_{nc}} = - \frac{1}{N} y_{nc}
+    #
+    # where the double sums have disappeared due to \delta_ij \delta_kl
+    # described above
+    #
+    # Finally, as y_{nc} is 1 only once per row, we get 
     dl_d_log_probabilities = torch.zeros_like(log_probabilities)
     batch_size = embedding.size(dim=0)
     dl_d_log_probabilities[range(batch_size), targets] = -(1.0 / batch_size)
