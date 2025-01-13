@@ -315,6 +315,10 @@ def manual_backprop(
     dl_d_log_probabilities = torch.zeros_like(log_probabilities)
     batch_size = embedding.size(dim=0)
     dl_d_log_probabilities[range(batch_size), targets] = -(1.0 / batch_size)
+    # where we've used advanced indexing:
+    # The first index selects the rows with a specific row number
+    # Of these rows, the second index selects the column of the corresponding row
+
     # dl/d(probs) = dl/d(log(probs)) * d(log(probs))/d(probs)
     # From above, we calculated dl/d(log(probs)), and
     # d log(x)/dx = (1/x)
