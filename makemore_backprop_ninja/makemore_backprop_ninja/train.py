@@ -293,20 +293,15 @@ def manual_backprop(
     #
     # If we denote 
     #
-    # u_{nc} =\log(\mathbb{P}(x_{nc})} 
+    # u_{nc} =\log(\mathbb{P}(x_{nc})
     #
-    # We get that
+    # We notice that we only have an explicit dependency on u_{nc} in l, hence
     #
-    # \frac{dl}{d\log(\mathbb{P}(x_{nc}))} 
-    # = \frac{\partial l}{\partial u_{nc}} \frac{\partial u_{nc}}{\partial \log(\mathbb{P}(x_{nc})}}
+    # \frac{dl}{d\log(\mathbb{P}(x_{nc}))} = \frac{dl}{d u_{nc}} 
     #
     # where
     #
-    # \frac{\partial u_{nc}}{\partial \log(\mathbb{P}(x_{nc})}} = 1 
-    # 
-    # and
-    #
-    # \frac{\partial l}{\partial u_{nc}} = - \frac{1}{N} y_{nc}
+    # \frac{dl}{d u_{nc}} = - \frac{1}{N} y_{nc}
     #
     # where the double sums have disappeared due to \delta_ij \delta_kl
     # described above
