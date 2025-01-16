@@ -314,10 +314,30 @@ def manual_backprop(
     # The first index selects the rows with a specific row number
     # Of these rows, the second index selects the column of the corresponding row
 
-    # dl/d(probs) = dl/d(log(probs)) * d(log(probs))/d(probs)
-    # From above, we calculated dl/d(log(probs)), and
-    # d log(x)/dx = (1/x)
-    dl_d_probabilities = (1.0 / probabilities) * dl_d_log_probabilities
+    # Next, we will find the dependency on the loss from the probabilities, i.e.
+    #
+    # \frac{dl}{d \mathbb{P}(x_{nc})} 
+    #
+    # We can again denote 
+    #
+    # u_{nc} = \log(\mathbb{P}(x_{nc})
+    #
+    # In other words, l is a function of u, which again is a function of P
+    # Notice that we only have one path of dependence l -> u -> P, and since we
+    # do not have a multivariable function where the different variables are
+    # treated as independent, we use the total derivative. Hence, we get that
+    #
+    # \frac{dl}{d \mathbb{P}(x_{nc})} 
+    # = \frac{dl}{d u_{nc}} \frac{d u_{nc}}{d \mathbb{P}(x_{nc})} 
+    # 
+    # We know \frac{dl}{d u_{nc}} from the previous expression, and
+    # 
+    # \frac{d \log(\mathbb{P}(x_{nc})}{d \mathbb{P}(x_{nc})} 
+    # = \frac{1}{d \mathbb{P}(x_{nc})} 
+    #
+    # so
+    dl_d_probabilities = dl_d_log_probabilities * (1.0 / probabilities)
+
     # dl/d(counts_sum_inv) = dl/d(probs) * d(probs)/d(counts_sum_inv)
     # We have dl/d(probs) from above
     # Further, we have that
