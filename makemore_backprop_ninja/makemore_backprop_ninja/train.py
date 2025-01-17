@@ -336,6 +336,10 @@ def manual_backprop(
     # = \frac{1}{d \mathbb{P}(x_{nc})} 
     #
     # so
+    #
+    # \frac{dl}{d \mathbb{P}(x_{nc})} 
+    # = \frac{dl}{d \log(\mathbb{P}(x_{nc}))} * \frac{1}{d \mathbb{P}(x_{nc})} 
+    #
     dl_d_probabilities = dl_d_log_probabilities * (1.0 / probabilities)
 
     # dl/d(counts_sum_inv) = dl/d(probs) * d(probs)/d(counts_sum_inv)
