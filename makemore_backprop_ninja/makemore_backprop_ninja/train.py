@@ -342,15 +342,25 @@ def manual_backprop(
     #
     dl_d_probabilities = dl_d_log_probabilities * (1.0 / probabilities)
 
-    # dl/d(counts_sum_inv) = dl/d(probs) * d(probs)/d(counts_sum_inv)
-    # We have dl/d(probs) from above
-    # Further, we have that
-    # probs = counts * counts_sum_inv
-    # so
-    # d probs/ d counts_sum_inv = counts
-    # However, counts has dimension (N,C) and counts_sum_inv has dimension (N, 1)
-    # because we summed over the C dimension in the counts_sum variable
-    # Broadcasting rules
+    # In order to continue, we should inspect how we calculate the probabilities
+    #
+    # Firstly, we observe that
+    #
+    # \mathbb{P}(x_{nc}) 
+    # = \frac{ \exp(x_{nc} - \max_{C}(x_{nc}) ) }{ \sum_{C} \exp(x_{nc} - \max_{C}(x_{nc})) }
+    #
+    # as previously mentioned, we've chopped up the expression.
+    # In other words, we've defined
+    #
+    # m_{nc} = \max_{C}(x_{nc}) = \text{logits_maxes}
+    # o_{nc} = x_{nc} - \max_{C}(x_{nc}) = x_{nc} - m_{nc} = \text{normalized_logits}
+    # e_{nc} = \exp(x_{nc} - \max_{C}(x_{nc}) ) = \exp(o_{nc}) = \text{counts}
+    # s_{n} = \sum_{C} \exp(x_{nc} - \max_{C}(x_{nc})) = \sum_{C} e_{nc} = \text{counts_sum}
+    # i_{n} = \frac{1}{ \sum_{C} \exp(x_{nc} - \max_{C}(x_{nc})) } = \frac{1}{e_{n}} = \text{counts_sum_inv}
+    #
+    # so that
+    #
+    # \mathbb{P}(x_{nc}) = e_{nc} \cdot i_{n}
     # https://pytorch.org/docs/stable/notes/broadcasting.html
     # https://numpy.org/doc/stable/user/basics.broadcasting.html
     # tells us that count_sums_inv dimension 1 will be broadcasted
