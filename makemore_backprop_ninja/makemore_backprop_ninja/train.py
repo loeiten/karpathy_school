@@ -361,6 +361,15 @@ def manual_backprop(
     # so that
     #
     # \mathbb{P}(x_{nc}) = e_{nc} \cdot i_{n}
+    #
+    # We now observe that l has a dependency on P, which again has a dependency
+    # on i. I.e. the diagram is l -> P -> i, and no partial derivative is needed
+    #
+    # This means that
+    #
+    # \frac{d l(\mathbb{P}(i(x_{nc}))}{d i_{n}} 
+    # = \frac{d l(\mathbb{P}(i(x_{nc}))}{d \mathbb{P}(i(x_{nc}))} \frac{d \mathbb{P}(i(x_{nc}))}{d i_{n}} 
+    # = \frac{d l}{d \mathbb{P}} \frac{d \mathbb{P}}{d i_{n}} 
     # https://pytorch.org/docs/stable/notes/broadcasting.html
     # https://numpy.org/doc/stable/user/basics.broadcasting.html
     # tells us that count_sums_inv dimension 1 will be broadcasted
