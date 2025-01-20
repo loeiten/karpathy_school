@@ -370,6 +370,18 @@ def manual_backprop(
     # \frac{d l(\mathbb{P}(i(x_{nc}))}{d i_{n}} 
     # = \frac{d l(\mathbb{P}(i(x_{nc}))}{d \mathbb{P}(i(x_{nc}))} \frac{d \mathbb{P}(i(x_{nc}))}{d i_{n}} 
     # = \frac{d l}{d \mathbb{P}} \frac{d \mathbb{P}}{d i_{n}} 
+    #
+    # We have previously found \frac{dl}{d \mathbb{P}(x_{nc})}, and we only need
+    # to calculate \frac{d \mathbb{P}}{d i_{n}}, from above we see
+    #
+    # \frac{d \mathbb{P}}{d i_{n}} = 
+    # \frac{d (e_{nc} \cdot i_{n})}{d i_{n}} = e_{nc}
+    #
+    # However, counts (a.k.a e_{nc}) has dimension (N,C) and counts_sum_inv
+    # (a.k.a i_{n}) has dimension (N, 1).
+    # In other words we have an element-wise multiplication going on, where i_{n} 
+    # has been stretched (broadcasted) in the "classes" dimension.
+    # Standard broadcasting rules can be found at
     # https://pytorch.org/docs/stable/notes/broadcasting.html
     # https://numpy.org/doc/stable/user/basics.broadcasting.html
     # tells us that count_sums_inv dimension 1 will be broadcasted
