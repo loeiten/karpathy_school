@@ -384,26 +384,41 @@ def manual_backprop(
     # Standard broadcasting rules can be found at
     # https://pytorch.org/docs/stable/notes/broadcasting.html
     # https://numpy.org/doc/stable/user/basics.broadcasting.html
-    # tells us that count_sums_inv dimension 1 will be broadcasted
-    # With an example, lets probs : R^{2x2} and counts_sum_inv : R^{2x1}
-    # probs =
-    # [[a_00, a_01],
-    #  [a_10, a_11]]
-    # counts_sum_inv =
-    # [[b_00],
-    #  [b_10]]
-    # counts_sum_inv will be stretched in the direction of dimension 1 and become
-    # counts_sum_inv =
-    # [[b_00, b_00],
-    #  [b_10, b_10]]
-    # as the multiplication is element-wise, we get
-    # probs*counts_sum_inv =
-    # [[a_00*b_00, a_01*b_00],
-    #  [a_10*b_10, a_11*b_10]]
-    # Since counts_sum_inv is replicated we must accumulate the gradient
-    # (recall from micrograd when the same value was an input to several other
-    #  nodes)
-    # We will therefore sum the gradient over the columns
+    #
+    # If we use an example where probs : R^{2x2} and counts_sum_inv : R^{2x1}
+    # we have
+    #
+    # \mathbb{P}(x_{nc}) = e_{nc} \cdot i_{n}
+    # \text{counts} =
+    # \begin{bmatrix}
+    #   e_{00} & _{01} \\
+    #   e_{10} & _{11}
+    # \end{bmatrix}
+    #
+    # and
+    #
+    # \text{counts_sum_inv} =
+    # \begin{bmatrix}
+    #   i_{00} \\
+    #   i_{10}
+    # \end{bmatrix}
+    #
+    # which after broadcasting looks like
+    #
+    # \text{counts_sum_inv} =
+    # \begin{bmatrix}
+    #   i_{00} & i_{00} \\
+    #   i_{10} & i_{10}
+    # \end{bmatrix}
+    #
+    # the element-wise multiplication yields
+    #
+    # e_{nc} \times i_{n} =
+    # \begin{bmatrix}
+    #   e_{00} \cdot i_{00} & e_{01} \cdot i_{00} \\
+    #   e_{10} \cdot i_{10} & e_{11} \cdot i_{10}
+    # \end{bmatrix}
+    #
     dl_d_counts_sum_inv = (counts * dl_d_probabilities).sum(dim=1, keepdim=True)
     # counts appears twice
     # 1. probabilities = counts * counts_sum_inv
