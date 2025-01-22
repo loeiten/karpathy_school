@@ -356,7 +356,7 @@ def manual_backprop(
     # o_{nc} = x_{nc} - \max_{C}(x_{nc}) = x_{nc} - m_{nc} = \text{normalized_logits}
     # e_{nc} = \exp(x_{nc} - \max_{C}(x_{nc}) ) = \exp(o_{nc}) = \text{counts}
     # s_{n} = \sum_{C} \exp(x_{nc} - \max_{C}(x_{nc})) = \sum_{C} e_{nc} = \text{counts_sum}
-    # i_{n} = \frac{1}{ \sum_{C} \exp(x_{nc} - \max_{C}(x_{nc})) } = \frac{1}{e_{n}} = \text{counts_sum_inv}
+    # i_{n} = \frac{1}{ \sum_{C} \exp(x_{nc} - \max_{C}(x_{nc})) } = \frac{1}{s_{n}} = \text{counts_sum_inv}
     #
     # so that
     #
@@ -437,6 +437,32 @@ def manual_backprop(
     #
     # By combining this, we get
     dl_d_counts_sum_inv = (counts * dl_d_probabilities).sum(dim=1, keepdim=True)
+
+    # Let's now investigate how the final loss is changing when we change
+    # e_{nc} = \exp(x_{nc} - \max_{C}(x_{nc}) ) = \exp(o_{nc}) = \text{counts}
+    # From above, we have that 
+    #
+    # \mathbb{P}(x_{nc}) = e_{nc} \cdot i_{n}(e_{nc})
+    #
+    # So we need to calculate
+    #
+    # \frac{d l(e_{nc}, i_{n}(e_{nc}))}{d e_{nc}} 
+    #
+    # We can see that the dependency diagram is
+    #
+    #  e ----> l
+    #  |       ^
+    #  v       |
+    # i(e) ----.
+    #
+    # i.e. we must take the contribution of e and the indirect contribution of
+    # i(e) into account.
+    # This is where partial derivatives come into play:
+    # Imagine we are moving on a mountain.
+    # The height is given by h(x, y), and there is a road so that we can express
+    # y in terms of x, i.e. h(x, y(x))
+    #
+    #
     # counts appears twice
     # 1. probabilities = counts * counts_sum_inv
     # 2. counts_sum = counts.sum(1, keepsdim=True)
