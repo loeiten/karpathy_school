@@ -419,6 +419,23 @@ def manual_backprop(
     #   e_{10} \cdot i_{10} & e_{11} \cdot i_{10}
     # \end{bmatrix}
     #
+    # Since i_{n} has been replicated, it will have C contributions to the final
+    # loss. 
+    # To illustrate this we can use an example with three classes.
+    # If we consider batch n=0, we see that the contribution on the final loss
+    # becomes
+    #
+    #      .--> mul --> e_{00} --> ... --.
+    #     /                               \ 
+    # i_{0} --> mul --> e_{01} --> ... ----+-> l
+    #     \                               /  
+    #      .--> mul --> e_{02} --> ... --.
+    # 
+    # Intuitively, we see that if we change the value of i_{0} a bit, the value
+    # of l has three paths, and all these paths must be accounted for.
+    # We do this through summing the contributions.
+    #
+    # By combining this, we get
     dl_d_counts_sum_inv = (counts * dl_d_probabilities).sum(dim=1, keepdim=True)
     # counts appears twice
     # 1. probabilities = counts * counts_sum_inv
