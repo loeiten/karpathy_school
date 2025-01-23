@@ -460,33 +460,14 @@ def manual_backprop(
     # This is where partial derivatives come into play:
     # Imagine we are moving on a mountain.
     # The height is given by h(x, y), and there is a road so that we can express
-    # y in terms of x, i.e. h(x, y(x))
-    #
-    #
-    # counts appears twice
-    # 1. probabilities = counts * counts_sum_inv
-    # 2. counts_sum = counts.sum(1, keepsdim=True)
-    # We must therefore accumulate the gradients
-    # 1. dl/d(counts) = dl/d(probabilities) * d(probabilities)/d(counts)
-    #    dl/d(counts) = dl/d(probabilities) * counts_sum_inv
-    #    counts_sum_inv has dimension (N,1)
-    #    dl/d(probabilities) has dimension (N,C)
-    #    counts_sum_inv will therefore be stretched in the C dimension
-    # 2. dl/d(counts) = dl/d(counts_sum) * d(counts_sum)/d(counts)
-    # However, we don't know dl/d(counts_sum) yet, but it can be calculated
-    # Do let's calculate that first
-    # dl/d(counts_sum) = dl/d(counts_sum_inv) * d(counts_sum_inv)/d(counts_sum)
-    # Since d/dx (1/x) = -1/(x^2), we get
-    # dl/d(counts_sum) = dl/d(counts_sum_inv) * (-1/counts^2)
-    dl_d_counts_sum = dl_d_counts_sum_inv * (-counts_sum**(-2))
-    # Ok, we now have all we need to calculate dl/d(counts)
-    # Let's start with the point 1 above
-    # 1. dl/d(counts) = dl/d(probabilities) * counts_sum_inv
-    #    With broadcasting of counts_sum_inv
-    dl_d_counts = dl_d_probabilities * counts_sum_inv
-    # Let's continue with point 2
-    # Using the information above, we have
-    # dl/d(counts) = dl/d(counts_sum) * d(counts_sum)/d(counts)
+    # y in terms of x, i.e. h(x, y(x)).
+    # In this setup the partial derivative answers the question: How does the 
+    # height change if I only change x, and let y be unchanged
+    # The total derivative answers the question: How does the height change if I
+    # change x and at the same time update y(x).
+    # I.e.:
+    # Partial derivative: Do not follow the road
+    # Total derivative: Follow the road
     #
     # counts is of shape of (N, C)
     # =>
