@@ -469,11 +469,15 @@ def manual_backprop(
     # Partial derivative: Do not follow the road
     # Total derivative: Follow the road
     #
-    # counts is of shape of (N, C)
-    # =>
-    # dl/d(counts) is of shape of (N, C)
-    # and
-    # d(counts_sum)/d(counts) must also be of shape of (N, C)
+    # Using the chain rule we get
+    #
+    # \frac{d l(\mathbb{P}(e_{nc}, i_{n}(s_{n}(e_{nc})))}{d e_{nc}} =
+    # \frac{d l}{d \mathbb{P}} \frac{d \mathbb{P}}{d e_{nc}} =
+    # \frac{d l}{d \mathbb{P}} ( 
+    #   \frac{\partial \mathbb{P}}{\partial e_{nc}} + 
+    #   \frac{\partial \mathbb{P}}{\partial i_{n}}
+    #   \frac{d i_{n}}{d s_{n}} \frac{d s_{n}}{d e_{nc}}
+    # )
     #
     # Now we need to figure out d(counts_sum)/d(counts)
     # Consider a 2x3 matrix we have
