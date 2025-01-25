@@ -479,14 +479,14 @@ def manual_backprop(
     #   \frac{d i_{n}}{d s_{n}} \frac{d s_{n}}{d e_{nc}}
     # )
     #
-    # Now we need to figure out d(counts_sum)/d(counts)
-    # Consider a 2x3 matrix we have
-    # counts = 
-    # [[counts_00, counts_01, counts_02],
-    #  [counts_10, counts_11, counts_12]]
-    # counts_sum = 
-    # [[counts_00+counts_01+counts_02],
-    #  [counts_10+counts_11+counts_12]]
+    # We could have used this expression directly, however, it's more
+    # computationally efficient to compute the gradient of e_{nc} in terms of
+    # the gradients of s_{n}
+    # This is because
+    #
+    # \frac{d l(\mathbb{P}(i_{n}(s_{n}))}{d s_{n}} =
+    # \frac{d l}{d \mathbb{P}} \frac{d \mathbb{P}}{d s_{n}} =
+    # \frac{d l}{d \mathbb{P}} ( \frac{\partial \mathbb{P}}{\partial i_{n}} \frac{d i_{n}}{d s_{n}} )
     # i.e.
     # counts_sum_0 = counts_00+counts_01+counts_02
     # counts_sum_1 = counts_10+counts_11+counts_12
