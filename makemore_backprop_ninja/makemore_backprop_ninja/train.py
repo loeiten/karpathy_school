@@ -487,6 +487,13 @@ def manual_backprop(
     # \frac{d l(\mathbb{P}(i_{n}(s_{n}))}{d s_{n}} =
     # \frac{d l}{d \mathbb{P}} \frac{d \mathbb{P}}{d s_{n}} =
     # \frac{d l}{d \mathbb{P}} ( \frac{\partial \mathbb{P}}{\partial i_{n}} \frac{d i_{n}}{d s_{n}} )
+    #
+    # using this result, we get that
+    #
+    # \frac{d l(\mathbb{P}(e_{nc}, i_{n}(s_{n}(e_{nc})))}{d e_{nc}} =
+    # \frac{d l}{d \mathbb{P}} \frac{\partial \mathbb{P}}{\partial e_{nc}} + 
+    # \frac{d l}{d s_{n}} \frac{d s_{n}}{d e_{nc}}
+    #
     # i.e.
     # counts_sum_0 = counts_00+counts_01+counts_02
     # counts_sum_1 = counts_10+counts_11+counts_12
