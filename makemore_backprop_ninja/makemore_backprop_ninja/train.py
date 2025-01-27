@@ -494,6 +494,10 @@ def manual_backprop(
     # \frac{d l}{d \mathbb{P}} \frac{\partial \mathbb{P}}{\partial e_{nc}} + 
     # \frac{d l}{d s_{n}} \frac{d s_{n}}{d e_{nc}}
     #
+    # Calculating the individual components we get
+    #
+    # \frac{d l}{d \mathbb{P}} = dl_d_probabilities
+    #
     # i.e.
     # counts_sum_0 = counts_00+counts_01+counts_02
     # counts_sum_1 = counts_10+counts_11+counts_12
