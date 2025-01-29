@@ -501,6 +501,9 @@ def manual_backprop(
     # \frac{\partial \mathbb{P}}{\partial e_{nc}} =
     # \frac{\partial }{\partial e_{nc}} i_{n} e_{nc} = i_{n} = counts_sum_inv
     #
+    # \frac{\partial \mathbb{P}}{\partial i_{n}} =
+    # \frac{\partial }{\partial i_{n}} i_{n} e_{nc} = e_{nc} = counts
+    #
     # i.e.
     # counts_sum_0 = counts_00+counts_01+counts_02
     # counts_sum_1 = counts_10+counts_11+counts_12
