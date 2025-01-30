@@ -504,36 +504,19 @@ def manual_backprop(
     # \frac{\partial \mathbb{P}}{\partial i_{n}} =
     # \frac{\partial }{\partial i_{n}} i_{n} e_{nc} = e_{nc} = counts
     #
+    # \frac{d s_{n}}{d e_{nc}} = 
+    # \frac{d }{d e_{nc}} \sum_C e_{nc}
+    #
+    # If we write out this explicitly we get
+    #
+    # \frac{d }{d e_{00}} (e_{00} + e_{01} + \ldots e_{10} \ldots) = 1
+    # \frac{d }{d e_{01}} (e_{00} + e_{01} + \ldots e_{10} \ldots) = 1
+    # \ldots
+    # \frac{d }{d e_{10}} (e_{00} + e_{01} + \ldots e_{10} \ldots) = 1
+    #
     # i.e.
-    # counts_sum_0 = counts_00+counts_01+counts_02
-    # counts_sum_1 = counts_10+counts_11+counts_12
-    # We observe that counts_sum_i only depend on sum_j(counts_ij) 
-    # (that is the rows)
-    # In other words, d(counts_sum_i)/d(counts_ij) can be written
-    # d(counts_sum_0)/d(counts_00) = 1
-    # d(counts_sum_0)/d(counts_01) = 1
-    # d(counts_sum_0)/d(counts_02) = 1
-    # d(counts_sum_0)/d(counts_10) = 0
-    # d(counts_sum_0)/d(counts_11) = 0
-    # d(counts_sum_0)/d(counts_12) = 0
-    # d(counts_sum_1)/d(counts_00) = 0
-    # d(counts_sum_1)/d(counts_01) = 0
-    # d(counts_sum_1)/d(counts_02) = 0
-    # d(counts_sum_1)/d(counts_10) = 1
-    # d(counts_sum_1)/d(counts_11) = 1
-    # d(counts_sum_1)/d(counts_12) = 1
-    # so
-    # d(counts_sum)/d(counts) = 
-    # [[d(counts_sum_0)/d(counts_00) + d(counts_sum_1)/d(counts_00), 
-    #   d(counts_sum_0)/d(counts_01) + d(counts_sum_1)/d(counts_01), 
-    #   d(counts_sum_0)/d(counts_02) + d(counts_sum_1)/d(counts_02)],
-    #  [d(counts_sum_0)/d(counts_10) + d(counts_sum_1)/d(counts_10), 
-    #   d(counts_sum_0)/d(counts_11) + d(counts_sum_1)/d(counts_11), 
-    #   d(counts_sum_0)/d(counts_12) + d(counts_sum_1)/d(counts_12)]]]
-    # I.e. we just get a matrix of ones
-    # We must also remember to use += as we have two expressions using counts
-    # as described above
-    dl_d_counts += torch.ones_like(counts)*dl_d_counts_sum
+    # 
+    # \frac{d s_{n}}{d e_{nc}} = torch.ones_like(counts)
     # dl/d(normalized_logits) = dl/d(counts) * d(counts)/d(normalized_logits)
     # We know dl/d(counts) from above, and we have that
     # counts = exp(normalized_logits)
