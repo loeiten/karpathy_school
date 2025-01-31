@@ -517,6 +517,13 @@ def manual_backprop(
     # i.e.
     # 
     # \frac{d s_{n}}{d e_{nc}} = torch.ones_like(counts)
+    #
+    # We finally need to calculate the part of the derivative of l with respect
+    # to s_{n}
+    # We have that
+    #
+    # \frac{d i_{n}}{d s_{n}} = 
+    # \frac{d }{d s_{n}} \frac{1}{s_{n}} = - (\frac{1}{s_{n}})^2 = - counts_sum^(-2)
     # dl/d(normalized_logits) = dl/d(counts) * d(counts)/d(normalized_logits)
     # We know dl/d(counts) from above, and we have that
     # counts = exp(normalized_logits)
