@@ -524,6 +524,14 @@ def manual_backprop(
     #
     # \frac{d i_{n}}{d s_{n}} = 
     # \frac{d }{d s_{n}} \frac{1}{s_{n}} = - (\frac{1}{s_{n}})^2 = - counts_sum^(-2)
+    #
+    # and
+    #
+    # \frac{d l(\mathbb{P}(i_{n}(s_{n}))}{d s_{n}} =
+    # \frac{d l}{d \mathbb{P}} ( \frac{\partial \mathbb{P}}{\partial i_{n}} \frac{d i_{n}}{d s_{n}} ) =
+    # \frac{d l}{d i_{n}} \frac{d i_{n}}{d s_{n}} =
+    # dl_d_counts_sum_inv * (- counts_sum^(-2)) =
+    # dl_d_counts_sum
     # dl/d(normalized_logits) = dl/d(counts) * d(counts)/d(normalized_logits)
     # We know dl/d(counts) from above, and we have that
     # counts = exp(normalized_logits)
