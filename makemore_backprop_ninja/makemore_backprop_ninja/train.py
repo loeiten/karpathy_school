@@ -532,6 +532,11 @@ def manual_backprop(
     # \frac{d l}{d i_{n}} \frac{d i_{n}}{d s_{n}} =
     # dl_d_counts_sum_inv * (- counts_sum^(-2)) =
     # dl_d_counts_sum
+    #
+    # so
+    #
+    dl_d_counts_sum = dl_d_counts_sum_inv * (-counts_sum**(-2))
+
     # dl/d(normalized_logits) = dl/d(counts) * d(counts)/d(normalized_logits)
     # We know dl/d(counts) from above, and we have that
     # counts = exp(normalized_logits)
