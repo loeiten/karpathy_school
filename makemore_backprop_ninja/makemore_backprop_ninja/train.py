@@ -537,6 +537,14 @@ def manual_backprop(
     #
     dl_d_counts_sum = dl_d_counts_sum_inv * (-counts_sum**(-2))
 
+    # Using this, with the calculations of the components above we get that the
+    # calculation for
+    #
+    # \frac{d l(\mathbb{P}(e_{nc}, i_{n}(s_{n}(e_{nc})))}{d e_{nc}} 
+    #
+    # becomes
+    dl_d_counts = dl_d_probabilities * counts_sum_inv + dl_d_counts_sum*torch.ones_like(counts)
+
     # dl/d(normalized_logits) = dl/d(counts) * d(counts)/d(normalized_logits)
     # We know dl/d(counts) from above, and we have that
     # counts = exp(normalized_logits)
