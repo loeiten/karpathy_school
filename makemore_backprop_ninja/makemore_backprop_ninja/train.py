@@ -544,6 +544,7 @@ def manual_backprop(
     #
     # becomes
     dl_d_counts = dl_d_probabilities * counts_sum_inv + dl_d_counts_sum*torch.ones_like(counts)
+    # FIXME: YOU ARE HERE: Rewriting the expressions
 
     # dl/d(normalized_logits) = dl/d(counts) * d(counts)/d(normalized_logits)
     # We know dl/d(counts) from above, and we have that
@@ -608,7 +609,6 @@ def manual_backprop(
 
     # dl_d_logits = (dl_d_normalized_logits_clone + F.one_hot(logits.max(1).indices, num_classes=logits.shape[1]))*dl_d_logits_maxes
     dl_d_logits = torch.ones_like(logits)*dl_d_logits_maxes
-    # FIXME: YOU ARE HERE: NOT THE DIFFERENCE WITH THE CHAIN, IF MUL BOTH EQUAL TO ABOVE
     dl_d_logits = dl_d_normalized_logits_clone + (F.one_hot(logits.max(1).indices, num_classes=logits.shape[1]))*dl_d_logits_maxes
     # Calculate the derivatives of the second layer
     dl_d_h = torch.zeros_like(h)
