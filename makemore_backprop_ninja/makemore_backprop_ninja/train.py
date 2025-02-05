@@ -546,37 +546,68 @@ def manual_backprop(
     dl_d_counts = dl_d_probabilities * counts_sum_inv + dl_d_counts_sum*torch.ones_like(counts)
     # FIXME: YOU ARE HERE: Rewriting the expressions
 
-    # dl/d(normalized_logits) = dl/d(counts) * d(counts)/d(normalized_logits)
-    # We know dl/d(counts) from above, and we have that
-    # counts = exp(normalized_logits)
-    # d/dx exp(x) = exp(x)
-    # so
+    # Next, we can calculate the contribution on the final loss is changing when
+    # we change
+    #
+    # o_{nc} = x_{nc} - \max_{C}(x_{nc}) = o_{nc} = \text{normalized_logits}
+    #
+    # Recall that
+    #
+    # l -> l(u(\mathbb{P}(e(o(m)), i(s(e(o(m))))))).
+    #
+    # i.e. that there are two paths the loss can take from o_{nc}. Both
+    # dependencies of o_{nc} goes through e_{nc}. We already know about all
+    # the contributions on l of e_{nc} through the total derivative.
+    # Hence, we can simply write
+    # 
+    # \frac{d l(e_{nc}(o_{nc}))}{d o_{nc}} = \frac{d l}{d e} \frac{d e}{d o} 
+    #  
+    # Since
+    #
+    # \frac{d e}{d o} = \frac{d}{d o} \exp(o) = \exp(o) = e = \text{counts}
+    #
+    # we get
     dl_d_normalized_logits = dl_d_counts * counts
-    # dl/d(logits_maxes) 
-    # = dl/d(normalized_logits) * d(normalized_logits)/d(logits_maxes)
-    # We know dl/d(logits_maxes) from above and
-    # normalized_logits = logits - logits_maxes
-    # and
-    # d/dx (y-x) = -1
-    # However, logits_maxes have the shape (1, C), whilst normalized_logits has
-    # shape (N, C)
-    # Assuming a 2x2 matrix, we have due to broadcasting
+
+    # We can use the same logic to calculate the contribution coming from 
     #
-    # [[normalized_logits_00, normalized_logits_01],                                         
-    #  [normalized_logits_10, normalized_logits_11]]                                         
-    # =
-    # [[logits_00, logits_01],                                         
-    #  [logits_10, logits_11]]                                         
-    # -
-    # [[logits_maxes_0, logits_maxes_0],                                         
-    #  [logits_maxes_1, logits_maxes_0]]                                         
+    # m_{n} = \max_{C}(x_{nc}) = \text{logits_maxes}
     #
-    # We know that dl_d_logits_maxes must have the same shape as logits_maxes
-    # (1, N) and we see that there are several dependencies of the same index
-    # of logits_maxes, hence, we must accumulate the gradients
-    # NOTE: We clone to ensure there are no inplace operations
+    # as all paths on m goes through o, we get that
+    #
+    # \frac{d l(o_{nc}(m_{n}))}{d m_{n}} = \frac{d l}{d o_{nc}} \frac{d o_{nc}}{d m_{n}} 
+    #
+    # We have that
+    #
+    # \frac{d o_{nc}}{d m_{n}} = \frac{d }{d m_{n}} x_{nc} - m_{n} = -1
+    #
+    # However, notice that we are dealing with a broadcasting operation.
+    # If we write out the elements in the matrix explicitly, we get that
+    #
+    # \frac{d }{d m_{0}} (x_{0c} - m_{0}) = -1
+    # \frac{d }{d m_{1}} (x_{1c} - m_{1}) = -1
+    # \ldots
+    #
+    # However, as with the calculation of \frac{d l}{d i_{n}} (a.k.a dl_d_counts_sum_inv)
+    # we see that we will have a broadcasting when calculating x_{nc} - m_{n}
+    # i.e. using 3 classes again, we will have a graph looking like
+    #
+    #      .--> minus --> x_{00} --> ... --.
+    #     /                                 \ 
+    # m_{0} --> minus --> x_{01} --> ... ----+-> l
+    #     \                                 /  
+    #      .--> minus --> x_{02} --> ... --.
+    #
+    # which means that the contribution must be summed over the classes dimension
+    # hence we get
     dl_d_normalized_logits_clone = dl_d_normalized_logits.clone()
     dl_d_logits_maxes = -dl_d_normalized_logits.sum(1, keepdim=True)
+    # which is equivalent to
+    # dl_d_logits_maxes = (-1*dl_d_normalized_logits).sum(1, keepdim=True)
+    #
+    # NOTE: We will reuse the dl_d_normalized_logits, so we'll clone it to ensure 
+    #       that there are no inplace operations
+
     # dl/d(logits) = dl/d(logits_maxes) * d(logit_maxes)/d(logits)
     #
     # dl/d(logits) = dl/d(normalized_logits) * d(normalized_logits)/d(logits)
