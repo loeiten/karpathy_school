@@ -327,7 +327,7 @@ def manual_backprop(
     # do not have a multivariable function where the different variables are
     # treated as independent, we use the total derivative. Hence, we get that
     #
-    # \frac{dl}{d \mathbb{P}(x_{nc})} 
+    # \frac{dl(u_{nc}(\mathbb{P}))}{d \mathbb{P}(x_{nc})} 
     # = \frac{dl}{d u_{nc}} \frac{d u_{nc}}{d \mathbb{P}(x_{nc})} 
     # 
     # We know \frac{dl}{d u_{nc}} from the previous expression, and
@@ -338,7 +338,7 @@ def manual_backprop(
     # so
     #
     # \frac{dl}{d \mathbb{P}(x_{nc})} 
-    # = \frac{dl}{d \log(\mathbb{P}(x_{nc}))} * \frac{1}{d \mathbb{P}(x_{nc})} 
+    # = \frac{dl}{d \log(\mathbb{P}(x_{nc}))} \frac{1}{d \mathbb{P}(x_{nc})} 
     #
     dl_d_probabilities = dl_d_log_probabilities * (1.0 / probabilities)
 
