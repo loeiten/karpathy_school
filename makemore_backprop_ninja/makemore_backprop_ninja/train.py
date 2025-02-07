@@ -352,8 +352,8 @@ def manual_backprop(
     # as previously mentioned, we've chopped up the expression.
     # In other words, we've defined
     #
-    # m_{nc} = \max_{C}(x_{nc}) = \text{logits_maxes}
-    # o_{nc} = x_{nc} - \max_{C}(x_{nc}) = x_{nc} - m_{nc} = \text{normalized_logits}
+    # m_{n} = \max_{C}(x_{nc}) = \text{logits_maxes}
+    # o_{nc} = x_{nc} - \max_{C}(x_{nc}) = x_{nc} - m_{n} = \text{normalized_logits}
     # e_{nc} = \exp(x_{nc} - \max_{C}(x_{nc}) ) = \exp(o_{nc}) = \text{counts}
     # s_{n} = \sum_{C} \exp(x_{nc} - \max_{C}(x_{nc})) = \sum_{C} e_{nc} = \text{counts_sum}
     # i_{n} = \frac{1}{ \sum_{C} \exp(x_{nc} - \max_{C}(x_{nc})) } = \frac{1}{s_{n}} = \text{counts_sum_inv}
