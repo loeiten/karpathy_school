@@ -360,6 +360,10 @@ def manual_backprop(
     #
     # so that
     #
+    # l -> l(u(\mathbb{P}(e(o(x, m(x))), i(s(e(o(x, m(x)))))))),
+    #
+    # and
+    #
     # \mathbb{P}(x_{nc}) = e_{nc} \cdot i_{n}
     #
     # We now observe that l has a dependency on P, which again has a dependency
