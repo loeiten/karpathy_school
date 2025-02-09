@@ -371,8 +371,9 @@ def manual_backprop(
     #
     # This means that
     #
-    # \frac{d l(\mathbb{P}(i(x_{nc}))}{d i_{n}} 
-    # = \frac{d l(\mathbb{P}(i(x_{nc}))}{d \mathbb{P}(i(x_{nc}))} \frac{d \mathbb{P}(i(x_{nc}))}{d i_{n}} 
+    # \frac{d l(u_{nc}(\mathbb{P}(i(x_{nc})))}{d i_{n}} 
+    # = \frac{d l(u_{nc}(\mathbb{P}(i(x_{nc})))}{d \mathbb{P}(i(x_{nc}))} 
+    #   \frac{d \mathbb{P}(i(x_{nc}))}{d i_{n}} 
     # = \frac{d l}{d \mathbb{P}} \frac{d \mathbb{P}}{d i_{n}} 
     #
     # We have previously found \frac{dl}{d \mathbb{P}(x_{nc})}, and we only need
