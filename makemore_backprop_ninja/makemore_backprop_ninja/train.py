@@ -376,8 +376,14 @@ def manual_backprop(
     #   \frac{d \mathbb{P}(i(x_{nc}))}{d i_{n}} 
     # = \frac{d l}{d \mathbb{P}} \frac{d \mathbb{P}}{d i_{n}} 
     #
-    # We have previously found \frac{dl}{d \mathbb{P}(x_{nc})}, and we only need
-    # to calculate \frac{d \mathbb{P}}{d i_{n}}, from above we see
+    # Note that we do not need to go through \frac{d l}{d u} when using the chain
+    # rule as this is already baked into \frac{d l}{d \mathbb{P}}.
+    # So when we have the total derivative of \mathbb{P}, we've obtained it by
+    # "following every route" out of \mathbb{P}.
+    #
+    # Furthermore, we've have previously found \frac{dl}{d \mathbb{P}(x_{nc})}. 
+    # We only need to calculate \frac{d \mathbb{P}}{d i_{n}}, so from above we 
+    # get
     #
     # \frac{d \mathbb{P}}{d i_{n}} = 
     # \frac{d (e_{nc} \cdot i_{n})}{d i_{n}} = e_{nc}
