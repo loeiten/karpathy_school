@@ -386,7 +386,7 @@ def manual_backprop(
     # get
     #
     # \frac{d \mathbb{P}}{d i_{n}} = 
-    # \frac{d (e_{nc} \cdot i_{n})}{d i_{n}} = e_{nc}
+    # \frac{d }{d i_{n}}(e_{nc} \cdot i_{n}) = e_{nc}
     #
     # However, counts (a.k.a e_{nc}) has dimension (N,C) and counts_sum_inv
     # (a.k.a i_{n}) has dimension (N, 1).
