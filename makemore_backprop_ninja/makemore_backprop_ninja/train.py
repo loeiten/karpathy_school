@@ -402,8 +402,8 @@ def manual_backprop(
     # \mathbb{P}(x_{nc}) = e_{nc} \cdot i_{n}
     # \text{counts} =
     # \begin{bmatrix}
-    #   e_{00} & _{01} \\
-    #   e_{10} & _{11}
+    #   e_{00} & e_{01} \\
+    #   e_{10} & e_{11}
     # \end{bmatrix}
     #
     # and
