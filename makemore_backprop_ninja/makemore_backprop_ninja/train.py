@@ -450,7 +450,9 @@ def manual_backprop(
     dl_d_counts_sum_inv = (counts * dl_d_probabilities).sum(dim=1, keepdim=True)
 
     # Let's now investigate how the final loss is changing when we change
+    #
     # e_{nc} = \exp(x_{nc} - \max_{C}(x_{nc}) ) = \exp(o_{nc}) = \text{counts}
+    #
     # From above, we have that 
     #
     # \mathbb{P}(x_{nc}) = e_{nc} \cdot i_{n}(e_{nc})
