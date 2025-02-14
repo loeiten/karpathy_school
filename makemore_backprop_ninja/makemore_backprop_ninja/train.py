@@ -566,10 +566,12 @@ def manual_backprop(
     #
     # Recall that
     #
-    # l -> l(u(\mathbb{P}(e(o(m)), i(s(e(o(m))))))).
+    # l -> l(u(\mathbb{P}(e(o(x, m(x))), i(s(e(o(x, m(x)))))))),
     #
-    # i.e. that there are two paths the loss can take from o_{nc}. Both
-    # dependencies of o_{nc} goes through e_{nc}. We already know about all
+    # i.e. that there are two paths the calculation of the loss can take from 
+    # o_{nc}, one from the calculation of e(o(x, m(x))) and the other from
+    # i(s(e(o(x, m(x))))). 
+    # Both dependencies of o_{nc} goes through e_{nc}. We already know about all
     # the contributions on l of e_{nc} through the total derivative.
     # Hence, we can simply write
     # 
