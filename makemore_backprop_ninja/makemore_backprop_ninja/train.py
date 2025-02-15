@@ -623,6 +623,21 @@ def manual_backprop(
     # NOTE: We will reuse the dl_d_normalized_logits, so we'll clone it to ensure 
     #       that there are no inplace operations
 
+    # Finally we can calculate the contribution of the logits on the loss.
+    # Since
+    #
+    # l -> l(u(\mathbb{P}(e(o(x, m(x))), i(s(e(o(x, m(x)))))))),
+    #
+    # there are 4 paths x can take to the loss, namely x and m(x) from o, which
+    # appears twice in the calculation.
+    # Hence we need to calculate
+    #
+    # \frac{d l(o_{nc}(x_{nc} ,m_{n}(x_{nc})))}{d x_{nc}} = 
+    # \frac{d l}{d o_{nc}} \frac{d o_{nc}(x_{nc}, m_{n}(x_{nc}))}{d x_{nc}} = 
+    # \frac{d l}{d o_{nc}} (
+    #   \frac{\partial o_{nc}}{\partial x_{nc}} \frac{d x_{nc}}{d x_{nc}} +
+    #   \frac{\partial o_{nc}}{\partial m_{n}} \frac{d m_{n}}{d x_{nc}}) 
+    # )
     # dl/d(logits) = dl/d(logits_maxes) * d(logit_maxes)/d(logits)
     #
     # dl/d(logits) = dl/d(normalized_logits) * d(normalized_logits)/d(logits)
