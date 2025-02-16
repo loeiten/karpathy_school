@@ -638,6 +638,11 @@ def manual_backprop(
     #   \frac{\partial o_{nc}}{\partial x_{nc}} \frac{d x_{nc}}{d x_{nc}} +
     #   \frac{\partial o_{nc}}{\partial m_{n}} \frac{d m_{n}}{d x_{nc}}) 
     # )
+    #
+    # From before we have that
+    #
+    # \frac{d l}{d o_{nc}} = dl_d_normalized_logits
+    # \frac{\partial o_{nc}}{\partial m_{n}} = \frac{d o_{nc}}{d m_{n}} = dl_d_logits_maxes
     # dl/d(logits) = dl/d(logits_maxes) * d(logit_maxes)/d(logits)
     #
     # dl/d(logits) = dl/d(normalized_logits) * d(normalized_logits)/d(logits)
