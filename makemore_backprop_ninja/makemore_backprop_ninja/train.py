@@ -653,6 +653,34 @@ def manual_backprop(
     # \frac{\partial o_{nc}}{\partial x_{nc}}
     # = \frac{\partial }{\partial x_{nc}} = x_{nc} - \max_{C}(x_{nc}) = 1
     #
+    # Hence, we only have to calculate \frac{d m_{n}}{d x_{nc}}
+    # Assuming we have 2 classes and a batch size of 3, we get
+    #
+    # \frac{d m_{n}}{d x_{nc}} =
+    # \begin{bmatrix}
+    #   \frac{d }{d x_{00}} m_{n} & \frac{d }{d x_{01}} m_{n} \\
+    #   \frac{d }{d x_{10}} m_{n} & \frac{d }{d x_{11}} m_{n} \\
+    #   \frac{d }{d x_{20}} m_{n} & \frac{d }{d x_{21}} m_{n} 
+    # \end{bmatrix}
+    # =
+    # \begin{bmatrix}
+    #   \frac{d }{d x_{00}} \max(x_{00}, x_{01}) & \frac{d }{d x_{01}} \max(x_{00}, x_{01}) \\
+    #   \frac{d }{d x_{10}} \max(x_{10}, x_{11}) & \frac{d }{d x_{11}} \max(x_{10}, x_{11}) \\
+    #   \frac{d }{d x_{20}} \max(x_{20}, x_{21}) & \frac{d }{d x_{21}} \max(x_{20}, x_{21}) 
+    # \end{bmatrix}
+    #
+    # Using the definition of max, we see that
+    #
+    # \max(a,b) = {\begin{cases} a, &{\text{if }} a \geq b \\ b, &{\text{if }} a \leq b\end{cases}}
+    #
+    # so
+    #
+    # \frac{d }{d a} \max(a, b) = {\begin{cases} 1, &{\text{if }} a \geq b \\ 0, &{\text{if }} a \leq b\end{cases}}
+    #
+    # i.e. there will be only one 1 in a row, the rest will be 0.
+    # We can use one-hot encoding to make life easy for us.
+    # By combining everything, we get
+    #
     # dl/d(logits) = dl/d(logits_maxes) * d(logit_maxes)/d(logits)
     #
     # dl/d(logits) = dl/d(normalized_logits) * d(normalized_logits)/d(logits)
