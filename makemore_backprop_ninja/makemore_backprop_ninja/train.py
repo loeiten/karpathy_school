@@ -680,6 +680,8 @@ def manual_backprop(
     # i.e. there will be only one 1 in a row, the rest will be 0.
     # We can use one-hot encoding to make life easy for us.
     # By combining everything, we get
+    dl_d_logits = dl_d_normalized_logits_clone + (F.one_hot(logits.max(1).indices, num_classes=logits.shape[1]))*dl_d_logits_maxes
+
     #
     # dl/d(logits) = dl/d(logits_maxes) * d(logit_maxes)/d(logits)
     #
