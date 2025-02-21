@@ -557,7 +557,6 @@ def manual_backprop(
     #
     # becomes
     dl_d_counts = dl_d_probabilities * counts_sum_inv + dl_d_counts_sum*torch.ones_like(counts)
-    # FIXME: YOU ARE HERE: Rewriting the expressions
 
     # Next, we can calculate the contribution on the final loss is changing when
     # we change
