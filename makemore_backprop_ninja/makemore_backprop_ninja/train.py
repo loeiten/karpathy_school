@@ -269,7 +269,7 @@ def manual_backprop(
     #
     # l = - \frac{1}{N} \sum_{n=1}^{N} \sum_{c=1}^{C} y_{nc} \log(\mathbb{P}(x_{nc}))
     #
-    # Notice that there will be one prediction per element, i.e. x = x(n,c) 
+    # Notice that there will be one prediction per sample per class, i.e. x = x(n,c) 
     # where n is a specific batch and c a specific class
     # We are interested in understanding how each of the elements in the N x C
     # matrix is contributing to the loss.
