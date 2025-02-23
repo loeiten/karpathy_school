@@ -279,27 +279,40 @@ def manual_backprop(
     # To make the calculation simple for ourselves we've chopped the expression,
     # so that we don't need to take the derivative of x_{nc} directly
     # Instead, we will take the derivative w.r.t to the immediate variable
+    #
     # \log(\mathbb{P}(x_{nc}))
     # 
     # Let us store the total derivative of \log(\mathbb{P}(x_{nc})) in a tensor
-    # T. I.e. for each element we want to calculate
+    # T. 
+    # I.e. for each element we want to calculate
     #
-    # T_{nc} = \frac{dl}{d\log(\mathbb{P}(x_{nc}))}
+    # T_{ij} = \frac{dl}{d\log(\mathbb{P}(x_{ij}))}
     #
-    # Notice that there will only be one surviving term per element as
-    #
-    # \frac{\partial \log(\mathbb{P}(x_{ij})}{\partial \log(\mathbb{P}(x_{kl})} 
-    # = \delta_ij \delta_kl
-    #
-    # If we denote 
-    #
+    # Let's denote 
+    # 
     # u_{nc} =\log(\mathbb{P}(x_{nc})
     #
-    # We notice that we only have an explicit dependency on u_{nc} in l, hence
+    # Notice that l depends on every u, i.e.
     #
-    # \frac{dl}{d\log(\mathbb{P}(x_{nc}))} = \frac{dl}{d u_{nc}} 
+    # l : l(u_{00}, u_{01}, ..., u_{10}, u_{11}, ... u_{nc})
+    # 
+    # By using the definition of the differential of multivariate calculus we
+    # have that
     #
-    # where
+    # \frac{d l}{d u_{ij}}  
+    # = \frac{\partial l}{\partial u_{00}} \frac{d u_{00}}{d u_{ij}} 
+    # + \frac{\partial l}{\partial u_{01}} \frac{d u_{01}}{d u_{ij}} 
+    # + \ldots
+    # + \frac{\partial l}{\partial u_{10}} \frac{d u_{10}}{d u_{ij}} 
+    # + \ldots
+    # + \frac{\partial l}{\partial u_{nc}} \frac{d u_{nc}}{d u_{ij}} 
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial u_{nc}} \frac{d u_{nc}}{d u_{ij}} 
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial u_{nc}} \delta_{ni}\delta_{cj}
+    # = \frac{\partial l}{\partial u_{ij}}
+    #
+    # where \delta_{ab} is the Kronecker delta.
+    #
+    # By plugging in the expression for l, we get that
     #
     # \frac{dl}{d u_{nc}} = - \frac{1}{N} y_{nc}
     #
