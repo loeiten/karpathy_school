@@ -299,13 +299,18 @@ def manual_backprop(
     # By using the definition of the differential of multivariate calculus we
     # have that
     #
+    # d l
+    # = \frac{\partial l}{\partial u_{00}} d u_{00}
+    # + \frac{\partial l}{\partial u_{01}} d u_{01}
+    # + \ldots
+    # + \frac{\partial l}{\partial u_{10}} d u_{10}
+    # + \ldots
+    # + \frac{\partial l}{\partial u_{nc}} d u_{nc}
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial u_{nc}} d u_{nc}
+    #
+    # so
+    #
     # \frac{d l}{d u_{ij}}  
-    # = \frac{\partial l}{\partial u_{00}} \frac{d u_{00}}{d u_{ij}} 
-    # + \frac{\partial l}{\partial u_{01}} \frac{d u_{01}}{d u_{ij}} 
-    # + \ldots
-    # + \frac{\partial l}{\partial u_{10}} \frac{d u_{10}}{d u_{ij}} 
-    # + \ldots
-    # + \frac{\partial l}{\partial u_{nc}} \frac{d u_{nc}}{d u_{ij}} 
     # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial u_{nc}} \frac{d u_{nc}}{d u_{ij}} 
     # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial u_{nc}} \delta_{ni}\delta_{cj}
     # = \frac{\partial l}{\partial u_{ij}}
@@ -315,9 +320,6 @@ def manual_backprop(
     # By plugging in the expression for l, we get that
     #
     # \frac{dl}{d u_{nc}} = - \frac{1}{N} y_{nc}
-    #
-    # where the double sums have disappeared due to \delta_ij \delta_kl
-    # described above
     #
     # Finally, as y_{nc} is 1 only once per row, we get 
     dl_d_log_probabilities = torch.zeros_like(log_probabilities)
