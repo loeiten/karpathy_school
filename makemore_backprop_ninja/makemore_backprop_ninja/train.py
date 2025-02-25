@@ -331,30 +331,68 @@ def manual_backprop(
 
     # Next, we will find the dependency on the loss from the probabilities, i.e.
     #
-    # \frac{dl}{d \mathbb{P}(x_{nc})} 
+    # \frac{dl}{d \mathbb{P}(x_{ij})} 
     #
     # We can again denote 
     #
     # u_{nc} = \log(\mathbb{P}(x_{nc})
     #
     # In other words, l is a function of u, which again is a function of P
-    # Notice that we only have one path of dependence l -> u -> P, and since we
-    # do not have a multivariable function where the different variables are
-    # treated as independent, we use the total derivative. Hence, we get that
+    # Notice that we only have one path of dependence l -> u -> P for each
+    # element n,c
     #
-    # \frac{dl(u_{nc}(\mathbb{P}))}{d \mathbb{P}(x_{nc})} 
-    # = \frac{dl}{d u_{nc}} \frac{d u_{nc}}{d \mathbb{P}(x_{nc})} 
-    # 
-    # We know \frac{dl}{d u_{nc}} from the previous expression, and
-    # 
-    # \frac{d \log(\mathbb{P}(x_{nc})}{d \mathbb{P}(x_{nc})} 
-    # = \frac{1}{d \mathbb{P}(x_{nc})} 
+    # Using the differential we get that
+    #
+    # d l  
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial u_{nc}} d u_{nc}
+    #
+    # We can expand d u_{nc} in the basis of \mathbb{P}_{ij}
+    #
+    # d u_{nc}  
+    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{\partial u_{nc}}{\partial \mathbb{P}_{ij}} d \mathbb{P}_{ij}
+    #
+    # Since u_{nc} only depends on \mathbb{P}_{ij} and is zero for all other
+    # elements, we get that
+    #
+    # \frac{\partial u_{nc}}{\partial \mathbb{P}_{ij}} 
+    # = \frac{d u_{nc}}{d \mathbb{P}_{ij}} \delta_{ni}\delta_{cj}
+    #
+    # I.e. the partial derivative will be the same as the total derivative
+    # Plugging this into the expression above, we get that
+    #
+    # d u_{nc} 
+    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{d u_{nc}}{d \mathbb{P}_{nc}} \delta_{ni}\delta_{cj} d \mathbb{P}_{ij}
+    # = \frac{d u_{nc}}{d \mathbb{P}_{nc}} d \mathbb{P}_{nc}
+    #
+    # Plugging this into the original expression gives
+    #
+    # d l  
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial u_{nc}} 
+    #   \frac{d u_{nc}}{d \mathbb{P}_{nc}} d \mathbb{P}_{nc}
+    #
+    # So 
+    #
+    # \frac{dl}{d \mathbb{P}(x_{ij})} 
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial u_{nc}} 
+    #   \frac{d u_{nc}}{d \mathbb{P}_{nc}} \frac{d \mathbb{P}_{nc}}{d \mathbb{P}_{ij}} 
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial u_{nc}} 
+    #   \frac{d u_{nc}}{d \mathbb{P}_{nc}} \delta_{ni}\delta_{cj}
+    #
+    # This gives
+    #
+    # \frac{dl}{d \mathbb{P}(x_{nc})} 
+    # = \frac{\partial l}{\partial u_{nc}} \frac{d u_{nc}}{d \mathbb{P}_{nc}} 
+    #
+    # We have that
+    #
+    # \frac{d u_{nc}}{d \mathbb{P}_{nc}} 
+    # = \frac{d \log(\mathbb{P}(x_{nc}))}{d \mathbb{P}(x_{nc})} 
+    # = \frac{1}{d \mathbb{P}(x_{nc}))} 
     #
     # so
     #
     # \frac{dl}{d \mathbb{P}(x_{nc})} 
-    # = \frac{dl}{d \log(\mathbb{P}(x_{nc}))} \frac{1}{d \mathbb{P}(x_{nc})} 
-    #
+    # = \frac{\partial l}{\partial u_{nc}} \frac{1}{d \mathbb{P}(x_{nc}))} 
     dl_d_probabilities = dl_d_log_probabilities * (1.0 / probabilities)
 
     # In order to continue, we should inspect how we calculate the probabilities
