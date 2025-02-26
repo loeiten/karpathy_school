@@ -311,8 +311,10 @@ def manual_backprop(
     # so
     #
     # \frac{d l}{d u_{ij}}  
-    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial u_{nc}} \frac{d u_{nc}}{d u_{ij}} 
-    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial u_{nc}} \delta_{ni}\delta_{cj}
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial u_{nc}} 
+    #   \frac{d u_{nc}}{d u_{ij}} 
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial u_{nc}} 
+    #   \delta_{ni}\delta_{cj}
     # = \frac{\partial l}{\partial u_{ij}}
     #
     # where \delta_{ab} is the Kronecker delta.
