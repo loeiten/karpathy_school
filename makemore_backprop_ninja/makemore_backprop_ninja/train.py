@@ -351,7 +351,8 @@ def manual_backprop(
     # We can expand d u_{nc} in the basis of \mathbb{P}_{ij}
     #
     # d u_{nc}  
-    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{\partial u_{nc}}{\partial \mathbb{P}_{ij}} d \mathbb{P}_{ij}
+    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{\partial u_{nc}}{\partial 
+    #   \mathbb{P}_{ij}} d \mathbb{P}_{ij}
     #
     # Since u_{nc} only depends on \mathbb{P}_{ij} and is zero for all other
     # elements, we get that
