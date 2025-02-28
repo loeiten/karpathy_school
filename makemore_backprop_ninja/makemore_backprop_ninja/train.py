@@ -360,11 +360,13 @@ def manual_backprop(
     # \frac{\partial u_{nc}}{\partial \mathbb{P}_{ij}} 
     # = \frac{d u_{nc}}{d \mathbb{P}_{ij}} \delta_{ni}\delta_{cj}
     #
-    # I.e. the partial derivative will be the same as the total derivative
+    # I.e. the partial derivative will be the same as the total derivative as 
+    # all the other variables will be zero when taking the total derivate.
     # Plugging this into the expression above, we get that
     #
     # d u_{nc} 
-    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{d u_{nc}}{d \mathbb{P}_{nc}} \delta_{ni}\delta_{cj} d \mathbb{P}_{ij}
+    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{d u_{nc}}{d \mathbb{P}_{nc}} 
+    #   \delta_{ni}\delta_{cj} d \mathbb{P}_{ij}
     # = \frac{d u_{nc}}{d \mathbb{P}_{nc}} d \mathbb{P}_{nc}
     #
     # Plugging this into the original expression gives
@@ -377,7 +379,8 @@ def manual_backprop(
     #
     # \frac{dl}{d \mathbb{P}(x_{ij})} 
     # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial u_{nc}} 
-    #   \frac{d u_{nc}}{d \mathbb{P}_{nc}} \frac{d \mathbb{P}_{nc}}{d \mathbb{P}_{ij}} 
+    #   \frac{d u_{nc}}{d \mathbb{P}_{nc}} 
+    #   \frac{d \mathbb{P}_{nc}}{d \mathbb{P}_{ij}} 
     # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial u_{nc}} 
     #   \frac{d u_{nc}}{d \mathbb{P}_{nc}} \delta_{ni}\delta_{cj}
     #
@@ -403,16 +406,23 @@ def manual_backprop(
     # Firstly, we observe that
     #
     # \mathbb{P}(x_{nc}) 
-    # = \frac{ \exp(x_{nc} - \max_{C}(x_{nc}) ) }{ \sum_{C} \exp(x_{nc} - \max_{C}(x_{nc})) }
+    # = \frac{ 
+    #     \exp(x_{nc} - \max_{C}(x_{nc}) ) }{ 
+    #     \sum_{C} \exp(x_{nc} - \max_{C}(x_{nc})) }
     #
     # as previously mentioned, we've chopped up the expression.
     # In other words, we've defined
     #
-    # m_{n} = \max_{C}(x_{nc}) = \text{logits_maxes}
-    # o_{nc} = x_{nc} - \max_{C}(x_{nc}) = x_{nc} - m_{n} = \text{normalized_logits}
-    # e_{nc} = \exp(x_{nc} - \max_{C}(x_{nc}) ) = \exp(o_{nc}) = \text{counts}
-    # s_{n} = \sum_{C} \exp(x_{nc} - \max_{C}(x_{nc})) = \sum_{C} e_{nc} = \text{counts_sum}
-    # i_{n} = \frac{1}{ \sum_{C} \exp(x_{nc} - \max_{C}(x_{nc})) } = \frac{1}{s_{n}} = \text{counts_sum_inv}
+    # m_{n} = \max_{C}(x_{nc}) 
+    #       = \text{logits_maxes}
+    # o_{nc} = x_{nc} - \max_{C}(x_{nc}) = x_{nc} - m_{n} 
+    #        = \text{normalized_logits}
+    # e_{nc} = \exp(x_{nc} - \max_{C}(x_{nc}) ) = \exp(o_{nc}) 
+    #        = \text{counts}
+    # s_{n} = \sum_{C} \exp(x_{nc} - \max_{C}(x_{nc})) = \sum_{C} e_{nc} 
+    #       = \text{counts_sum}
+    # i_{n} = \frac{1}{ \sum_{C} \exp(x_{nc} - \max_{C}(x_{nc})) } = \frac{1}{s_{n}} 
+    #       = \text{counts_sum_inv}
     #
     # so that
     #
