@@ -433,14 +433,36 @@ def manual_backprop(
     # \mathbb{P}(x_{nc}) = e_{nc} \cdot i_{n}
     #
     # We now observe that l has a dependency on P, which again has a dependency
-    # on i. I.e. the diagram is l -> P -> i, and no partial derivative is needed
+    # on i. 
+    # I.e. the diagram is l -> P -> i.
+    # We have that
     #
-    # This means that
+    # dl
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    #   d \mathbb{P}_{nc}
     #
-    # \frac{d l(u_{nc}(\mathbb{P}(i(x_{nc})))}{d i_{n}} 
-    # = \frac{d l(u_{nc}(\mathbb{P}(i(x_{nc})))}{d \mathbb{P}(i(x_{nc}))} 
-    #   \frac{d \mathbb{P}(i(x_{nc}))}{d i_{n}} 
-    # = \frac{d l}{d \mathbb{P}} \frac{d \mathbb{P}}{d i_{n}} 
+    # Where
+    #
+    # d \mathbb{P}_{nc} (e_{nc}, i_{n}) 
+    # = \sum_{j=0}^{N} \sum_{k=0}^{N} 
+    #   \frac{\partial \mathbb{P}_{nc}}{\partial e_{jk}} d e_{jk}
+    #   +
+    #   \sum_{j=0}^{N} 
+    #   \frac{\partial \mathbb{P}_{nc}}{\partial i_{j}} d i_{j}
+    #
+    # Again since an arbitrary element \mathbb{P}_{nc}} depends only on the same
+    # elements in e_{nc} and i_{nc}, we can write this as
+    #
+    # d \mathbb{P}_{nc} (e_{nc}, i_{n}) 
+    # = \sum_{j=0}^{N} \sum_{k=0}^{N} 
+    #   \frac{\partial \mathbb{P}_{nc}}{\partial e_{jk}} 
+    #   \delta_{nj} \delta_{ck} d e_{jk}
+    #   +
+    #   \sum_{j=0}^{N} 
+    #   \frac{d \mathbb{P}_{nc}}{d i_{j}} \delta_{nj} d i_{j}
+    # = \frac{\partial \mathbb{P}_{nc}}{\partial e_{nc}} d e_{nc}
+    #   +
+    #   \frac{d \mathbb{P}_{nc}}{d i_{n}} d i_{n}
     #
     # Note that we do not need to go through \frac{d l}{d u} when using the chain
     # rule as this is already baked into \frac{d l}{d \mathbb{P}}.
