@@ -464,10 +464,20 @@ def manual_backprop(
     #   +
     #   \frac{d \mathbb{P}_{nc}}{d i_{n}} d i_{n}
     #
-    # Note that we do not need to go through \frac{d l}{d u} when using the chain
-    # rule as this is already baked into \frac{d l}{d \mathbb{P}}.
-    # So when we have the total derivative of \mathbb{P}, we've obtained it by
-    # "following every route" out of \mathbb{P}.
+    # Inserting this into the equation above, we get
+    #
+    # dl
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    #   (\frac{\partial \mathbb{P}_{nc}}{\partial e_{nc}} d e_{nc}
+    #   +
+    #   \frac{d \mathbb{P}_{nc}}{d i_{n}} d i_{n})
+    #  
+    # As a specific i_{k} is independent off all other i_{l}, and because e_{jk}
+    # does not depend on any i_{l}, we get that
+    #
+    # \frac{dl}{d i_{n}} 
+    # = \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    #   \frac{d \mathbb{P}_{nc}}{d i_{n}}
     #
     # Furthermore, we've have previously found \frac{dl}{d \mathbb{P}(x_{nc})}. 
     # We only need to calculate \frac{d \mathbb{P}}{d i_{n}}, so from above we 
