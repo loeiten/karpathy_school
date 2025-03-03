@@ -479,12 +479,16 @@ def manual_backprop(
     # = \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}} 
     #   \frac{d \mathbb{P}_{nc}}{d i_{n}}
     #
-    # Furthermore, we've have previously found \frac{dl}{d \mathbb{P}(x_{nc})}. 
-    # We only need to calculate \frac{d \mathbb{P}}{d i_{n}}, so from above we 
-    # get
+    # Furthermore, we have that
     #
-    # \frac{d \mathbb{P}}{d i_{n}} = 
-    # \frac{d }{d i_{n}}(e_{nc} \cdot i_{n}) = e_{nc}
+    # \frac{d \mathbb{P}_{nc}}{d i_{n}}
+    # = \frac{d }{d i_{n}}(e_{nc} \cdot i_{n}) = e_{nc}
+    #
+    # So
+    #
+    # \frac{dl}{d i_{n}} 
+    # = \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}} e_{nc}
+    dl_d_counts_sum_inv = (dl_d_probabilities * counts).sum(dim=1, keepdim=True)
     #
     # However, counts (a.k.a e_{nc}) has dimension (N,C) and counts_sum_inv
     # (a.k.a i_{n}) has dimension (N, 1).
