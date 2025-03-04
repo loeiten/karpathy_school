@@ -464,6 +464,11 @@ def manual_backprop(
     #   +
     #   \frac{d \mathbb{P}_{nc}}{d i_{n}} d i_{n}
     #
+    # Notice that we have kept the partial derivatives with respect to e_{nc} as
+    # \mathbb{P}_{nc} have indirect dependencies of e_{nc} through i_{n} and
+    # s_{n}.
+    # I.e. in this case the partial and total derivative will not be the same
+    #
     # Inserting this into the equation above, we get
     #
     # dl
