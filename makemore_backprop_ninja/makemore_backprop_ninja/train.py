@@ -494,8 +494,17 @@ def manual_backprop(
     # \frac{dl}{d i_{n}} 
     # = \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}} e_{nc}
     dl_d_counts_sum_inv = (dl_d_probabilities * counts).sum(dim=1, keepdim=True)
+    # Note how we in the previous derivation found \frac{dl}{d \mathbb{P}(x_{nc})} 
+    # instead of \frac{\partial l}{\partial \mathbb{P}_{nc}}.
+    # However, as \mathbb{P}_{nc} is a direct input function to l, there is no
+    # difference between the total and the partial derivative.
+    # Also, we do not need to go through \frac{d l}{d u_{nc}} when using the chain
+    # rule as this is already baked into \frac{d l}{d \mathbb{P}_{nc}}.
+    # So when we have the total derivative of \mathbb{P}, we've obtained it by
+    # "following every route" out of \mathbb{P}. 
     #
-    # However, counts (a.k.a e_{nc}) has dimension (N,C) and counts_sum_inv
+    # There is also a more intuitive explanation of the sum:
+    # counts (a.k.a e_{nc}) has dimension (N,C) and counts_sum_inv
     # (a.k.a i_{n}) has dimension (N, 1).
     # In other words we have an element-wise multiplication going on, where i_{n} 
     # has been stretched (broadcasted) in the "classes" dimension.
