@@ -561,9 +561,6 @@ def manual_backprop(
     # Intuitively, we see that if we change the value of i_{0} a bit, the value
     # of l has three paths, and all these paths must be accounted for.
     # We do this through summing the contributions.
-    #
-    # By combining this, we get
-    dl_d_counts_sum_inv = (counts * dl_d_probabilities).sum(dim=1, keepdim=True)
 
     # Let's now investigate how the final loss is changing when we change
     #
