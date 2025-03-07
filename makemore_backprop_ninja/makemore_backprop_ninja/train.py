@@ -564,6 +564,50 @@ def manual_backprop(
 
     # Let's now investigate how the final loss is changing when we change
     #
+    # s_{n} = \sum_{C} \exp(x_{nc} - \max_{C}(x_{nc})) = \text{counts_sum}
+    #
+    # We have that 
+    #
+    # i_{n} = \frac{1}{s_{n}}
+    #
+    # Using the differentials, we can start from the point of previous 
+    # derivation, where we found that
+    #
+    # dl
+    # = \sum_{n=0}^{N} \frac{\partial l}{\partial i_{n}} d i_{n}
+    #
+    # We can now expand the basis d i_{n} in terms of s_{n}.
+    # We find that
+    #
+    # d i_{n} 
+    # = \sum_{k=0}^{N} \frac{\partial i_{n}}{\partial s_{k}} d s_{k}  
+    # = \sum_{k=0}^{N} \frac{d i_{n}}{d s_{k}} \delta_{nk} d s_{k}  
+    # = \frac{d i_{n}}{d s_{n}} d s_{n}  
+    #
+    # where we have used that i_{l} only depend on s_{l}.
+    # Plugging this into the equation above, we get
+    #
+    # dl
+    # = \sum_{n=0}^{N} \frac{\partial l}{\partial i_{n}} 
+    #   \frac{d i_{n}}{d s_{n}} d s_{n})
+    #
+    # where
+    #
+    # \frac{d i_{n}}{d s_{n}} 
+    # = \frac{d }{d s_{n}} \frac{1}{s_{n}} 
+    # = - (\frac{1}{s_{n}})^2 
+    # = - counts_sum^(-2) 
+    #
+    # plugging this into the above expression yields
+    #
+    # dl
+    # = - \sum_{n=0}^{N} \frac{\partial l}{\partial i_{n}} \frac{1}{s_{n}^2} 
+    #   d s_{n}
+    #
+    # As s_{n} has no other dependency on s_{i}, we get that
+    #
+    # \frac{dl}{d s_{n}} = - \frac{\partial l}{\partial i_{n}} \frac{1}{s_{n}^2} 
+    #
     # e_{nc} = \exp(x_{nc} - \max_{C}(x_{nc}) ) = \exp(o_{nc}) = \text{counts}
     #
     # From above, we have that 
