@@ -607,6 +607,7 @@ def manual_backprop(
     # As s_{n} has no other dependency on s_{i}, we get that
     #
     # \frac{dl}{d s_{n}} = - \frac{\partial l}{\partial i_{n}} \frac{1}{s_{n}^2} 
+    dl_d_counts_sum = -dl_d_counts_sum_inv * (counts_sum**(-2))
     #
     # e_{nc} = \exp(x_{nc} - \max_{C}(x_{nc}) ) = \exp(o_{nc}) = \text{counts}
     #
