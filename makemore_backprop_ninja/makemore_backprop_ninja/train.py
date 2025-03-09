@@ -608,26 +608,29 @@ def manual_backprop(
     #
     # \frac{dl}{d s_{n}} = - \frac{\partial l}{\partial i_{n}} \frac{1}{s_{n}^2} 
     dl_d_counts_sum = -dl_d_counts_sum_inv * (counts_sum**(-2))
+
+    # Next, we can use what we've just found in order to investigate how the 
+    # final loss is changing when we change 
     #
     # e_{nc} = \exp(x_{nc} - \max_{C}(x_{nc}) ) = \exp(o_{nc}) = \text{counts}
     #
-    # From above, we have that 
+    # From above, we know that 
     #
-    # \mathbb{P}(x_{nc}) = e_{nc} \cdot i_{n}(e_{nc})
+    # \mathbb{P}(x_{nc}) = e_{nc} \cdot i_{n}(s_{n}(e_{nc}))
     #
     # So we need to calculate
     #
-    # \frac{d l(e_{nc}, i_{n}(e_{nc}))}{d e_{nc}} 
+    # \frac{d l(e_{nc}, i_{n}(s_{n}(e_{nc})))}{d e_{nc}} 
     #
     # We can see that the dependency diagram is
     #
-    #  e ----> l
-    #  |       ^
-    #  v       |
-    # i(e) ----.
+    #  e -------> l
+    #  |          ^
+    #  v          |
+    # i(s) ----> s(e)
     #
     # i.e. we must take the contribution of e and the indirect contribution of
-    # i(e) into account.
+    # i(s(e)) into account.
     # This is where partial derivatives come into play:
     # Imagine we are moving on a mountain.
     # The height is given by h(x, y), and there is a road so that we can express
