@@ -635,58 +635,72 @@ def manual_backprop(
     # Imagine we are moving on a mountain.
     # The height is given by h(x, y), and there is a road so that we can express
     # y in terms of x, i.e. h(x, y(x)).
-    # In this setup the partial derivative answers the question: How does the 
-    # height change if I only change x, and let y be unchanged
-    # The total derivative answers the question: How does the height change if I
-    # change x and at the same time update y(x).
+    # In this setup the partial derivative answers the question: 
+    # How does the height change if I only change x, and let y be unchanged
+    # The total derivative answers the question: 
+    # How does the height change if I change x and at the same time update y(x).
     # I.e.:
     # Partial derivative: Do not follow the road
     # Total derivative: Follow the road
     #
-    # Using the chain rule we get
+    # Using the differentials, we again start from the point of previous 
+    # derivation, where we found that
     #
-    # \frac{d l(\mathbb{P}(e_{nc}, i_{n}(s_{n}(e_{nc})))}{d e_{nc}} =
-    # \frac{d l}{d \mathbb{P}} \frac{d \mathbb{P}}{d e_{nc}} =
-    # \frac{d l}{d \mathbb{P}} ( 
-    #   \frac{\partial \mathbb{P}}{\partial e_{nc}} + 
-    #   \frac{\partial \mathbb{P}}{\partial i_{n}}
-    #   \frac{d i_{n}}{d s_{n}} \frac{d s_{n}}{d e_{nc}}
-    # )
+    # dl
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    #   (\frac{\partial \mathbb{P}_{nc}}{\partial e_{nc}} d e_{nc}
+    #   +
+    #   \frac{d \mathbb{P}_{nc}}{d i_{n}} d i_{n})
     #
-    # We could have used this expression directly, however, it's more
-    # computationally efficient to compute the gradient of e_{nc} in terms of
-    # the gradients of s_{n}
-    # This is because
+    # We can plug in what we found in the derivation of \frac{dl}{d s_{n}}
+    # and see that
     #
-    # \frac{d l(\mathbb{P}(i_{n}(s_{n}))}{d s_{n}} =
-    # \frac{d l}{d \mathbb{P}} \frac{d \mathbb{P}}{d s_{n}} =
-    # \frac{d l}{d \mathbb{P}} ( \frac{\partial \mathbb{P}}{\partial i_{n}} \frac{d i_{n}}{d s_{n}} )
+    # dl
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    #   (\frac{\partial \mathbb{P}_{nc}}{\partial e_{nc}} d e_{nc}
+    #   +
+    #   \frac{d \mathbb{P}_{nc}}{d i_{n}} \frac{d i_{n}}{d s_{n}} d s_{n})
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    #   \frac{\partial \mathbb{P}_{nc}}{\partial e_{nc}} d e_{nc}
+    #   +
+    #   \sum_{n=0}^{N} 
+    #   (\sum_{c=0}^{C} 
+    #     \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    #     \frac{d \mathbb{P}_{nc}}{d i_{n}})
+    #    \frac{d i_{n}}{d s_{n}} d s_{n}
     #
-    # using this result, we get that
+    # Using
     #
-    # \frac{d l(\mathbb{P}(e_{nc}, i_{n}(s_{n}(e_{nc})))}{d e_{nc}} =
-    # \frac{d l}{d \mathbb{P}} \frac{\partial \mathbb{P}}{\partial e_{nc}} + 
-    # \frac{d l}{d s_{n}} \frac{d s_{n}}{d e_{nc}}
+    # \frac{dl}{d i_{n}} 
+    # = \sum_{c=0}^{C} 
+    #   \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    #   \frac{d \mathbb{P}_{nc}}{d i_{n}}
     #
-    # Calculating the individual components we get
+    # gives us
     #
-    # \frac{d l}{d \mathbb{P}} = dl_d_probabilities
+    # dl
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    #   \frac{\partial \mathbb{P}_{nc}}{\partial e_{nc}} d e_{nc}
+    #   +
+    #   \sum_{n=0}^{N} 
+    #   \frac{dl}{d i_{n}} 
+    #   \frac{d i_{n}}{d s_{n}} 
+    #   d s_{n}
     #
-    # \frac{\partial \mathbb{P}}{\partial e_{nc}} =
-    # \frac{\partial }{\partial e_{nc}} i_{n} e_{nc} = i_{n} = counts_sum_inv
+    # And, using
     #
-    # \frac{\partial \mathbb{P}}{\partial i_{n}} =
-    # \frac{\partial }{\partial i_{n}} i_{n} e_{nc} = e_{nc} = counts
+    # \frac{dl}{d s_{n}} 
+    # = \frac{dl}{d i_{n}} \frac{d i_{n}}{d s_{n}} 
     #
-    # \frac{d s_{n}}{d e_{nc}} = 
-    # \frac{d }{d e_{nc}} \sum_C e_{nc}
+    # gives us
     #
-    # If we write out this explicitly we get
-    #
-    # \frac{d }{d e_{00}} (e_{00} + e_{01} + \ldots e_{10} \ldots) = 1
-    # \frac{d }{d e_{01}} (e_{00} + e_{01} + \ldots e_{10} \ldots) = 1
-    # \ldots
-    # \frac{d }{d e_{10}} (e_{00} + e_{01} + \ldots e_{10} \ldots) = 1
+    # dl
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    #   \frac{\partial \mathbb{P}_{nc}}{\partial e_{nc}} d e_{nc}
+    #   +
+    #   \sum_{n=0}^{N} 
+    #   \frac{d l}{d s_{n}}
+    #   d s_{n}
     #
     # i.e.
     # 
