@@ -702,31 +702,40 @@ def manual_backprop(
     #   \frac{d l}{d s_{n}}
     #   d s_{n}
     #
-    # i.e.
-    # 
-    # \frac{d s_{n}}{d e_{nc}} = torch.ones_like(counts)
+    # We can now expand d s_{n} in terms of e_{nc}
     #
-    # We finally need to calculate the part of the derivative of l with respect
-    # to s_{n}
-    # We have that
+    # d s_{n} 
+    # = \sum_{k=0}^{N} \sum_{l=0}^{C} \frac{\partial s_{n}}{\partial e_{kl}} 
+    #   d e_{kl}
     #
-    # \frac{d i_{n}}{d s_{n}} = 
-    # \frac{d }{d s_{n}} \frac{1}{s_{n}} = - (\frac{1}{s_{n}})^2 = - counts_sum^(-2)
+    # Again, using that these are element-wise operations, i.e. that s_{n} will
+    # depend on all classes, we have that
     #
-    # and
-    #
-    # \frac{d l(\mathbb{P}(i_{n}(s_{n}))}{d s_{n}} =
-    # \frac{d l}{d \mathbb{P}} ( \frac{\partial \mathbb{P}}{\partial i_{n}} \frac{d i_{n}}{d s_{n}} ) =
-    # \frac{d l}{d i_{n}} \frac{d i_{n}}{d s_{n}} =
-    # dl_d_counts_sum_inv * (- counts_sum^(-2)) =
-    # dl_d_counts_sum
+    # d s_{n} 
+    # = \sum_{k=0}^{N} \sum_{l=0}^{C} 
+    #    \frac{d s_{n}}{d e_{kl}} \delta_{kn} d e_{kl}
+    # = \sum_{l=0}^{C} \frac{\partial s_{n}}{\partial e_{nl}} d e_{nl}  
     #
     # so
     #
-    dl_d_counts_sum = dl_d_counts_sum_inv * (-counts_sum**(-2))
-
-    # Using this, with the calculations of the components above we get that the
-    # calculation for
+    # dl
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    #   \frac{\partial \mathbb{P}_{nc}}{\partial e_{nc}} d e_{nc}
+    #   +
+    #   \sum_{n=0}^{N} 
+    #   \frac{d l}{d s_{n}}
+    #   \sum_{l=0}^{C} \frac{\partial s_{n}}{\partial e_{nl}} d e_{nl} 
+    #
+    # where
+    #
+    # \frac{\partial s_{n}}{\partial e_{nl}}
+    # = \frac{\partial }{\partial e_{nl}} \sum_{c=0}^{C} e_{nc}
+    # = \sum_{c=0}^C \delta_{lc}
+    # = 1
+    #
+    # so
+    #
+    # d s_{n} = \sum_{l=0}^{C} d e_{nl}
     #
     # \frac{d l(\mathbb{P}(e_{nc}, i_{n}(s_{n}(e_{nc})))}{d e_{nc}} 
     #
