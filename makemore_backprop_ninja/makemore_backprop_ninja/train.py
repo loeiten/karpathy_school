@@ -737,9 +737,48 @@ def manual_backprop(
     #
     # d s_{n} = \sum_{l=0}^{C} d e_{nl}
     #
-    # \frac{d l(\mathbb{P}(e_{nc}, i_{n}(s_{n}(e_{nc})))}{d e_{nc}} 
+    # Plugging this in above yields
     #
-    # becomes
+    # dl
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    #   \frac{\partial \mathbb{P}_{nc}}{\partial e_{nc}} d e_{nc}
+    #   +
+    #   \sum_{n=0}^{N} 
+    #   \frac{d l}{d s_{n}}
+    #   \sum_{l=0}^{C} d e_{nl}
+    #
+    # which can be rewritten to
+    #
+    # dl
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} (
+    #   \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    #   \frac{\partial \mathbb{P}_{nc}}{\partial e_{nc}} d e_{nc}
+    #   +
+    #   \frac{d l}{d s_{n}} d e_{nc})
+    #
+    # By using that
+    #
+    # \frac{\partial \mathbb{P}_{nc}}{\partial e_{nc}}
+    # = \frac{\partial }{\partial e_{nc}} e_{nc} \cdot i_{n}
+    # = i_{n}
+    #
+    # where we have used that the partial derivative neglects all indirect
+    # dependencies.
+    # Hence, we get
+    #
+    # dl
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} (
+    #   \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    #   i_{n} d e_{nc}
+    #   +
+    #   \frac{d l}{d s_{n}} d e_{nc})
+    #
+    # Using that e_{nc} does not depend on other e_{ij}, we get that
+    #
+    # \frac{dl}{d e_{nc}}
+    # = \frac{\partial l}{\partial \mathbb{P}_{nc}} i_{n}
+    #   +
+    #   \frac{d l}{d s_{n}}
     dl_d_counts = dl_d_probabilities * counts_sum_inv + dl_d_counts_sum*torch.ones_like(counts)
 
     # Next, we can calculate the contribution on the final loss is changing when
