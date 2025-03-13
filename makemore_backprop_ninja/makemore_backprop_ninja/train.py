@@ -780,6 +780,23 @@ def manual_backprop(
     #   +
     #   \frac{d l}{d s_{n}}
     dl_d_counts = dl_d_probabilities * counts_sum_inv + dl_d_counts_sum*torch.ones_like(counts)
+    # Notice that the + \frac{d l}{d s_{n}} part is the same scalar for every
+    # c in that batch-row n.
+    # Hence, we must go from (N,1) to (N,C) which we can do by the ones_like
+    # multiplication
+    #
+    # Another way to see this is by considering \frac{d s_{n}}{d e_{nc}} for
+    # every element.
+    # We would get
+    #
+    # \frac{d }{d e_{00}} (e_{00} + e_{01} + \ldots e_{10} \ldots) = 1
+    # \frac{d }{d e_{01}} (e_{00} + e_{01} + \ldots e_{10} \ldots) = 1
+    # \ldots
+    # \frac{d }{d e_{10}} (e_{00} + e_{01} + \ldots e_{10} \ldots) = 1
+    #
+    # i.e.
+    # 
+    # \frac{d s_{n}}{d e_{nc}} = torch.ones_like(counts)
 
     # Next, we can calculate the contribution on the final loss is changing when
     # we change
