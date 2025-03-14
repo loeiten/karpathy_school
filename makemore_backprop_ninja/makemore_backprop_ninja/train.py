@@ -922,6 +922,51 @@ def manual_backprop(
     dl_d_logits = dl_d_normalized_logits_clone + (F.one_hot(logits.max(1).indices, num_classes=logits.shape[1]))*dl_d_logits_maxes
 
     # Calculate the derivatives of the second layer
+    # Next we have that the logits are given by logits = h @ w2 + b2.
+    # logits has the shape [N, C]
+    # w2 has the shape [H, C], where H is the size of the hidden layer
+    # b2 has the shape [C], where H is the size of the hidden layer
+    # from this we can infer that
+    # h has the shape [N, H]
+    #
+    # formally, we get
+    #
+    # x_{nc} = \sum_{H} (h_{nh} w2_{hc}) + b2_{c}
+    #
+    # so
+    #
+    # \frac{d l(x_{nc}(h_{nh}))}{d h_{nh}} = \frac{d l}{d x_{nc}} \frac{d x_{nc}}{d h_{nh}}
+    #
+    # We have that
+    #
+    # FIXME: START BY WRITING OUT EXPLICITLY, THEN YOU COULD DO FANCY KRONECKER
+    #        DELTA STUFF...MUCH BETTER
+    #
+    # \frac{d l}{d x_{nc}} = dl_d_logits
+    #
+    # and
+    #
+    # \frac{d x_{nc}}{d h_{nh}} 
+    # = \sum_{H} ( \frac{d }{d h_{nh}} h_{ij} w2_{jk} ) + \frac{d }{d h_{nh}} b2_{k} 
+    #
+    # notice that the indices what we take the derivate with respect to and the
+    # indices in the expression are different.
+    # We have that
+    #
+    # \sum_{H} ( \frac{d }{d h_{nh}} h_{ij} w2_{jk} ) 
+    # = \sum_{H} ( \delta_{ni} \delta_{hj} w2_{jk} )
+    #
+    # and because
+    #
+    # \frac{d }{d h_{nh}} b2_{k}  = 0
+    #
+    # we have
+    #
+    # = w2_{hc}
+    #
+    # so
+    #
+    # 
     dl_d_h = torch.zeros_like(h)
     dl_d_h_pre_activation = torch.zeros_like(h_pre_activation)
     dl_d_w2 = torch.zeros_like(w2)
