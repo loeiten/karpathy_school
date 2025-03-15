@@ -780,6 +780,8 @@ def manual_backprop(
     #   +
     #   \frac{d l}{d s_{n}}
     dl_d_counts = dl_d_probabilities * counts_sum_inv + dl_d_counts_sum*torch.ones_like(counts)
+
+    # FIXME: You are here
     # Notice that the + \frac{d l}{d s_{n}} part is the same scalar for every
     # c in that batch-row n.
     # Hence, we must go from (N,1) to (N,C) which we can do by the ones_like
