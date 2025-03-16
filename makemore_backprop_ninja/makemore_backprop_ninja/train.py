@@ -444,7 +444,7 @@ def manual_backprop(
     # Where
     #
     # d \mathbb{P}_{nc} (e_{nc}, i_{n}) 
-    # = \sum_{j=0}^{N} \sum_{k=0}^{N} 
+    # = \sum_{j=0}^{N} \sum_{k=0}^{C} 
     #   \frac{\partial \mathbb{P}_{nc}}{\partial e_{jk}} d e_{jk}
     #   +
     #   \sum_{j=0}^{N} 
@@ -454,7 +454,7 @@ def manual_backprop(
     # elements in e_{nc} and i_{nc}, we can write this as
     #
     # d \mathbb{P}_{nc} (e_{nc}, i_{n}) 
-    # = \sum_{j=0}^{N} \sum_{k=0}^{N} 
+    # = \sum_{j=0}^{N} \sum_{k=0}^{C} 
     #   \frac{\partial \mathbb{P}_{nc}}{\partial e_{jk}} 
     #   \delta_{nj} \delta_{ck} d e_{jk}
     #   +
