@@ -780,8 +780,6 @@ def manual_backprop(
     #   +
     #   \frac{d l}{d s_{n}}
     dl_d_counts = dl_d_probabilities * counts_sum_inv + dl_d_counts_sum*torch.ones_like(counts)
-
-    # FIXME: You are here
     # Notice that the + \frac{d l}{d s_{n}} part is the same scalar for every
     # c in that batch-row n.
     # Hence, we must go from (N,1) to (N,C) which we can do by the ones_like
@@ -814,11 +812,24 @@ def manual_backprop(
     # i(s(e(o(x, m(x))))). 
     # Both dependencies of o_{nc} goes through e_{nc}. We already know about all
     # the contributions on l of e_{nc} through the total derivative.
-    # Hence, we can simply write
+    # Hence, by expanding in the basis of o_{nc} we get
     # 
-    # \frac{d l(e_{nc}(o_{nc}))}{d o_{nc}} = \frac{d l}{d e} \frac{d e}{d o} 
-    #  
-    # Since
+    # dl  
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial e_{nc}} d e_{nc}
+    #
+    # where
+    #
+    # de_{nc} 
+    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{\partial e_{nc}}{\partial o_{ij}} 
+    #   d o_{ij}
+    #
+    # due to the direct dependency we get that
+    #
+    # de_{nc} 
+    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{d e_{nc}}{d o_{ij}} 
+    #   \delta_{ni}\delta_{cj}
+    #   d o_{ij}
+    # = \frac{d e_{nc}}{d o_{nc}} d o_{nc}
     #
     # \frac{d e}{d o} = \frac{d}{d o} \exp(o) = \exp(o) = e = \text{counts}
     #
