@@ -831,9 +831,27 @@ def manual_backprop(
     #   d o_{ij}
     # = \frac{d e_{nc}}{d o_{nc}} d o_{nc}
     #
-    # \frac{d e}{d o} = \frac{d}{d o} \exp(o) = \exp(o) = e = \text{counts}
+    # inserting this above gives
     #
-    # we get
+    # dl  
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial e_{nc}} 
+    #   \frac{d e_{nc}}{d o_{nc}} d o_{nc}
+    #
+    # As o_{nc} is independent of o_{ij}, we get that
+    #
+    # \frac{dl}{d o_{nc}}
+    # = \frac{\partial l}{\partial e_{nc}} \frac{d e_{nc}}{d o_{nc}}
+    #
+    # where
+    #
+    # \frac{d e_{nc}}{d o_{nc}} 
+    # = \frac{d}{d o_{nc}} \exp(o_{nc}) 
+    # = \exp(o_{nc}) = e_{nc} = \text{counts}
+    #
+    # so
+    #
+    # \frac{dl}{d o_{nc}}
+    # = \frac{\partial l}{\partial e_{nc}} e_{nc}
     dl_d_normalized_logits = dl_d_counts * counts
 
     # We can use the same logic to calculate the contribution coming from 
