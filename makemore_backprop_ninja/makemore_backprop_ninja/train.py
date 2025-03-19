@@ -860,7 +860,31 @@ def manual_backprop(
     #
     # as all paths on m goes through o, we get that
     #
-    # \frac{d l(o_{nc}(m_{n}))}{d m_{n}} = \frac{d l}{d o_{nc}} \frac{d o_{nc}}{d m_{n}} 
+    # dl  
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}} d o_{nc} 
+    #
+    # Expanding in the basis of m_{n} gives
+    #
+    # d o_{nc} 
+    # = \sum_{i=0}^{N} \frac{\partial o_{nc}}{\partial m_{i}} d m_{i} 
+    #
+    # As the maxes depend on all classes, we have that
+    # d o_{nc} 
+    # = \sum_{i=0}^{N} \frac{d o_{nc}}{d m_{i}} \delta_{in} d m_{i} 
+    # = \frac{d o_{nc}}{d m_{n}} d m_{n} 
+    # 
+    # Inserting in the above, we get
+    #
+    # dl  
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}} 
+    #   \frac{d o_{nc}}{d m_{n}} d m_{n}  
+    #
+    # Again, for a fixed batch, the max function does not depend on any other
+    # batches, so
+    #
+    # \frac{dl}{d m_{n}}
+    # = \sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}} 
+    #   \frac{d o_{nc}}{d m_{n}}   
     #
     # We have that
     #
