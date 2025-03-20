@@ -890,7 +890,12 @@ def manual_backprop(
     #
     # \frac{d o_{nc}}{d m_{n}} = \frac{d }{d m_{n}} x_{nc} - m_{n} = -1
     #
-    # However, notice that we are dealing with a broadcasting operation.
+    # so
+    #
+    # \frac{dl}{d m_{n}}
+    # = -\sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}} 
+    dl_d_normalized_logits_clone = dl_d_normalized_logits.clone()
+    dl_d_logits_maxes = -dl_d_normalized_logits.sum(1, keepdim=True)
     # If we write out the elements in the matrix explicitly, we get that
     #
     # \frac{d }{d m_{0}} (x_{0c} - m_{0}) = -1
