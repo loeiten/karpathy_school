@@ -896,13 +896,19 @@ def manual_backprop(
     # = -\sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}} 
     dl_d_normalized_logits_clone = dl_d_normalized_logits.clone()
     dl_d_logits_maxes = -dl_d_normalized_logits.sum(1, keepdim=True)
+    # NOTE: We will reuse the dl_d_normalized_logits, so we'll clone it to ensure 
+    #       that there are no inplace operations
+    #
+    # Another way to see this is to notice that we are dealing with a 
+    # broadcasting operation.
     # If we write out the elements in the matrix explicitly, we get that
     #
     # \frac{d }{d m_{0}} (x_{0c} - m_{0}) = -1
     # \frac{d }{d m_{1}} (x_{1c} - m_{1}) = -1
     # \ldots
     #
-    # However, as with the calculation of \frac{d l}{d i_{n}} (a.k.a dl_d_counts_sum_inv)
+    # However, as with the calculation of \frac{d l}{d i_{n}} 
+    # (a.k.a dl_d_counts_sum_inv)
     # we see that we will have a broadcasting when calculating x_{nc} - m_{n}
     # i.e. using 3 classes again, we will have a graph looking like
     #
@@ -914,13 +920,6 @@ def manual_backprop(
     #
     # which means that the contribution must be summed over the classes dimension
     # hence we get
-    dl_d_normalized_logits_clone = dl_d_normalized_logits.clone()
-    dl_d_logits_maxes = -dl_d_normalized_logits.sum(1, keepdim=True)
-    # which is equivalent to
-    # dl_d_logits_maxes = (-1*dl_d_normalized_logits).sum(1, keepdim=True)
-    #
-    # NOTE: We will reuse the dl_d_normalized_logits, so we'll clone it to ensure 
-    #       that there are no inplace operations
 
     # Finally we can calculate the contribution of the logits on the loss.
     # Since
