@@ -928,16 +928,33 @@ def manual_backprop(
     #
     # there are 4 paths x can take to the loss, namely x and m(x) from o, which
     # appears twice in the calculation.
-    # Hence we need to calculate
     #
-    # \frac{d l(o_{nc}(x_{nc} ,m_{n}(x_{nc})))}{d x_{nc}} = 
-    # \frac{d l}{d o_{nc}} \frac{d o_{nc}(x_{nc}, m_{n}(x_{nc}))}{d x_{nc}} = 
-    # \frac{d l}{d o_{nc}} (
-    #   \frac{\partial o_{nc}}{\partial x_{nc}} \frac{d x_{nc}}{d x_{nc}} +
-    #   \frac{\partial o_{nc}}{\partial m_{n}} \frac{d m_{n}}{d x_{nc}}) 
-    # )
+    # Using the standard approach with the differentials, we have that
     #
-    # From before we have that
+    # dl 
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}} 
+    #   d o_{nc}
+    #
+    # where
+    #
+    # d o_{nc}
+    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{\partial o_{nc}}{\partial x_{ij}} 
+    #   d x_{ij}
+    #   +
+    #   \sum_{i=0}^{N} \frac{\partial o_{nc}}{\partial m_{i}} d m_{i}
+    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{\partial o_{nc}}{\partial x_{ij}} 
+    #   \delta_{in}\delta_{jc}
+    #   d x_{ij}
+    #   +
+    #   \sum_{i=0}^{N} \frac{d o_{nc}}{d m_{i}} \delta_{in} d m_{i}
+    # = \frac{\partial o_{nc}}{\partial x_{nc}} d x_{nc}
+    #   +
+    #   \frac{d o_{nc}}{d m_{n}} d m_{n}
+    #
+    # Where we have used the normal argument that there are no cross-
+    # dependencies on the elements of the matrix, and that there is only a
+    # direct dependency of m_{n} on o_{nc}
+    #
     #
     # \frac{d l}{d o_{nc}} = dl_d_normalized_logits
     # \frac{\partial o_{nc}}{\partial m_{n}} = \frac{d o_{nc}}{d m_{n}} = dl_d_logits_maxes
