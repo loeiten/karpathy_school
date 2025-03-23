@@ -955,11 +955,28 @@ def manual_backprop(
     # dependencies on the elements of the matrix, and that there is only a
     # direct dependency of m_{n} on o_{nc}
     #
+    # Inserting this into the above equation, we get
+    # 
+    # dl 
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}} 
+    #   \frac{\partial o_{nc}}{\partial x_{nc}} d x_{nc}
+    #   +
+    #   \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}} 
+    #   \frac{d o_{nc}}{d m_{n}} d m_{n}
     #
-    # \frac{d l}{d o_{nc}} = dl_d_normalized_logits
-    # \frac{\partial o_{nc}}{\partial m_{n}} = \frac{d o_{nc}}{d m_{n}} = dl_d_logits_maxes
+    # Using the previous result of 
     #
-    # By definition, we have that
+    # \frac{dl}{d m_{n}}
+    # = -\sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}} 
+    #
+    # gives
+    #
+    # dl 
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}} 
+    #   \frac{\partial o_{nc}}{\partial x_{nc}} d x_{nc}
+    #   -
+    #   \sum_{n=0}^{N} \frac{dl}{d m_{n}}
+    #   \frac{d o_{nc}}{d m_{n}} d m_{n}
     #
     # \frac{d x_{nc}}{d x_{nc}} = 1
     #
