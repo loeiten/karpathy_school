@@ -978,9 +978,20 @@ def manual_backprop(
     #   \sum_{n=0}^{N} \frac{dl}{d m_{n}}
     #   \frac{d o_{nc}}{d m_{n}} d m_{n}
     #
-    # \frac{d x_{nc}}{d x_{nc}} = 1
+    # Finally, we can expand d m_{n} in terms of d x_{nc}
     #
-    # And we have that
+    # d m_{n}
+    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{\partial m_{n}}{\partial x_{ij}} 
+    #   d x_{ij}
+    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{\partial m_{n}}{\partial x_{ij}} \delta_{in} 
+    #   d x_{ij}
+    # = \sum_{j=0}^{C} \frac{\partial m_{n}}{\partial x_{nj}} d x_{nj}
+    # = \sum_{j=0}^{C} \frac{\partial }{\partial x_{nj}} \max_{J} (x_{nj}) 
+    #   d x_{nj}
+    # = \sum_{c=0}^{C} \frac{\partial }{\partial x_{nc}} \max_{C} (x_{nc}) 
+    #   d x_{nc}
+    #
+    # Where we have used that j is just an index, and could be named anything
     #
     # \frac{\partial o_{nc}}{\partial x_{nc}}
     # = \frac{\partial }{\partial x_{nc}} = x_{nc} - \max_{C}(x_{nc}) = 1
