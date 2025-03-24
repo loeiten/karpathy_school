@@ -992,6 +992,36 @@ def manual_backprop(
     #   d x_{nc}
     #
     # Where we have used that j is just an index, and could be named anything
+    # Using the definition of max, we have that
+    #
+    # \max(a,b) 
+    # = \begin{cases} 
+    #    a, &{\text{if }} a \geq b \\ 
+    #    b, &{\text{if }} a \leq b
+    # \end{cases}
+    #
+    # so
+    #
+    # \frac{\partial }{\partial a} \max(a, b) 
+    # = \begin{cases} 
+    #    1, &{\text{if }} a \geq b \\
+    #    0, &{\text{if }} a \leq b
+    # \end{cases}
+    #
+    # In our case we have max of array.
+    # Instead of writing all possible cases, we can write it compactly as
+    #
+    # \frac{\partial }{\partial x_i} \max_k(x_i) 
+    # = \begin{cases} 
+    #    1, & i=\arg \max_{k} x_{k} \\
+    #    0, &{\text{otherwise}}
+    # \end{cases}
+    #
+    # i.e., we will only have a 1 in the element with the max
+    #
+    # inserting this yields
+    #
+    # d m_{n} = \sum_{c=0}^{C} \{c=\arg \max_{C}x_{nc} \} d x_{nc}
     #
     # \frac{\partial o_{nc}}{\partial x_{nc}}
     # = \frac{\partial }{\partial x_{nc}} = x_{nc} - \max_{C}(x_{nc}) = 1
