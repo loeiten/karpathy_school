@@ -1023,6 +1023,25 @@ def manual_backprop(
     #
     # d m_{n} = \sum_{c=0}^{C} \{c=\arg \max_{C}x_{nc} \} d x_{nc}
     #
+    # substituting back to dl gives us
+    #
+    # dl 
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}} 
+    #   \frac{\partial o_{nc}}{\partial x_{nc}} d x_{nc}
+    #   -
+    #   \sum_{n=0}^{N} \frac{dl}{d m_{n}}
+    #   \frac{d o_{nc}}{d m_{n}} \sum_{c=0}^{C} \{c=\arg \max_{C}x_{nc} \} 
+    #   d x_{nc}
+    #
+    # Which gives
+    #
+    # \frac{dl}{x_{nc}}
+    # = \frac{\partial l}{\partial o_{nc}} 
+    #   \frac{\partial o_{nc}}{\partial x_{nc}}
+    #   -
+    #   \frac{dl}{d m_{n}}
+    #   \frac{d o_{nc}}{d m_{n}} \{c=\arg \max_{C}x_{nc} \} 
+    #
     # \frac{\partial o_{nc}}{\partial x_{nc}}
     # = \frac{\partial }{\partial x_{nc}} = x_{nc} - \max_{C}(x_{nc}) = 1
     #
