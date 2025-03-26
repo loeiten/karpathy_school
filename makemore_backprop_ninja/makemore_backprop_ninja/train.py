@@ -1042,11 +1042,24 @@ def manual_backprop(
     #   \frac{dl}{d m_{n}}
     #   \frac{d o_{nc}}{d m_{n}} \{c=\arg \max_{C}x_{nc} \} 
     #
-    # \frac{\partial o_{nc}}{\partial x_{nc}}
-    # = \frac{\partial }{\partial x_{nc}} = x_{nc} - \max_{C}(x_{nc}) = 1
+    # Using that
     #
-    # Hence, we only have to calculate \frac{d m_{n}}{d x_{nc}}
-    # Assuming we have 2 classes and a batch size of 3, we get
+    # \frac{\partial o_{nc}}{\partial x_{nc}}
+    # = \frac{\partial }{\partial x_{nc}} (x_{nc} - m_{n})
+    # = 1
+    #
+    # and
+    #
+    # \frac{d o_{nc}}{d m_{n}}
+    # = \frac{d }{d m_{n}} (x_{nc} - m_{n})
+    # = 1
+    #
+    # gives
+    #
+    # \frac{dl}{x_{nc}}
+    # = \frac{\partial l}{\partial o_{nc}} 
+    #   -
+    #   \frac{d o_{nc}}{d m_{n}} \{c=\arg \max_{C}x_{nc} \} 
     #
     # \frac{d m_{n}}{d x_{nc}} =
     # \begin{bmatrix}
