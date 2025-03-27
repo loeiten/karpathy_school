@@ -1060,6 +1060,15 @@ def manual_backprop(
     # = \frac{\partial l}{\partial o_{nc}} 
     #   -
     #   \frac{d o_{nc}}{d m_{n}} \{c=\arg \max_{C}x_{nc} \} 
+    dl_d_logits = dl_d_normalized_logits_clone + dl_d_logits_maxes*(F.one_hot(logits.max(1).indices, num_classes=logits.shape[1]))
+    # Where
+    #
+    # \frac{\partial l}{\partial o_{nc}} = dl_d_normalized_logits
+    # \frac{d o_{nc}}{d m_{n}} = dl_d_logits_maxes
+    #
+    # We can also see the one-hot part of the expression by considering 2 
+    # classes and a batch size of 3.
+    # This gives
     #
     # \frac{d m_{n}}{d x_{nc}} =
     # \begin{bmatrix}
@@ -1069,9 +1078,12 @@ def manual_backprop(
     # \end{bmatrix}
     # =
     # \begin{bmatrix}
-    #   \frac{d }{d x_{00}} \max(x_{00}, x_{01}) & \frac{d }{d x_{01}} \max(x_{00}, x_{01}) \\
-    #   \frac{d }{d x_{10}} \max(x_{10}, x_{11}) & \frac{d }{d x_{11}} \max(x_{10}, x_{11}) \\
-    #   \frac{d }{d x_{20}} \max(x_{20}, x_{21}) & \frac{d }{d x_{21}} \max(x_{20}, x_{21}) 
+    #   \frac{d }{d x_{00}} \max(x_{00}, x_{01}) & 
+    #     \frac{d }{d x_{01}} \max(x_{00}, x_{01}) \\
+    #   \frac{d }{d x_{10}} \max(x_{10}, x_{11}) & 
+    #     \frac{d }{d x_{11}} \max(x_{10}, x_{11}) \\
+    #   \frac{d }{d x_{20}} \max(x_{20}, x_{21}) & 
+    #     \frac{d }{d x_{21}} \max(x_{20}, x_{21}) 
     # \end{bmatrix}
     #
     # Using the definition of max, we see that
