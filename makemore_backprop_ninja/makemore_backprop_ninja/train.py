@@ -1088,17 +1088,10 @@ def manual_backprop(
     #
     # Using the definition of max, we see that
     #
-    # \max(a,b) = {\begin{cases} a, &{\text{if }} a \geq b \\ b, &{\text{if }} a \leq b\end{cases}}
-    #
-    # so
-    #
-    # \frac{d }{d a} \max(a, b) = {\begin{cases} 1, &{\text{if }} a \geq b \\ 0, &{\text{if }} a \leq b\end{cases}}
-    #
     # i.e. there will be only one 1 in a row, the rest will be 0.
-    # We can use one-hot encoding to make life easy for us.
-    # By combining everything, we get
-    dl_d_logits = dl_d_normalized_logits_clone + (F.one_hot(logits.max(1).indices, num_classes=logits.shape[1]))*dl_d_logits_maxes
 
+    # FIXME: You are here
+    #
     # Calculate the derivatives of the second layer
     # Next we have that the logits are given by logits = h @ w2 + b2.
     # logits has the shape [N, C]
@@ -1117,8 +1110,6 @@ def manual_backprop(
     #
     # We have that
     #
-    # FIXME: START BY WRITING OUT EXPLICITLY, THEN YOU COULD DO FANCY KRONECKER
-    #        DELTA STUFF...MUCH BETTER
     #
     # \frac{d l}{d x_{nc}} = dl_d_logits
     #
