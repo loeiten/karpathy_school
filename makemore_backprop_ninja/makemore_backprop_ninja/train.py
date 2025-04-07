@@ -1090,21 +1090,33 @@ def manual_backprop(
     #
     # i.e. there will be only one 1 in a row, the rest will be 0.
 
-    # FIXME: You are here
-    #
-    # Calculate the derivatives of the second layer
+    # The derivatives of the second layer
+
     # Next we have that the logits are given by logits = h @ w2 + b2.
-    # logits has the shape [N, C]
-    # w2 has the shape [H, C], where H is the size of the hidden layer
-    # b2 has the shape [C], where H is the size of the hidden layer
-    # from this we can infer that
-    # h has the shape [N, H]
     #
-    # formally, we get
+    # In other words
     #
-    # x_{nc} = \sum_{H} (h_{nh} w2_{hc}) + b2_{c}
+    # x_{nc} = \sum_{h=0}^{H} h_{nh}w2_{hc} + b2_{c}
     #
-    # so
+    # Where h is the hidden dimension
+    #
+    # Expanding dl in terms of x_{nc}, we get
+    #
+    # dl
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial x_{nc}} 
+    #   d x_{nc}
+    #
+    # where
+    #
+    # d x_{nc} (h_{nh}, w2_{hc}, b2_{c})
+    # = \sum_{i=0}^{N} \sum_{j=0}^{H} \frac{\partial x_{nc}}{\partial h_{ij}} 
+    #   d h_{ij}
+    #   +
+    #   \sum_{k=0}^{H} \sum_{l=0}^{C} \frac{\partial x_{nc}}{\partial w2_{kl}} 
+    #   d w2_{kl}
+    #   +
+    #   \sum_{m=0}^{C} \frac{\partial x_{nc}}{\partial b2_{m}} 
+    #   d b2_{m}
     #
     # \frac{d l(x_{nc}(h_{nh}))}{d h_{nh}} = \frac{d l}{d x_{nc}} \frac{d x_{nc}}{d h_{nh}}
     #
