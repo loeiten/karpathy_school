@@ -1118,21 +1118,37 @@ def manual_backprop(
     #   \sum_{m=0}^{C} \frac{\partial x_{nc}}{\partial b2_{m}} 
     #   d b2_{m}
     #
-    # \frac{d l(x_{nc}(h_{nh}))}{d h_{nh}} = \frac{d l}{d x_{nc}} \frac{d x_{nc}}{d h_{nh}}
+    # From the above expression we can see the dependencies of between the 
+    # various elements.
+    # For example, for a given row r of x_{nc}, only the same row r in h_{nh}
+    # will be a dependency.
+    # For a given column c of x_{nc}, only the same column c in w2_{hc} will
+    # be a dependency
+    # Finally, for a given column c of x_{nc}, only the same column c in b_{c} 
+    # will be a dependency.
+    # Hence
     #
-    # We have that
+    # d x_{nc} (h_{nh}, w2_{hc}, b2_{c})
+    # = \sum_{i=0}^{N} \sum_{j=0}^{H} \frac{\partial x_{nc}}{\partial h_{ij}} 
+    #   \delta_{ni}
+    #   d h_{ij}
+    #   +
+    #   \sum_{k=0}^{H} \sum_{l=0}^{C} \frac{\partial x_{nc}}{\partial w2_{kl}} 
+    #   \delta_{cl}
+    #   d w2_{kl}
+    #   +
+    #   \sum_{m=0}^{C} \frac{\partial x_{nc}}{\partial b2_{m}} 
+    #   \delta_{cm}
+    #   d b2_{m}
+    # = \sum_{j=0}^{H} \frac{\partial x_{nc}}{\partial h_{nj}} 
+    #   d h_{nj}
+    #   +
+    #   \sum_{k=0}^{N} \frac{\partial x_{nc}}{\partial w2_{kc}} 
+    #   d w2_{kc}
+    #   +
+    #   \frac{\partial x_{nc}}{\partial b2_{c}} 
+    #   d b2_{c}
     #
-    #
-    # \frac{d l}{d x_{nc}} = dl_d_logits
-    #
-    # and
-    #
-    # \frac{d x_{nc}}{d h_{nh}} 
-    # = \sum_{H} ( \frac{d }{d h_{nh}} h_{ij} w2_{jk} ) + \frac{d }{d h_{nh}} b2_{k} 
-    #
-    # notice that the indices what we take the derivate with respect to and the
-    # indices in the expression are different.
-    # We have that
     #
     # \sum_{H} ( \frac{d }{d h_{nh}} h_{ij} w2_{jk} ) 
     # = \sum_{H} ( \delta_{ni} \delta_{hj} w2_{jk} )
