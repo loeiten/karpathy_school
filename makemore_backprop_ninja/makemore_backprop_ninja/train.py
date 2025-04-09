@@ -1149,22 +1149,56 @@ def manual_backprop(
     #   \frac{\partial x_{nc}}{\partial b2_{c}} 
     #   d b2_{c}
     #
+    # By writing out the expression of x_{nc} we get
     #
-    # \sum_{H} ( \frac{d }{d h_{nh}} h_{ij} w2_{jk} ) 
-    # = \sum_{H} ( \delta_{ni} \delta_{hj} w2_{jk} )
+    # d x_{nc} (h_{nh}, w2_{hc}, b2_{c})
+    # = \sum_{j=0}^{H} \frac{\partial }{\partial h_{nj}} 
+    #   (\sum_{h=0}^{H} h_{nh}w2_{hc} + b2_{c})
+    #   d h_{nj}
+    #   +
+    #   \sum_{k=0}^{N} \frac{\partial }{\partial w2_{kc}} 
+    #   (\sum_{h=0}^{H} h_{nh}w2_{hc} + b2_{c})
+    #   d w2_{kc}
+    #   +
+    #   \frac{\partial }{\partial b2_{c}} 
+    #   (\sum_{h=0}^{H} h_{nh}w2_{hc} + b2_{c})
+    #   d b2_{c}
     #
-    # and because
+    # Again, using that there are no cross-dependencies between the variables
+    # gives
     #
-    # \frac{d }{d h_{nh}} b2_{k}  = 0
-    #
-    # we have
-    #
-    # = w2_{hc}
-    #
-    # so
-    #
-    # 
-    dl_d_h = torch.zeros_like(h)
+    # d x_{nc} 
+    # = \sum_{j=0}^{H} \frac{\partial }{\partial h_{nj}} 
+    #   (\sum_{h=0}^{H} h_{nh}w2_{hc} + b2_{c})
+    #   \delta_{jh}
+    #   d h_{nj}
+    #   +
+    #   \sum_{k=0}^{N} \frac{\partial }{\partial w2_{kc}} 
+    #   (\sum_{h=0}^{H} h_{nh}w2_{hc} + b2_{c})
+    #   \delta_{kh}
+    #   d w2_{kc}
+    #   +
+    #   \frac{\partial }{\partial b2_{c}} 
+    #   (\sum_{h=0}^{H} h_{nh}w2_{hc} + b2_{c})
+    #   d b2_{c}
+    # = \frac{\partial }{\partial h_{nh}} 
+    #   (\sum_{h=0}^{H} h_{nh}w2_{hc} + b2_{c})
+    #   d h_{nh}
+    #   +
+    #   \frac{\partial }{\partial w2_{hc}} 
+    #   (\sum_{h=0}^{H} h_{nh}w2_{hc} + b2_{c})
+    #   d w2_{hc}
+    #   +
+    #   \frac{\partial }{\partial b2_{c}} 
+    #   (\sum_{h=0}^{H} h_{nh}w2_{hc} + b2_{c})
+    #   d b2_{c}
+    # = \sum_{h=0}^{H} w2_{hc}
+    #   d h_{nh}
+    #   +
+    #   \sum_{h=0}^{H} h_{nh}
+    #   d w2_{hc}
+    #   +
+    #   d b2_{c}
     dl_d_h_pre_activation = torch.zeros_like(h_pre_activation)
     dl_d_w2 = torch.zeros_like(w2)
     dl_d_b2 = torch.zeros_like(b2)
