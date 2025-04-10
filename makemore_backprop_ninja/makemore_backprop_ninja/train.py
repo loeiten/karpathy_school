@@ -1199,6 +1199,26 @@ def manual_backprop(
     #   d w2_{hc}
     #   +
     #   d b2_{c}
+    #
+    # Inserting this back int dl gives us
+    #
+    # dl
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial x_{nc}} 
+    #   (\sum_{h=0}^{H} w2_{hc} d h_{nh}
+    #    +
+    #    \sum_{h=0}^{H} h_{nh} d w2_{hc}
+    #    +
+    #    d b2_{c})
+    #
+    # again, as there are no cross dependencies between the different elements
+    # of h, and not between any of the elements of h, w2 and b2, we get
+    #
+    # \frac{dl}{d h_{nh}}
+    # = \sum_{c=0}^{C} \frac{\partial l}{\partial x_{nc}} w2_{hc} 
+    dl_d_h = dl_d_logits@w2.T
+    # Where we have used the definition of the transpose and the definition of
+    # the matrix multiplication
+
     dl_d_h_pre_activation = torch.zeros_like(h_pre_activation)
     dl_d_w2 = torch.zeros_like(w2)
     dl_d_b2 = torch.zeros_like(b2)
