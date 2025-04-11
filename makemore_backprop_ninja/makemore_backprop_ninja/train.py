@@ -1219,6 +1219,24 @@ def manual_backprop(
     # Where we have used the definition of the transpose and the definition of
     # the matrix multiplication
 
+    # We can use the same approach to find the derivative with respect to w2.
+    # Starting from
+    #
+    # dl
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial x_{nc}} 
+    #   (\sum_{h=0}^{H} w2_{hc} d h_{nh}
+    #    +
+    #    \sum_{h=0}^{H} h_{nh} d w2_{hc}
+    #    +
+    #    d b2_{c})
+    #
+    # using the same arguments as above, we get
+    #
+    # \frac{dl}{d w_{hc}}
+    # = \sum_{c=0}^{C} \frac{\partial l}{\partial x_{nc}} h_{nh} 
+    dl_d_w2 = h.T@dl_d_logits
+
+
     dl_d_h_pre_activation = torch.zeros_like(h_pre_activation)
     dl_d_w2 = torch.zeros_like(w2)
     dl_d_b2 = torch.zeros_like(b2)
