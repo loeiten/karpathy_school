@@ -1236,10 +1236,23 @@ def manual_backprop(
     # = \sum_{c=0}^{C} \frac{\partial l}{\partial x_{nc}} h_{nh} 
     dl_d_w2 = h.T@dl_d_logits
 
+    # Finally, the derivative w.r.t b2 can be obtained from
+    #
+    # dl
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial x_{nc}} 
+    #   (\sum_{h=0}^{H} w2_{hc} d h_{nh}
+    #    +
+    #    \sum_{h=0}^{H} h_{nh} d w2_{hc}
+    #    +
+    #    d b2_{c})
+    #
+    # using the same arguments as above, we get
+    #
+    # \frac{dl}{d b2_{c}}
+    # = \sum_{n=0}^{N} \frac{\partial l}{\partial x_{nc}}
+    dl_d_b2 = dl_d_logits.sum(0)
 
     dl_d_h_pre_activation = torch.zeros_like(h_pre_activation)
-    dl_d_w2 = torch.zeros_like(w2)
-    dl_d_b2 = torch.zeros_like(b2)
     # Calculate the derivatives of the batch norm layer (of the first layer)
     dl_d_batch_normalization_raw = torch.zeros_like(batch_normalization_raw)
     dl_d_inv_batch_normalization_std = torch.zeros_like(inv_batch_normalization_std)
