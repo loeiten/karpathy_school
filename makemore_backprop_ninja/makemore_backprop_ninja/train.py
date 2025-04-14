@@ -1252,7 +1252,48 @@ def manual_backprop(
     # = \sum_{n=0}^{N} \frac{\partial l}{\partial x_{nc}}
     dl_d_b2 = dl_d_logits.sum(0)
 
-    dl_d_h_pre_activation = torch.zeros_like(h_pre_activation)
+    # Furthermore we can find the influence on l from the pre-activation
+    # Let's denote
+    #
+    # a_{nh} = \text{h_pre_activation}
+    #
+    # We have that
+    #
+    # h_{nh} = \tanh(a_{nh})
+    #
+    # so
+    #
+    # dl 
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial h_{nh}} d h_{nh}
+    #
+    # where
+    #
+    # d h_{nh} 
+    # = \sum_{i=0}^{N} \sum_{j=0}^{H} 
+    #   \frac{\partial h_{nh}}{\partial a_{ij}} d a_{ij}
+    # = \sum_{i=0}^{N} \sum_{j=0}^{H} 
+    #   \frac{d h_{nh}}{d a_{ij}} 
+    #   \delta_{in} \delta_{hj}
+    #   d a_{ij}
+    # = \frac{d h_{nh}}{d a_{nh}} 
+    #   d a_{nh}
+    # = \frac{d }{d a_{nh}} \tanh(a_{nh})
+    #   d a_{nh}
+    # = (1 - \tanh^2(a_{nh})) d a_{nh}
+    #
+    # substituting back to dl yields
+    #
+    # dl
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial h_{nh}} 
+    #   (1 - \tanh^2(a_{nh})) d a_{nh}
+    #
+    # which gives
+    #
+    # \frac{dl}{d a_{nh}}
+    # = \frac{\partial l}{\partial h_{nh}} 
+    #   (1 - \tanh^2(a_{nh})) 
     # Calculate the derivatives of the batch norm layer (of the first layer)
     dl_d_batch_normalization_raw = torch.zeros_like(batch_normalization_raw)
     dl_d_inv_batch_normalization_std = torch.zeros_like(inv_batch_normalization_std)
