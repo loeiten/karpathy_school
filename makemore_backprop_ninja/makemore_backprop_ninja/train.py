@@ -1294,6 +1294,8 @@ def manual_backprop(
     # \frac{dl}{d a_{nh}}
     # = \frac{\partial l}{\partial h_{nh}} 
     #   (1 - \tanh^2(a_{nh})) 
+    dl_d_h_pre_activation = dl_d_h*(1.0-torch.tanh(h_pre_activation)**2)
+
     # Calculate the derivatives of the batch norm layer (of the first layer)
     dl_d_batch_normalization_raw = torch.zeros_like(batch_normalization_raw)
     dl_d_inv_batch_normalization_std = torch.zeros_like(inv_batch_normalization_std)
