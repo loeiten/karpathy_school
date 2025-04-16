@@ -1297,13 +1297,27 @@ def manual_backprop(
     dl_d_h_pre_activation = dl_d_h*(1.0-torch.tanh(h_pre_activation)**2)
 
     # Calculate the derivatives of the batch norm layer (of the first layer)
-    dl_d_batch_normalization_raw = torch.zeros_like(batch_normalization_raw)
-    dl_d_inv_batch_normalization_std = torch.zeros_like(inv_batch_normalization_std)
-    dl_d_batch_normalization_var = torch.zeros_like(batch_normalization_var)
-    dl_d_batch_normalization_diff_squared = torch.zeros_like(
-        batch_normalization_diff_squared
-    )
-    dl_d_batch_normalization_diff = torch.zeros_like(batch_normalization_diff)
+
+    # Let us start by writing the equations for the batch normalization
+    #
+    # d_{nh} = \text{h_pre_batch_norm}
+    # \mu_{h} = \frac{1}{n} \sum_{n=0}^{N} d_{nh} 
+    #         = \text{batch_normalization_mean}
+    # f_{nh} = d_{nh}-\mu_{h} = \text{batch_norm_diff}
+    # g_{nh} = (d_{nh}-\mu_{h})^{2} = f_{nh}^{2} = \text{batch_norm_diff_squared}
+    # \sigma_{h} = \frac{1}{n-1} \sum_{n=0}^{N} (d_{nh}-\mu_{h})^{2}
+    #            = \frac{1}{n-1} \sum_{n=0}^{N} g_{nh} 
+    #            = \text{batch_normalization_var}
+    # j_{h} = \frac{1}{
+    #           \sqrt{\frac{1}{n-1} \sum_{n=0}^{N} (d_{nh}-\mu_{h})^{2}}
+    #           + \epsilon
+    #         }
+    #       = \frac{1}{\sqrt{\sigma_{h} + \epsilon}}
+    #       = \text{inv_batch_normalization_std}
+    # k_{nh} = \frac{d_{nh}-\mu_{h}}{\sqrt{\sigma_{h} + \epsilon}}
+    #        = f_{nh} \cdot j_{h}
+    #        = \text{batch_normalization_raw}
+    # a_{nh} = \gamma k_{nh} + \beta = \text{h_pre_activation}
     dl_d_batch_normalization_mean = torch.zeros_like(batch_normalization_mean)
     dl_d_h_pre_batch_norm = torch.zeros_like(h_pre_batch_norm)
     dl_d_batch_normalization_gain = torch.zeros_like(batch_normalization_gain)
