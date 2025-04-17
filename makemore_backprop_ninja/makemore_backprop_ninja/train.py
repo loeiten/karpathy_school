@@ -1318,6 +1318,38 @@ def manual_backprop(
     #        = f_{nh} \cdot j_{h}
     #        = \text{batch_normalization_raw}
     # a_{nh} = \gamma k_{nh} + \beta = \text{h_pre_activation}
+    #
+    # We start by calculating the total derivative of l with respect to k_{nh}
+    #
+    # dl 
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial a_{nh}} d a_{nh}
+    #
+    # where
+    #
+    # d a_{nh}
+    # = \sum_{i=0}^{N} \sum_{j=0}^{H} 
+    #   \frac{\partial a_{nh}}{\partial k_{ij}} d k_{ij}
+    # = \sum_{i=0}^{N} \sum_{j=0}^{H} 
+    #   \frac{d a_{nh}}{d k_{ij}} 
+    #   \delta_{ni} \delta_{jh}
+    #   d k_{ij}
+    # = \frac{d a_{nh}}{d k_{nh}} d k_{nh}
+    # = \frac{d }{d k_{nh}}(\gamma k_{nh} + \beta) d k_{nh}
+    # = \gamma d k_{nh}
+    #
+    # where we've used the normal argumentation as in previous derivations.
+    # Substituting into dl yields
+    #
+    # dl 
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial a_{nh}} \gamma d k_{nh}
+    #
+    # so
+    #
+    # \frac{dl}{d k_{nh}}
+    # = \frac{\partial l}{\partial a_{nh}} \gamma d k_{nh}
+    dl_d_batch_normalization_raw = dl_d_h_pre_activation*batch_normalization_gain
     dl_d_batch_normalization_mean = torch.zeros_like(batch_normalization_mean)
     dl_d_h_pre_batch_norm = torch.zeros_like(h_pre_batch_norm)
     dl_d_batch_normalization_gain = torch.zeros_like(batch_normalization_gain)
