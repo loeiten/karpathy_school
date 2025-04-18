@@ -1350,6 +1350,50 @@ def manual_backprop(
     # \frac{dl}{d k_{nh}}
     # = \frac{\partial l}{\partial a_{nh}} \gamma d k_{nh}
     dl_d_batch_normalization_raw = dl_d_h_pre_activation*batch_normalization_gain
+
+    # Furthermore, we have that
+    #
+    # dl 
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial k_{nh}} d k_{nh}
+    #
+    # where
+    #
+    # d k_{nh} 
+    # = \sum_{i=0}^{N} \sum_{j=0}^{H} 
+    #   \frac{\partial a_{nh}}{\partial f_{ij}} d f_{ij}
+    #   +
+    #   \sum_{j=0}^{H} 
+    #   \frac{\partial a_{nh}}{\partial j_{j}} d j_{j}
+    # = \sum_{i=0}^{N} \sum_{j=0}^{H} 
+    #   \frac{d a_{nh}}{d f_{ij}} 
+    #   \delta_{in} \delta_{jh}
+    #   d f_{ij}
+    #   +
+    #   \sum_{j=0}^{H} 
+    #   \frac{d a_{nh}}{d j_{j}} 
+    #   \delta_{jh}
+    #   d j_{j}
+    # = \frac{d a_{nh}}{d f_{nh}} d f_{nh}
+    #   +
+    #   \frac{d a_{nh}}{d j_{h}} d j_{h}
+    # = \frac{d }{d f_{nh}}(f_{nh} \cdot j_{h}) d f_{nh}
+    #   +
+    #   \frac{d }{d j_{h}}(f_{nh} \cdot j_{h}) d j_{h}
+    # = j_{h} d f_{nh} + f_{nh} d j_{h}
+    #
+    # substituting above yields
+    #
+    # dl 
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial k_{nh}} (j_{h} d f_{nh} + f_{nh} d j_{h})
+    #
+    # this gives
+    #
+    # \frac{dl}{d j_{h}}
+    # = \sum_{n=0}^{N} \frac{\partial l}{\partial k_{nh}} f_{nh}
+    dl_d_inv_batch_normalization_std = (dl_d_batch_normalization_raw*batch_normalization_diff).sum(0, keepdim=True)
+
     dl_d_batch_normalization_mean = torch.zeros_like(batch_normalization_mean)
     dl_d_h_pre_batch_norm = torch.zeros_like(h_pre_batch_norm)
     dl_d_batch_normalization_gain = torch.zeros_like(batch_normalization_gain)
