@@ -1394,6 +1394,86 @@ def manual_backprop(
     # = \sum_{n=0}^{N} \frac{\partial l}{\partial k_{nh}} f_{nh}
     dl_d_inv_batch_normalization_std = (dl_d_batch_normalization_raw*batch_normalization_diff).sum(0, keepdim=True)
 
+    # Let us continue from
+    #
+    # dl 
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial k_{nh}} (j_{h} d f_{nh} + f_{nh} d j_{h})
+    #
+    # Notice that j_{h} actually has a dependency on f_{nh} through \sigma_{h}
+    # and g_{nh},so we need to expand d j_{h}.
+    # We have
+    #
+    # d j_{h} 
+    # = \sum_{i=0}^{H} \frac{\partial j_{h}}{\partial \sigma_{i}} d \sigma_{i}
+    # = \sum_{i=0}^{H} \frac{d j_{h}}{\d \sigma_{i}} \delta_{ih} d \sigma_{i}
+    # = \frac{d j_{h}}{\d \sigma_{h}} d \sigma_{h}
+    #
+    # where
+    #
+    # d \sigma_{h}
+    # = \sum_{i=0}^{N} \sum_{j=0}^{H} 
+    #   \frac{\partial \sigma_{h}}{\partial g_{ij}} 
+    #   d g_{ij}
+    # = \sum_{i=0}^{N} \sum_{j=0}^{H} 
+    #   \frac{d \sigma_{h}}{d g_{ij}} 
+    #   \delta_{hj}
+    #   d g_{ij}
+    # = \sum_{i=0}^{N} 
+    #   \frac{d \sigma_{h}}{d g_{ih}} 
+    #   d g_{ih}
+    #
+    # and
+    #
+    # d g_{ih}
+    # = \sum_{j=0}^{N} \sum_{k=0}^{H} 
+    #   \frac{\partial g_{ih}}{\partial f_{jk}} 
+    #   d f_{jk}
+    # = \sum_{j=0}^{N} \sum_{k=0}^{H} 
+    #   \frac{d g_{ih}}{d f_{jk}} 
+    #   \delta_{ij} \delta_{hk}
+    #   d f_{jk}
+    # = \frac{d g_{jh}}{d f_{jh}} 
+    #   d f_{jh}
+    #
+    # Putting it all together yields
+    #
+    # dl 
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial k_{nh}} 
+    #   (
+    #     j_{h} d f_{nh} 
+    #     + 
+    #     f_{nh} d j_{h}
+    #   )
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial k_{nh}} 
+    #   (
+    #     j_{h} d f_{nh} 
+    #     + 
+    #     f_{nh} \frac{d j_{h}}{\d \sigma_{h}} d \sigma_{h}
+    #   )
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial k_{nh}} 
+    #   (
+    #     j_{h} d f_{nh} 
+    #     + 
+    #     f_{nh} \frac{d j_{h}}{\d \sigma_{h}} 
+    #     \sum_{i=0}^{N} 
+    #     \frac{d \sigma_{h}}{d g_{ih}} 
+    #     d g_{ih}
+    #   )
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial k_{nh}} 
+    #   (
+    #     j_{h} d f_{nh} 
+    #     + 
+    #     f_{nh} \frac{d j_{h}}{\d \sigma_{h}} 
+    #     \sum_{i=0}^{N} 
+    #     \frac{d \sigma_{h}}{d g_{ih}} 
+    #     \frac{d g_{jh}}{d f_{jh}} 
+    #     d f_{jh}
+    #   )
     dl_d_batch_normalization_mean = torch.zeros_like(batch_normalization_mean)
     dl_d_h_pre_batch_norm = torch.zeros_like(h_pre_batch_norm)
     dl_d_batch_normalization_gain = torch.zeros_like(batch_normalization_gain)
