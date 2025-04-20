@@ -1474,6 +1474,39 @@ def manual_backprop(
     #     \frac{d g_{jh}}{d f_{jh}} 
     #     d f_{jh}
     #   )
+    #
+    # We could calculate all this at once, or we can make use of some 
+    # re-writings
+    # Let's go with the second option.
+    # Let's start with how l varies when we vary \sigma_{h} 
+    #
+    # dl 
+    # = \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial j_{h}} d j_{h}
+    # = \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial j_{h}} 
+    #   \frac{d j_{h}}{\d \sigma_{h}} 
+    #   d \sigma_{h}
+    # = \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial j_{h}} 
+    #   \frac{d }{\d \sigma_{h}} 
+    #   (\frac{1}{\sqrt{\sigma_{h}} + \epsilon}
+    #   d \sigma_{h}
+    # = - \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial j_{h}} 
+    #   \frac{d }{\d \sigma_{h}} 
+    #   (\frac{1}{2(\sqrt{\sigma_{h}} + \epsilon)^{\frac{3}{2}}}
+    #   d \sigma_{h}
+    #
+    # where we have used the definition of d j_{h} from above.
+    # This gives
+    #
+    # \frac{dl}{d \sigma_{h}}
+    # = - \frac{\partial l}{\partial j_{h}} 
+    #   \frac{d }{\d \sigma_{h}} 
+    #   (\frac{1}{2(\sqrt{\sigma_{h}} + \epsilon)^{\frac{3}{2}}}
+    dl_d_batch_normalization_var = -dl_d_inv_batch_normalization_std*(0.5 * (batch_normalization_var + 1e-5) ** (-1.5)) 
+
     dl_d_batch_normalization_mean = torch.zeros_like(batch_normalization_mean)
     dl_d_h_pre_batch_norm = torch.zeros_like(h_pre_batch_norm)
     dl_d_batch_normalization_gain = torch.zeros_like(batch_normalization_gain)
