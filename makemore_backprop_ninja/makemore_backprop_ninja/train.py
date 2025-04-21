@@ -1507,6 +1507,42 @@ def manual_backprop(
     #   (\frac{1}{2(\sqrt{\sigma_{h}} + \epsilon)^{\frac{3}{2}}}
     dl_d_batch_normalization_var = -dl_d_inv_batch_normalization_std*(0.5 * (batch_normalization_var + 1e-5) ** (-1.5)) 
 
+    # We can use this result to see how l changes when we change g_{nh}
+    #
+    # We have
+    #
+    # dl 
+    # = \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial \sigma_{h}} d \sigma_{h}
+    # = \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial \sigma_{h}}
+    #   \sum_{i=0}^{N} 
+    #   \frac{d \sigma_{h}}{d g_{ih}} 
+    #   d g_{ih}
+    # = \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial \sigma_{h}}
+    #   \sum_{i=0}^{N} 
+    #   \frac{d}{d g_{ih}} \frac{1}{n-1} \sum_{j=0}^{N} g_{jh} 
+    #   d g_{ih}
+    # = \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial \sigma_{h}}
+    #   \sum_{i=0}^{N} 
+    #   \frac{1}{n-1} \sum_{j=0}^{N} \delta_{ji} 
+    #   d g_{ih}
+    # = \sum_{h=0}^{H} 
+    #   \sum_{i=0}^{N} 
+    #   \frac{\partial l}{\partial \sigma_{h}}
+    #   \frac{1}{n-1} 
+    #   d g_{ih}
+    #
+    # where we have used the definition of d \sigma_{h} from above.
+    # So
+    #
+    # \frac{dl}{d g_{nh}}
+    # = \frac{\partial l}{\partial \sigma_{h}}
+    #   \frac{1}{n-1} 
+    dl_d_batch_normalization_diff_squared = dl_d_batch_normalization_var * (1.0 / (batch_size-1)) * torch.ones_like(batch_normalization_diff_squared) 
+    # where we again have used the "broadcasting" trick where we go from (1,H) 
     dl_d_batch_normalization_mean = torch.zeros_like(batch_normalization_mean)
     dl_d_h_pre_batch_norm = torch.zeros_like(h_pre_batch_norm)
     dl_d_batch_normalization_gain = torch.zeros_like(batch_normalization_gain)
