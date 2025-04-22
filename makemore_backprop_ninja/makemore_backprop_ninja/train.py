@@ -1543,6 +1543,50 @@ def manual_backprop(
     #   \frac{1}{n-1} 
     dl_d_batch_normalization_diff_squared = dl_d_batch_normalization_var * (1.0 / (batch_size-1)) * torch.ones_like(batch_normalization_diff_squared) 
     # where we again have used the "broadcasting" trick where we go from (1,H) 
+    # to (N,H) by using the ones_like multiplication
+
+    # We can now rewrite
+    #
+    # dl
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial k_{nh}} 
+    #   (
+    #     j_{h} d f_{nh} 
+    #     + 
+    #     f_{nh} \frac{d j_{h}}{\d \sigma_{h}} 
+    #     \sum_{i=0}^{N} 
+    #     \frac{d \sigma_{h}}{d g_{ih}} 
+    #     \frac{d g_{jh}}{d f_{jh}} 
+    #     d f_{jh}
+    #   )
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial k_{nh}} 
+    #   j_{h} d f_{nh} 
+    #     + 
+    #   \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial k_{nh}} 
+    #   f_{nh} \frac{d j_{h}}{\d \sigma_{h}} 
+    #   \sum_{i=0}^{N} 
+    #   \frac{d \sigma_{h}}{d g_{ih}} 
+    #   \frac{d g_{jh}}{d f_{jh}} 
+    #   d f_{jh}
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial k_{nh}} 
+    #   j_{h} d f_{nh} 
+    #     + 
+    #   \sum_{h=0}^{H}  
+    #   \frac{d l}{d j_{h}}
+    #   \frac{d j_{h}}{\d \sigma_{h}} 
+    #   \sum_{i=0}^{N} 
+    #   \frac{1}{n-1} 
+    #   2 f_{jh}
+    #   d f_{jh}
+    #
+    # where we've used that 
+    # 
+    # \frac{dl}{d j_{h}}
+    # = \sum_{n=0}^{N} \frac{\partial l}{\partial k_{nh}} f_{nh}
+    #
     dl_d_batch_normalization_mean = torch.zeros_like(batch_normalization_mean)
     dl_d_h_pre_batch_norm = torch.zeros_like(h_pre_batch_norm)
     dl_d_batch_normalization_gain = torch.zeros_like(batch_normalization_gain)
