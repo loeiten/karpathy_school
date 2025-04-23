@@ -1587,6 +1587,50 @@ def manual_backprop(
     # \frac{dl}{d j_{h}}
     # = \sum_{n=0}^{N} \frac{\partial l}{\partial k_{nh}} f_{nh}
     #
+    # Furthermore, we have that
+    #
+    # \frac{d g_{jh}}{d f_{jh}} = 2 f_{jh}
+    #
+    # from the definition, and that
+    #
+    # \frac{d \sigma_{h}}{d g_{ih}} = \frac{1}{n-1} 
+    #
+    # using the same argumentation as we used when deriving
+    # \frac{dl}{d g_{nh}}
+    #
+    # Inserting that (by definition)
+    #
+    # \frac{dl}{d \sigma_{h}} 
+    # = \frac{\partial l}{\partial j_{h}} 
+    #   \frac{d j_{h}}{\d \sigma_{h}} 
+    #
+    # yields
+    #
+    # dl
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial k_{nh}} 
+    #   j_{h} d f_{nh} 
+    #     + 
+    #   \sum_{h=0}^{H} 
+    #   \frac{dl}{d \sigma_{h}} 
+    #   \sum_{i=0}^{N} 
+    #   \frac{1}{n-1} 
+    #   2 f_{jh}
+    #   d f_{jh}
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial k_{nh}} 
+    #   j_{h} d f_{nh} 
+    #     + 
+    #   \sum_{h=0}^{H} 
+    #   \sum_{i=0}^{N} 
+    #   \frac{dl}{d g_{nh}}
+    #   2 f_{jh}
+    #   d f_{jh}
+    #
+    # where we have used that
+    # \frac{dl}{d g_{nh}}
+    # = \frac{\partial l}{\partial \sigma_{h}}
+    #   \frac{1}{n-1} 
     dl_d_batch_normalization_mean = torch.zeros_like(batch_normalization_mean)
     dl_d_h_pre_batch_norm = torch.zeros_like(h_pre_batch_norm)
     dl_d_batch_normalization_gain = torch.zeros_like(batch_normalization_gain)
