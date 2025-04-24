@@ -1631,6 +1631,18 @@ def manual_backprop(
     # \frac{dl}{d g_{nh}}
     # = \frac{\partial l}{\partial \sigma_{h}}
     #   \frac{1}{n-1} 
+    #
+    # finally, we get
+    #
+    # \frac{dl}{d f_{nh}}
+    # = \frac{\partial l}{\partial k_{nh}} j_{h} 
+    #   + 
+    #   \frac{dl}{d g_{nh}} 2 f_{jh}
+    dl_d_batch_normalization_diff = (
+        dl_d_batch_normalization_raw*inv_batch_normalization_std
+        +
+        dl_d_batch_normalization_diff_squared*2*batch_normalization_diff
+        )
     dl_d_batch_normalization_mean = torch.zeros_like(batch_normalization_mean)
     dl_d_h_pre_batch_norm = torch.zeros_like(h_pre_batch_norm)
     dl_d_batch_normalization_gain = torch.zeros_like(batch_normalization_gain)
