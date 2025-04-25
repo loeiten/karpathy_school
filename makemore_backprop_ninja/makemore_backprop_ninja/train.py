@@ -1637,7 +1637,7 @@ def manual_backprop(
     # \frac{dl}{d f_{nh}}
     # = \frac{\partial l}{\partial k_{nh}} j_{h} 
     #   + 
-    #   \frac{dl}{d g_{nh}} 2 f_{jh}
+    #   \frac{dl}{d g_{nh}} 2 f_{nh}
     dl_d_batch_normalization_diff = (
         dl_d_batch_normalization_raw*inv_batch_normalization_std
         +
