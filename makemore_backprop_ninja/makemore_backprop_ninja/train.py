@@ -1643,10 +1643,44 @@ def manual_backprop(
         +
         dl_d_batch_normalization_diff_squared*2*batch_normalization_diff
         )
-    dl_d_batch_normalization_mean = torch.zeros_like(batch_normalization_mean)
-    dl_d_h_pre_batch_norm = torch.zeros_like(h_pre_batch_norm)
-    dl_d_batch_normalization_gain = torch.zeros_like(batch_normalization_gain)
-    dl_d_batch_normalization_bias = torch.zeros_like(batch_normalization_bias)
+
+    # We now continue with how l changes when we nudges \mu_{h}
+    # Using our normal approach yields
+    #
+    # dl = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #      \frac{\partial l}{\partial f_{nh}} d f_{nh} 
+    #
+    # where
+    #
+    # d f_{nh}
+    # = \sum_{i=0}^{N} \sum_{j=0}^{H}
+    #   \frac{\partial f_{nh}}{\partial d_{ij}} d d_{ij}
+    #   +
+    #   \sum_{j=0}^{H}
+    #   \frac{\partial f_{nh}}{\partial \mu_{j}} d \mu_{j}
+    #
+    # Using that we have no cross dependencies we get
+    #
+    # d f_{nh}
+    # = \sum_{i=0}^{N} \sum_{j=0}^{H}
+    #   \frac{d f_{nh}}{d d_{ij}} d d_{ij}
+    #   \delta{in}\delta_{jh}
+    #   +
+    #   \sum_{j=0}^{H}
+    #   \frac{\d f_{nh}}{d \mu_{j}} d \mu_{j}
+    #   \delta_{jh}
+    # = \frac{d f_{nh}}{d d_{nh}} d d_{nh}
+    #   +
+    #   \frac{\d f_{nh}}{d \mu_{h}} d \mu_{h}
+    # = \frac{d }{d d_{nh}}(d_{nh}-\mu_{h}) d d_{nh}
+    #   +
+    #   \frac{\d }{d \mu_{h}}(d_{nh}-\mu_{h}) d \mu_{h}
+    # = d d_{nh} - d \mu_{h}
+    #
+    # So
+    #
+    # dl = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #      \frac{\partial l}{\partial f_{nh}} (d d_{nh} - d \mu_{h})
     # Calculate the derivatives of the first layer
     dl_d_w1 = torch.zeros_like(w1)
     dl_d_b1 = torch.zeros_like(b1)
