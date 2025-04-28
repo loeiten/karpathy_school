@@ -1686,6 +1686,9 @@ def manual_backprop(
     #
     # \frac{dl}{d \mu_{h}} 
     #  = - \sum_{n=0}^{N} \frac{\partial l}{\partial f_{nh}}
+    dl_d_batch_normalization_diff_clone = dl_d_batch_normalization_diff.clone()
+    dl_d_batch_normalization_mean = -dl_d_batch_normalization_diff_clone.sum(0, keepdim=True)
+
     # Calculate the derivatives of the first layer
     dl_d_w1 = torch.zeros_like(w1)
     dl_d_b1 = torch.zeros_like(b1)
