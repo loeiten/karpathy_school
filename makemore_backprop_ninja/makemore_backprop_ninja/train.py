@@ -1689,6 +1689,55 @@ def manual_backprop(
     dl_d_batch_normalization_diff_clone = dl_d_batch_normalization_diff.clone()
     dl_d_batch_normalization_mean = -dl_d_batch_normalization_diff_clone.sum(0, keepdim=True)
 
+    # Continuing from
+    #
+    # dl = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #      \frac{\partial l}{\partial f_{nh}} (d d_{nh} - d \mu_{h})
+    #
+    # Notice that \mu_{h} = \frac{1}{n} \sum_{n=0}^{N} d_{nh}, so we can expand
+    # d \mu_{h} is the basis of d_{nh}.
+    # We have
+    #
+    # d \mu_{h} 
+    # = \sum_{i=0}^{N} \sum_{j=0}^{H} 
+    #   \frac{\partial \mu_{h}}{\partial d_{ij}} d d_{ij}
+    # = \sum_{i=0}^{N} \sum_{j=0}^{H} 
+    #   \frac{d \mu_{h}}{d d_{ij}} d d_{ij}
+    #   \delta_{jh}
+    # = \sum_{i=0}^{N} \frac{d \mu_{h}}{d d_{ij}} d d_{ih}
+    # = \sum_{i=0}^{N} 
+    #   \frac{d }{d d_{ij}} \frac{1}{n} \sum_{k=0}^{N} d_{kh} 
+    #   d d_{ih}
+    # = \sum_{i=0}^{N} \frac{1}{n} d d_{ih}
+    # 
+    # Inserting this above yields
+    #
+    # dl 
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial f_{nh}} 
+    #   (d d_{nh} - \sum_{i=0}^{N} \frac{1}{n} d d_{ih})
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial f_{nh}} d d_{nh} 
+    #   - 
+    #   \frac{1}{n}
+    #   \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial f_{nh}}
+    #   \sum_{i=0}^{N} d d_{ih})
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial f_{nh}} d d_{nh} 
+    #   +
+    #   \frac{1}{n}
+    #   \sum_{h=0}^{H} 
+    #   \frac{dl}{d \mu_{h}} 
+    #   \sum_{i=0}^{N} d d_{ih})
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #   \frac{\partial l}{\partial f_{nh}} d d_{nh} 
+    #   +
+    #   \frac{1}{n}
+    #   \sum_{h=0}^{H} \sum_{n=0}^{N} 
+    #   \frac{dl}{d \mu_{h}} 
+    #   d d_{nh})
+
     # Calculate the derivatives of the first layer
     dl_d_w1 = torch.zeros_like(w1)
     dl_d_b1 = torch.zeros_like(b1)
