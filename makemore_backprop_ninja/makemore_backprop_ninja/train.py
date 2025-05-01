@@ -1744,6 +1744,17 @@ def manual_backprop(
     # = \frac{\partial l}{\partial f_{nh}}
     #   +
     #   \frac{1}{n} \frac{dl}{d \mu_{h}} 
+    dl_d_batch_normalization_diff_clone_2 = dl_d_batch_normalization_diff.clone()
+    dl_d_h_pre_batch_norm = \
+        (
+         dl_d_batch_normalization_diff_clone_2
+         + 
+           
+           dl_d_batch_normalization_mean*
+(1.0/batch_size)*torch.ones_like(h_pre_batch_norm)
+        )
+    # Where we again have multiplied with torch.ones_like to get the correct 
+    # dimension
 
     # Calculate the derivatives of the first layer
     dl_d_w1 = torch.zeros_like(w1)
