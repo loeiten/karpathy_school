@@ -1756,6 +1756,36 @@ def manual_backprop(
     # Where we again have multiplied with torch.ones_like to get the correct 
     # dimension
 
+    # We note that the scalar parameters \gamma_{h} and \beta_{h} are the 
+    # trainable parameters
+    #
+    # We get
+    #
+    # dl = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #      \frac{\partial l}{\partial a_{nh}} d a_{nh}
+    #
+    # where
+    #
+    # d a_{nh} 
+    #  = \frac{\partial a_{nh}}{\partial \gamma_{h}} d \gamma_{h}
+    #  + \frac{\partial a_{nh}}{\partial \beta_{h}} d \beta_{h}
+    #
+    # so
+    #
+    # dl = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #      \frac{\partial l}{\partial a_{nh}} 
+    #      (\frac{\partial a_{nh}}{\partial \gamma_{h}} d \gamma_{h}
+    #      + \frac{\partial a_{nh}}{\partial \beta_{h}} d \beta_{h})
+    #   = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #      \frac{\partial l}{\partial a_{nh}} 
+    #      (\frac{\partial }{\partial \gamma_{h}}(\gamma_{h} k_{nh} + \beta_{h}) 
+    #       d \gamma_{h}
+    #      + \frac{\partial }{\partial \beta_{h}} (\gamma_{h} k_{nh} + \beta_{h})
+    #       d \beta_{h})
+    #   = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #      \frac{\partial l}{\partial a_{nh}} 
+    #      (k_{nh} d \gamma_{h} + d \beta_{h})
+
     # Calculate the derivatives of the first layer
     dl_d_w1 = torch.zeros_like(w1)
     dl_d_b1 = torch.zeros_like(b1)
