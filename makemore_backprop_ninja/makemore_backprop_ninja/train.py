@@ -1785,6 +1785,11 @@ def manual_backprop(
     #   = \sum_{n=0}^{N} \sum_{h=0}^{H} 
     #      \frac{\partial l}{\partial a_{nh}} 
     #      (k_{nh} d \gamma_{h} + d \beta_{h})
+    #
+    # and
+    #
+    # \frac{dl}{d \gamma_{h}} 
+    # = \sum_{n=0}^{N} \frac{\partial l}{\partial a_{nh}} k_{nh}
 
     # Calculate the derivatives of the first layer
     dl_d_w1 = torch.zeros_like(w1)
