@@ -1792,6 +1792,16 @@ def manual_backprop(
     # = \sum_{n=0}^{N} \frac{\partial l}{\partial a_{nh}} k_{nh}
     dl_d_batch_normalization_gain = (dl_d_h_pre_activation * batch_normalization_raw).sum(0,keepdim=True)
 
+    # Continuing from
+    #
+    # dl = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #      \frac{\partial l}{\partial a_{nh}} 
+    #      (k_{nh} d \gamma_{h} + d \beta_{h})
+    #
+    # so
+    #
+    # \frac{dl}{d \beta_{h}} 
+    # = \sum_{n=0}^{N} \frac{\partial l}{\partial a_{nh}} 
 
     # Calculate the derivatives of the first layer
     dl_d_w1 = torch.zeros_like(w1)
