@@ -1805,8 +1805,21 @@ def manual_backprop(
     dl_d_batch_normalization_bias = (dl_d_h_pre_activation).sum(0,keepdim=True)
 
     # Calculate the derivatives of the first layer
-    dl_d_w1 = torch.zeros_like(w1)
-    dl_d_b1 = torch.zeros_like(b1)
+
+    # Let's now turn our attention to the first layer
+    # We have
+    #
+    # d_{nh} = \sum_{h=0}^{H} c_{nf}w1_{fh} + b1_{h}
+    #
+    # Where 
+    #
+    # c_{nf} = \text{concatenated_embedding}
+    # f = b\cdot e = \text{block_size}\cdot \text{embedding_size}
+    #
+    # Using the same formula for the derivative of the linear layer gives
+    #
+    # \frac{dl}{d w1_{fh}}
+    # = \sum_{h=0}^{H} \frac{\partial l}{\partial d_{nh}} c_{nf} 
     # Calculate the derivatives of the embedding layer
     dl_d_concatenated_embedding = torch.zeros_like(concatenated_embedding)
     dl_d_embedding = torch.zeros_like(embedding)
