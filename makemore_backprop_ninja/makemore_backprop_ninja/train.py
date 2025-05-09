@@ -1827,6 +1827,7 @@ def manual_backprop(
     # \frac{dl}{d b1_{h}}
     # = \sum_{n=0}^{N} \frac{\partial l}{\partial d_{nh}}
     dl_d_b1 = dl_d_h_pre_batch_norm.sum(0)
+
     # Calculate the derivatives of the embedding layer
     dl_d_concatenated_embedding = torch.zeros_like(concatenated_embedding)
     dl_d_embedding = torch.zeros_like(embedding)
