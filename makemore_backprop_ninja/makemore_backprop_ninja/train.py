@@ -1829,8 +1829,11 @@ def manual_backprop(
     dl_d_b1 = dl_d_h_pre_batch_norm.sum(0)
 
     # Calculate the derivatives of the embedding layer
-    dl_d_concatenated_embedding = torch.zeros_like(concatenated_embedding)
-    dl_d_embedding = torch.zeros_like(embedding)
+
+    # Finally, from the calculation of the linear layer, we have that
+    #
+    # \frac{dl}{d c_{nf}}
+    # = \sum_{h=0}^{H} \frac{\partial l}{\partial d_{nh}} w1_{fh} 
     dl_d_c = torch.zeros_like(c)
 
     gradients: Dict[str, torch.Tensor] = {}
