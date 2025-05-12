@@ -1835,6 +1835,25 @@ def manual_backprop(
     # \frac{dl}{d c_{nf}}
     # = \sum_{h=0}^{H} \frac{\partial l}{\partial d_{nh}} w1_{fh} 
     dl_d_concatenated_embedding = dl_d_h_pre_batch_norm@w1.T
+
+    # We also want to find the gradient of the embedding layer c
+    # In order to that we have to go through the concatenated embedding layer
+    # In fact, the concatenated embedding layer is nothing but a view of the
+    # embedding layer
+    # Thus, we just need to restructure from shape (n,f) to (n,b,e)
+    #
+    # Formally we have that
+    #
+    # dl
+    # = \sum_{n=0}^{N} \sum_{l=0}^{B\cdot E} 
+    #   \frac{\partial l}{\partial c_{nf}} d c_{nf}
+    # = \sum_{n=0}^{N} \sum_{b=0}^{B} \sum_{e=0}^{E} 
+    #   \frac{\partial l}{\partial v_{nbe}} d v_{nbe}
+    #
+    # as c_{n(b\cdot e)} = v_{nbe}
+    #
+    # Hence
+    # \frac{dl}{v_{nij}} = \frac{\partial l}{\partial v_{nbe}} 
     dl_d_c = torch.zeros_like(c)
 
     gradients: Dict[str, torch.Tensor] = {}
