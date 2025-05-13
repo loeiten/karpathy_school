@@ -1854,6 +1854,7 @@ def manual_backprop(
     #
     # Hence
     # \frac{dl}{v_{nij}} = \frac{\partial l}{\partial v_{nbe}} 
+    dl_d_embedding = dl_d_concatenated_embedding.view(batch_size, -1, embedding.shape[2])
     dl_d_c = torch.zeros_like(c)
 
     gradients: Dict[str, torch.Tensor] = {}
