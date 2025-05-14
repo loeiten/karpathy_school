@@ -1855,6 +1855,51 @@ def manual_backprop(
     # Hence
     # \frac{dl}{v_{nij}} = \frac{\partial l}{\partial v_{nbe}} 
     dl_d_embedding = dl_d_concatenated_embedding.view(batch_size, -1, embedding.shape[2])
+
+    # At last, we can find how l changes when we change the embedding weights
+    # The embedding is defined as c[input] data
+    # In other words, our job is to route the gradients from the previous layer
+    # to the correct index
+    #
+    # Formally we have that
+    #
+    # dl
+    # = \sum_{n=0}^{N} \sum_{b=0}^{B} \sum_{e=0}^{E} 
+    #   \frac{\partial l}{\partial v_{nbe}} d v_{nbe}
+    #
+    # where
+    #
+    # d v_{nbe} 
+    # = \sum_{v=0}^{V} \sum_{k=0}^{E}
+    #   \frac{\partial v_{nbe}}{\partial c_{vk}} d c_{vk}
+    #
+    # Where V is the vocab size.
+    # Since v_{nbe} is nothing but a selection of c_{vk}, we have that
+    #
+    # \frac{\partial v_{nbe}}{\partial c_{vk}} 
+    # = \frac{\partial c_{x_{nb}e}}{\partial c_{vk}} 
+    # = \delta_{vx_{nb}}\delta_{ek}
+    #
+    # Putting it all together gives
+    #
+    # dl
+    # = \sum_{n=0}^{N} \sum_{b=0}^{B} \sum_{e=0}^{E} 
+    #   \frac{\partial l}{\partial v_{nbe}}
+    #   \sum_{v=0}^{V} \sum_{k=0}^{E}
+    #   \delta_{vx_{nb}}\delta_{ek}
+    #   d c_{vk}
+    # = \sum_{n=0}^{N} \sum_{b=0}^{B} \sum_{e=0}^{E} 
+    #   \frac{\partial l}{\partial v_{nbe}}
+    #   \sum_{v=0}^{V} 
+    #   \delta_{vx_{nb}}
+    #   d c_{vk}
+    #
+    # Reading off the gradients gives
+    #
+    # \frac{dl}{d c_{vk}}
+    # = \sum_{n=0}^{N} \sum_{b=0}^{B} \sum_{e=0}^{E} \sum_{v=0}^{V} 
+    #   \delta_{vx_{nb}}
+    #   \frac{\partial l}{\partial v_{nbe}}
     dl_d_c = torch.zeros_like(c)
 
     gradients: Dict[str, torch.Tensor] = {}
