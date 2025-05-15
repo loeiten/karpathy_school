@@ -1901,6 +1901,10 @@ def manual_backprop(
     #   \delta_{vx_{nb}}
     #   \frac{\partial l}{\partial v_{nbe}}
     dl_d_c = torch.zeros_like(c)
+    for i in range(input_data.shape[0]):
+        for j in range(input_data.shape[1]):
+            idx = input_data[i,j]
+            dl_d_c[idx] += dl_d_embedding[i,j]
 
     gradients: Dict[str, torch.Tensor] = {}
     gradients["dl_d_log_probabilities"] = dl_d_log_probabilities
