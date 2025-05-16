@@ -1628,6 +1628,7 @@ def manual_backprop(
     #   d f_{jh}
     #
     # where we have used that
+    #
     # \frac{dl}{d g_{nh}}
     # = \frac{\partial l}{\partial \sigma_{h}}
     #   \frac{1}{n-1} 
