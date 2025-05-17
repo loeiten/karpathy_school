@@ -1317,7 +1317,7 @@ def manual_backprop(
     # k_{nh} = \frac{d_{nh}-\mu_{h}}{\sqrt{\sigma_{h} + \epsilon}}
     #        = f_{nh} \cdot j_{h}
     #        = \text{batch_normalization_raw}
-    # a_{nh} = \gamma k_{nh} + \beta = \text{h_pre_activation}
+    # a_{nh} = \gamma_{h} k_{nh} + \beta_{h} = \text{h_pre_activation}
     #
     # We start by calculating the total derivative of l with respect to k_{nh}
     #
@@ -1335,20 +1335,20 @@ def manual_backprop(
     #   \delta_{ni} \delta_{jh}
     #   d k_{ij}
     # = \frac{d a_{nh}}{d k_{nh}} d k_{nh}
-    # = \frac{d }{d k_{nh}}(\gamma k_{nh} + \beta) d k_{nh}
-    # = \gamma d k_{nh}
+    # = \frac{d }{d k_{nh}}(\gamma_{h} k_{nh} + \beta_{h}) d k_{nh}
+    # = \gamma_{h} d k_{nh}
     #
     # where we've used the normal argumentation as in previous derivations.
     # Substituting into dl yields
     #
     # dl 
     # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
-    #   \frac{\partial l}{\partial a_{nh}} \gamma d k_{nh}
+    #   \frac{\partial l}{\partial a_{nh}} \gamma_{h} d k_{nh}
     #
     # so
     #
     # \frac{dl}{d k_{nh}}
-    # = \frac{\partial l}{\partial a_{nh}} \gamma d k_{nh}
+    # = \frac{\partial l}{\partial a_{nh}} \gamma_{h} d k_{nh}
     dl_d_batch_normalization_raw = dl_d_h_pre_activation*batch_normalization_gain
 
     # Furthermore, we have that
