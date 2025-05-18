@@ -1232,7 +1232,7 @@ def manual_backprop(
     #
     # using the same arguments as above, we get
     #
-    # \frac{dl}{d w_{hc}}
+    # \frac{dl}{d w2_{hc}}
     # = \sum_{c=0}^{C} \frac{\partial l}{\partial x_{nc}} h_{nh} 
     dl_d_w2 = h.T@dl_d_logits
 
