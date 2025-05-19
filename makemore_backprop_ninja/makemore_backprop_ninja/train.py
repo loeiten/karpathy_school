@@ -132,7 +132,7 @@ def train_neural_net_model(
 
         # Do the back propagation
         gradients = manual_backprop(
-            model=model, intermediate_variables=intermediate_variables, targets=targets
+            model=model, intermediate_variables=intermediate_variables, targets=targets, input_data=dataset["training_input_data"][idxs]
         )
         # Do the actual backprop in order to compare
         loss.backward()
@@ -185,6 +185,7 @@ def manual_backprop(
     model: Tuple[torch.Tensor, ...],
     intermediate_variables: Dict[str, torch.Tensor],
     targets: torch.Tensor,
+    input_data: torch.Tensor
 ) -> Dict[str, torch.Tensor]:
     """Do the manual back propagation, and set the gradients to the parameters.
 
@@ -194,6 +195,7 @@ def manual_backprop(
             variables (i.e. those which are not part of model parameters).
         targets(torch.Tensor): The targets
             Needed to compute the log_prob gradients
+        input_data (torch.Size): The input data for the batch
 
     Returns:
         A map of the gradients
