@@ -112,7 +112,12 @@ def train_neural_net_model(
             loss = -log_probabilities[range(batch_size), targets].mean()
 
             # Add variables to dictionary for better variable handling
+
+            # NOTE: logits_maxes is not used in any calculations of the backprop
+            #       However, we still need the variable to compare the gradients
             intermediate_variables["logits_maxes"] = logits_maxes
+            # NOTE: normalized_logits is not used in any calculations of the backprop
+            #       However, we still need the variable to compare the gradients
             intermediate_variables["normalized_logits"] = normalized_logits
             intermediate_variables["counts"] = counts
             intermediate_variables["counts_sum"] = counts_sum
