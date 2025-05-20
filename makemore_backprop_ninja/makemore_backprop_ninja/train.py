@@ -204,17 +204,18 @@ def manual_backprop(
     (
         c,
         w1,
-        b1,
+        _, # We are not using b1 in any calculations
         w2,
-        b2,
+        _, # We are not using b2 in any calculations
         batch_normalization_gain,
-        batch_normalization_bias,
+        _, # We are not using batch_normalization_bias
     ) = model
     # Intermediate variables from predict
     embedding = intermediate_variables["embedding"]
     concatenated_embedding = intermediate_variables["concatenated_embedding"]
     h_pre_batch_norm = intermediate_variables["h_pre_batch_norm"]
-    batch_normalization_mean = intermediate_variables["batch_normalization_mean"]
+    # batch_normalization_mean is not used in any calculations of the backprop
+    # batch_normalization_mean = intermediate_variables["batch_normalization_mean"]
     batch_normalization_diff = intermediate_variables["batch_normalization_diff"]
     batch_normalization_diff_squared = intermediate_variables[
         "batch_normalization_diff_squared"
@@ -226,8 +227,10 @@ def manual_backprop(
     h = intermediate_variables["h"]
     # Intermediate variables from loss
     logits = intermediate_variables["logits"]
-    logits_maxes = intermediate_variables["logits_maxes"]
-    normalized_logits = intermediate_variables["normalized_logits"]
+    # logits_maxes is not used in any calculations of the backprop
+    # logits_maxes = intermediate_variables["logits_maxes"]
+    # normalized_logits is not used in any calculations of the backprop
+    # normalized_logits = intermediate_variables["normalized_logits"]
     counts = intermediate_variables["counts"]
     counts_sum = intermediate_variables["counts_sum"]
     counts_sum_inv = intermediate_variables["counts_sum_inv"]
