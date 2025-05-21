@@ -67,6 +67,8 @@ def predict_neural_network(
     intermediate_variables: Dict[str, torch.Tensor] = {}
     intermediate_variables["embedding"] = embedding
     intermediate_variables["concatenated_embedding"] = concatenated_embedding
+    # NOTE: h_pre_batch_norm is not used in any calculations of the backprop
+    #       However, we still need it to compare the gradients
     intermediate_variables["h_pre_batch_norm"] = h_pre_batch_norm
 
     if training:
@@ -98,6 +100,10 @@ def predict_neural_network(
             batch_normalization_gain * batch_normalization_raw
         ) + batch_normalization_bias
 
+
+        # NOTE: batch_normalization_mean is is not used in any calculations of the 
+        #       backprop
+        #       However, we still need the variable to compare the gradients
         intermediate_variables["batch_normalization_mean"] = batch_normalization_mean
         intermediate_variables["batch_normalization_diff"] = batch_normalization_diff
         intermediate_variables["batch_normalization_diff_squared"] = (
