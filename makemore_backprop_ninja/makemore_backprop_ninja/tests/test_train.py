@@ -11,20 +11,18 @@ from makemore_backprop_ninja.data_classes import (
 )
 from makemore_backprop_ninja.models import get_explicit_model
 from makemore_backprop_ninja.preprocessing import get_dataset
-from makemore_backprop_ninja.train import parse_args, train_neural_net_model
+from makemore_backprop_ninja.train import parse_args, train_neural_net_model, BackpropMode
 
 from makemore_backprop_ninja import DEVICE
 
 
-@pytest.mark.parametrize("use_functional", [True, False])
-def test_train_neural_net_model(use_functional: bool) -> None:
+@pytest.mark.parametrize("backprop_mode", [el.value for el in BackpropMode])
+def test_train_neural_net_model(backprop_mode: BackpropMode) -> None:
     """
     Test the test_train_neural_net_model function.
 
     Args:
-        use_functional (bool): Whether or not to use the functional version of
-            the cross entropy.
-            If False, the hand-written version will be used
+        backprop_mode (BackpropMode): What backprop mode to use
     """
     model_params = ModelParams(
         block_size=3,
@@ -66,7 +64,7 @@ def test_train_neural_net_model(use_functional: bool) -> None:
         dataset=dataset,
         optimization_params=optimization_params,
         batch_normalization_parameters=batch_normalization_parameters,
-        use_functional=use_functional,
+        backprop_mode=backprop_mode,
     )
     assert optimization_params.cur_step == 1
 
@@ -82,7 +80,7 @@ def test_train_neural_net_model(use_functional: bool) -> None:
         dataset=dataset,
         optimization_params=optimization_params,
         batch_normalization_parameters=batch_normalization_parameters,
-        use_functional=use_functional,
+        backprop_mode=backprop_mode,
     )
     assert optimization_params.cur_step == 4
 

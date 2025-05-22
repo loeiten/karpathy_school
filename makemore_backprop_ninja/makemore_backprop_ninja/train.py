@@ -19,6 +19,12 @@ from tqdm import tqdm
 
 from makemore_backprop_ninja import DATASET, DEVICE
 
+from enum import Enum
+
+class BackpropMode(Enum):
+    AUTOMATIC = "AUTOMATIC"
+    VERBOSE = "VERBOSE"
+
 
 # Reducing the number of locals here will penalize the didactical purpose
 # pylint: disable-next=too-many-arguments,too-many-locals,too-complex,too-many-branches
@@ -27,7 +33,7 @@ def train_neural_net_model(
     batch_normalization_parameters: BatchNormalizationParameters,
     dataset: DATASET,
     optimization_params: Optional[OptimizationParams],
-    use_functional: bool = True,
+    backprop_mode: BackpropMode = BackpropMode.AUTOMATIC,
     seed: int = 2147483647,
 ) -> Tuple[torch.Tensor, ...]:
     """Train the neural net model.
@@ -40,9 +46,7 @@ def train_neural_net_model(
             Data containing the training and validation set
         optimization_params (Optional[OptimizationParams]): Optimization
             options
-        use_functional (bool): Whether or not to use the functional version of
-            the cross entropy.
-            If False, the hand-written version will be used
+        backprop_mode (BackpropMode): The backprop mode to use
         seed (int): The seed for the random number generator
 
     Returns:
@@ -85,7 +89,8 @@ def train_neural_net_model(
         )
         intermediate_variables["logits"] = logits
         targets = dataset["training_ground_truth"][idxs]
-        if use_functional:
+
+        if backprop_mode != BackpropMode.VERBOSE:
             loss = F.cross_entropy(logits, targets)
         else:
             # The written out version of the cross entropy
@@ -107,7 +112,7 @@ def train_neural_net_model(
             # For the picked row, the second index picks an element for the
             # first index (a character is picked from the batch)
             # This is equivalent to sparse cross-entropy
-            # See note in manual_backprop for more details
+            # See note in verbose_manual_backprop for more details
             batch_size = idxs.size(dim=0)
             loss = -log_probabilities[range(batch_size), targets].mean()
 
@@ -136,18 +141,22 @@ def train_neural_net_model(
             tensor.retain_grad()
 
         # Do the back propagation
-        gradients = manual_backprop(
-            model=model, intermediate_variables=intermediate_variables, targets=targets, input_data=dataset["training_input_data"][idxs]
-        )
-        # Do the actual backprop in order to compare
-        loss.backward()
-        if i % optimization_params.mini_batches_per_data_capture == 0:
-            compare_gradients(
-                model=model,
-                intermediate_variables=intermediate_variables,
-                gradients=gradients,
+        if backprop_mode == BackpropMode.VERBOSE:
+            gradients = verbose_manual_backprop(
+                model=model, intermediate_variables=intermediate_variables, targets=targets, input_data=dataset["training_input_data"][idxs], backprop_mode=backprop_mode
             )
-        attach_gradients(model=model, gradients=gradients)
+
+        # Always do the  backprop in order to compare
+        loss.backward()
+
+        if backprop_mode != BackpropMode.AUTOMATIC:
+            if i % optimization_params.mini_batches_per_data_capture == 0:
+                compare_gradients(
+                    model=model,
+                    intermediate_variables=intermediate_variables,
+                    gradients=gradients,
+                )
+            attach_gradients(model=model, gradients=gradients)
 
         # Update the weights
         for parameters in layered_parameters:
@@ -186,11 +195,11 @@ def train_neural_net_model(
 
 # Reducing the number of locals here will penalize the didactical purpose
 # pylint: disable-next=too-many-locals,too-many-statements
-def manual_backprop(
+def verbose_manual_backprop(
     model: Tuple[torch.Tensor, ...],
     intermediate_variables: Dict[str, torch.Tensor],
     targets: torch.Tensor,
-    input_data: torch.Tensor
+    input_data: torch.Tensor,
 ) -> Dict[str, torch.Tensor]:
     """Do the manual back propagation, and set the gradients to the parameters.
 
@@ -2072,7 +2081,7 @@ def train(
     model_params: ModelParams,
     optimization_params: OptimizationParams,
     batch_normalization_parameters: BatchNormalizationParameters,
-    use_functional: bool = True,
+    backprop_mode: BackpropMode = BackpropMode.AUTOMATIC,
     seed: int = 2147483647,
 ) -> Tuple[torch.Tensor, ...]:
     """Train the model.
@@ -2082,9 +2091,7 @@ def train(
         optimization_params (OptimizationParams): The optimization parameters
         batch_normalization_parameters (BatchNormalizationParameters):
             Contains the running mean and the running standard deviation
-        use_functional (bool): Whether or not to use the functional version of
-            the cross entropy.
-            If False, the hand-written version will be used
+        backprop_mode (BackpropMode): The backprop mode to use
         seed (int): The seed for the random number generator
 
     Returns:
@@ -2102,7 +2109,7 @@ def train(
         dataset=dataset,
         batch_normalization_parameters=batch_normalization_parameters,
         optimization_params=optimization_params,
-        use_functional=use_functional,
+        backprop_mode=backprop_mode,
         seed=seed,
     )
 
@@ -2112,16 +2119,14 @@ def train(
 def train_model(
     model_params: ModelParams,
     optimization_params: OptimizationParams,
-    use_functional: bool,
+    backprop_mode: BackpropMode,
 ) -> None:
     """Train the model.
 
     Args:
         model_params (ModelParams): The model parameters
         optimization_params (OptimizationParams): The optimization parameters
-        use_functional (bool): Whether or not to use the functional version of
-            the cross entropy.
-            If False, the hand-written version will be used
+        backprop_mode (BackpropMode): What backprop mode to use
     """
     # These parameters will be used as batch norm parameters during inference
     # Initialized to zero as the mean and one as std as the initialization of w1
@@ -2142,7 +2147,7 @@ def train_model(
         model_params=model_params,
         optimization_params=optimization_params,
         batch_normalization_parameters=batch_normalization_parameters,
-        use_functional=use_functional,
+        backprop_mode=backprop_mode,
     )
     print("Training done!")
 
@@ -2218,12 +2223,13 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
         help="Number of examples per batch",
     )
     parser.add_argument(
-        "-u",
-        "--use-functional",
-        type=bool,
+        "-m",
+        "--backprop-mode",
+        type=BackpropMode,
         required=False,
-        default=True,
-        help="Whether or not to use the functional version of the cross entropy.",
+        default=BackpropMode.AUTOMATIC,
+        choices=[el.name for el in BackpropMode]
+        help="What backprop mode to use",
     )
 
     args = parser.parse_args(sys_args)
@@ -2250,7 +2256,7 @@ def main(sys_args: List[str]):
     train_model(
         model_params=model_params,
         optimization_params=optimization_params,
-        use_functional=args.use_functional,
+        backprop_mode=args.backprop_mode,
     )
 
 
