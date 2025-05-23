@@ -16,7 +16,7 @@ from makemore_backprop_ninja.train import parse_args, train_neural_net_model, Ba
 from makemore_backprop_ninja import DEVICE
 
 
-@pytest.mark.parametrize("backprop_mode", [el.value for el in BackpropMode])
+@pytest.mark.parametrize("backprop_mode", list(BackpropMode))
 def test_train_neural_net_model(backprop_mode: BackpropMode) -> None:
     """
     Test the test_train_neural_net_model function.

@@ -143,7 +143,7 @@ def train_neural_net_model(
         # Do the back propagation
         if backprop_mode == BackpropMode.VERBOSE:
             gradients = verbose_manual_backprop(
-                model=model, intermediate_variables=intermediate_variables, targets=targets, input_data=dataset["training_input_data"][idxs], backprop_mode=backprop_mode
+                model=model, intermediate_variables=intermediate_variables, targets=targets, input_data=dataset["training_input_data"][idxs]
             )
 
         # Always do the  backprop in order to compare
@@ -2228,7 +2228,7 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
         type=BackpropMode,
         required=False,
         default=BackpropMode.AUTOMATIC,
-        choices=[el.name for el in BackpropMode]
+        choices=list(BackpropMode),
         help="What backprop mode to use",
     )
 
