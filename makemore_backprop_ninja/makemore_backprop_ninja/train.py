@@ -2,6 +2,7 @@
 
 import argparse
 import sys
+from enum import Enum
 from typing import Dict, List, Optional, Tuple
 
 import torch
@@ -19,7 +20,6 @@ from tqdm import tqdm
 
 from makemore_backprop_ninja import DATASET, DEVICE
 
-from enum import Enum
 
 class BackpropMode(Enum):
     AUTOMATIC = "AUTOMATIC"
@@ -143,7 +143,10 @@ def train_neural_net_model(
         # Do the back propagation
         if backprop_mode == BackpropMode.VERBOSE:
             gradients = verbose_manual_backprop(
-                model=model, intermediate_variables=intermediate_variables, targets=targets, input_data=dataset["training_input_data"][idxs]
+                model=model,
+                intermediate_variables=intermediate_variables,
+                targets=targets,
+                input_data=dataset["training_input_data"][idxs],
             )
 
         # Always do the  backprop in order to compare
@@ -218,11 +221,11 @@ def verbose_manual_backprop(
     (
         c,
         w1,
-        _, # We are not using b1 in any calculations
+        _,  # We are not using b1 in any calculations
         w2,
-        _, # We are not using b2 in any calculations
+        _,  # We are not using b2 in any calculations
         batch_normalization_gain,
-        _, # We are not using batch_normalization_bias
+        _,  # We are not using batch_normalization_bias
     ) = model
     # Intermediate variables from predict
     embedding = intermediate_variables["embedding"]
@@ -270,7 +273,7 @@ def verbose_manual_backprop(
     #
     # Note that the ground truth needs not to be one-hot encoded in all cases.
     # It can be a distribution like we have in knowledge distillation.
-    # There we use the outputs of the teacher model as the target for the student 
+    # There we use the outputs of the teacher model as the target for the student
     # model
     # In that case we can no longer use the torch.nn.CrossEntropyLoss, and we
     # need to use a custom implementation like
@@ -283,12 +286,12 @@ def verbose_manual_backprop(
     # predict
     #
     # Sticking to the PyTorch nomenclature, we call the ground truth y and the
-    # prediction x, we see that the loss function with the reduction can be 
+    # prediction x, we see that the loss function with the reduction can be
     # written as
     #
     # l = - \frac{1}{N} \sum_{n=1}^{N} \sum_{c=1}^{C} y_{nc} \log(\mathbb{P}(x_{nc}))
     #
-    # Notice that there will be one prediction per sample per class, i.e. x = x(n,c) 
+    # Notice that there will be one prediction per sample per class, i.e. x = x(n,c)
     # where n is a specific batch and c a specific class
     # We are interested in understanding how each of the elements in the N x C
     # matrix is contributing to the loss.
@@ -300,21 +303,21 @@ def verbose_manual_backprop(
     # Instead, we will take the derivative w.r.t to the immediate variable
     #
     # \log(\mathbb{P}(x_{nc}))
-    # 
+    #
     # Let us store the total derivative of \log(\mathbb{P}(x_{nc})) in a tensor
-    # T. 
+    # T.
     # I.e. for each element we want to calculate
     #
     # T_{ij} = \frac{dl}{d\log(\mathbb{P}(x_{ij}))}
     #
-    # Let's denote 
-    # 
+    # Let's denote
+    #
     # u_{nc} =\log(\mathbb{P}(x_{nc})
     #
     # Notice that l depends on every u, i.e.
     #
     # l : l(u_{00}, u_{01}, ..., u_{10}, u_{11}, ... u_{nc})
-    # 
+    #
     # By using the definition of the differential of multivariate calculus we
     # have that
     #
@@ -329,10 +332,10 @@ def verbose_manual_backprop(
     #
     # so
     #
-    # \frac{d l}{d u_{ij}}  
-    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial u_{nc}} 
-    #   \frac{d u_{nc}}{d u_{ij}} 
-    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial u_{nc}} 
+    # \frac{d l}{d u_{ij}}
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial u_{nc}}
+    #   \frac{d u_{nc}}{d u_{ij}}
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial u_{nc}}
     #   \delta_{ni}\delta_{cj}
     # = \frac{\partial l}{\partial u_{ij}}
     #
@@ -342,7 +345,7 @@ def verbose_manual_backprop(
     #
     # \frac{dl}{d u_{nc}} = - \frac{1}{N} y_{nc}
     #
-    # Finally, as y_{nc} is 1 only once per row, we get 
+    # Finally, as y_{nc} is 1 only once per row, we get
     dl_d_log_probabilities = torch.zeros_like(log_probabilities)
     batch_size = embedding.size(dim=0)
     dl_d_log_probabilities[range(batch_size), targets] = -(1.0 / batch_size)
@@ -352,9 +355,9 @@ def verbose_manual_backprop(
 
     # Next, we will find the dependency on the loss from the probabilities, i.e.
     #
-    # \frac{dl}{d \mathbb{P}(x_{ij})} 
+    # \frac{dl}{d \mathbb{P}(x_{ij})}
     #
-    # We can again denote 
+    # We can again denote
     #
     # u_{nc} = \log(\mathbb{P}(x_{nc})
     #
@@ -364,83 +367,83 @@ def verbose_manual_backprop(
     #
     # Using the differential we get that
     #
-    # d l  
+    # d l
     # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial u_{nc}} d u_{nc}
     #
     # We can expand d u_{nc} in the basis of \mathbb{P}_{ij}
     #
-    # d u_{nc}  
-    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{\partial u_{nc}}{\partial 
+    # d u_{nc}
+    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{\partial u_{nc}}{\partial
     #   \mathbb{P}_{ij}} d \mathbb{P}_{ij}
     #
     # Since u_{nc} only depends on \mathbb{P}_{ij} and is zero for all other
     # elements, we get that
     #
-    # \frac{\partial u_{nc}}{\partial \mathbb{P}_{ij}} 
+    # \frac{\partial u_{nc}}{\partial \mathbb{P}_{ij}}
     # = \frac{d u_{nc}}{d \mathbb{P}_{ij}} \delta_{ni}\delta_{cj}
     #
-    # I.e. the partial derivative will be the same as the total derivative as 
+    # I.e. the partial derivative will be the same as the total derivative as
     # all the other variables will be zero when taking the total derivate.
     # Plugging this into the expression above, we get that
     #
-    # d u_{nc} 
-    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{d u_{nc}}{d \mathbb{P}_{nc}} 
+    # d u_{nc}
+    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{d u_{nc}}{d \mathbb{P}_{nc}}
     #   \delta_{ni}\delta_{cj} d \mathbb{P}_{ij}
     # = \frac{d u_{nc}}{d \mathbb{P}_{nc}} d \mathbb{P}_{nc}
     #
     # Plugging this into the original expression gives
     #
-    # d l  
-    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial u_{nc}} 
+    # d l
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial u_{nc}}
     #   \frac{d u_{nc}}{d \mathbb{P}_{nc}} d \mathbb{P}_{nc}
     #
-    # So 
+    # So
     #
-    # \frac{dl}{d \mathbb{P}(x_{ij})} 
-    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial u_{nc}} 
-    #   \frac{d u_{nc}}{d \mathbb{P}_{nc}} 
-    #   \frac{d \mathbb{P}_{nc}}{d \mathbb{P}_{ij}} 
-    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial u_{nc}} 
+    # \frac{dl}{d \mathbb{P}(x_{ij})}
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial u_{nc}}
+    #   \frac{d u_{nc}}{d \mathbb{P}_{nc}}
+    #   \frac{d \mathbb{P}_{nc}}{d \mathbb{P}_{ij}}
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial u_{nc}}
     #   \frac{d u_{nc}}{d \mathbb{P}_{nc}} \delta_{ni}\delta_{cj}
     #
     # This gives
     #
-    # \frac{dl}{d \mathbb{P}(x_{nc})} 
-    # = \frac{\partial l}{\partial u_{nc}} \frac{d u_{nc}}{d \mathbb{P}_{nc}} 
+    # \frac{dl}{d \mathbb{P}(x_{nc})}
+    # = \frac{\partial l}{\partial u_{nc}} \frac{d u_{nc}}{d \mathbb{P}_{nc}}
     #
     # We have that
     #
-    # \frac{d u_{nc}}{d \mathbb{P}_{nc}} 
-    # = \frac{d \log(\mathbb{P}(x_{nc}))}{d \mathbb{P}(x_{nc})} 
-    # = \frac{1}{d \mathbb{P}(x_{nc}))} 
+    # \frac{d u_{nc}}{d \mathbb{P}_{nc}}
+    # = \frac{d \log(\mathbb{P}(x_{nc}))}{d \mathbb{P}(x_{nc})}
+    # = \frac{1}{d \mathbb{P}(x_{nc}))}
     #
     # so
     #
-    # \frac{dl}{d \mathbb{P}(x_{nc})} 
-    # = \frac{\partial l}{\partial u_{nc}} \frac{1}{d \mathbb{P}(x_{nc}))} 
+    # \frac{dl}{d \mathbb{P}(x_{nc})}
+    # = \frac{\partial l}{\partial u_{nc}} \frac{1}{d \mathbb{P}(x_{nc}))}
     dl_d_probabilities = dl_d_log_probabilities * (1.0 / probabilities)
 
     # In order to continue, we should inspect how we calculate the probabilities
     #
     # Firstly, we observe that
     #
-    # \mathbb{P}(x_{nc}) 
-    # = \frac{ 
-    #     \exp(x_{nc} - \max_{C}(x_{nc}) ) }{ 
+    # \mathbb{P}(x_{nc})
+    # = \frac{
+    #     \exp(x_{nc} - \max_{C}(x_{nc}) ) }{
     #     \sum_{C} \exp(x_{nc} - \max_{C}(x_{nc})) }
     #
     # as previously mentioned, we've chopped up the expression.
     # In other words, we've defined
     #
-    # m_{n} = \max_{C}(x_{nc}) 
+    # m_{n} = \max_{C}(x_{nc})
     #       = \text{logits_maxes}
-    # o_{nc} = x_{nc} - \max_{C}(x_{nc}) = x_{nc} - m_{n} 
+    # o_{nc} = x_{nc} - \max_{C}(x_{nc}) = x_{nc} - m_{n}
     #        = \text{normalized_logits}
-    # e_{nc} = \exp(x_{nc} - \max_{C}(x_{nc}) ) = \exp(o_{nc}) 
+    # e_{nc} = \exp(x_{nc} - \max_{C}(x_{nc}) ) = \exp(o_{nc})
     #        = \text{counts}
-    # s_{n} = \sum_{C} \exp(x_{nc} - \max_{C}(x_{nc})) = \sum_{C} e_{nc} 
+    # s_{n} = \sum_{C} \exp(x_{nc} - \max_{C}(x_{nc})) = \sum_{C} e_{nc}
     #       = \text{counts_sum}
-    # i_{n} = \frac{1}{ \sum_{C} \exp(x_{nc} - \max_{C}(x_{nc})) } = \frac{1}{s_{n}} 
+    # i_{n} = \frac{1}{ \sum_{C} \exp(x_{nc} - \max_{C}(x_{nc})) } = \frac{1}{s_{n}}
     #       = \text{counts_sum_inv}
     #
     # so that
@@ -452,32 +455,32 @@ def verbose_manual_backprop(
     # \mathbb{P}(x_{nc}) = e_{nc} \cdot i_{n}
     #
     # We now observe that l has a dependency on P, which again has a dependency
-    # on i. 
+    # on i.
     # I.e. the diagram is l -> P -> i.
     # We have that
     #
     # dl
-    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}}
     #   d \mathbb{P}_{nc}
     #
     # Where
     #
-    # d \mathbb{P}_{nc} (e_{nc}, i_{n}) 
-    # = \sum_{j=0}^{N} \sum_{k=0}^{C} 
+    # d \mathbb{P}_{nc} (e_{nc}, i_{n})
+    # = \sum_{j=0}^{N} \sum_{k=0}^{C}
     #   \frac{\partial \mathbb{P}_{nc}}{\partial e_{jk}} d e_{jk}
     #   +
-    #   \sum_{j=0}^{N} 
+    #   \sum_{j=0}^{N}
     #   \frac{\partial \mathbb{P}_{nc}}{\partial i_{j}} d i_{j}
     #
     # Again since an arbitrary element \mathbb{P}_{nc}} depends only on the same
     # elements in e_{nc} and i_{nc}, we can write this as
     #
-    # d \mathbb{P}_{nc} (e_{nc}, i_{n}) 
-    # = \sum_{j=0}^{N} \sum_{k=0}^{C} 
-    #   \frac{\partial \mathbb{P}_{nc}}{\partial e_{jk}} 
+    # d \mathbb{P}_{nc} (e_{nc}, i_{n})
+    # = \sum_{j=0}^{N} \sum_{k=0}^{C}
+    #   \frac{\partial \mathbb{P}_{nc}}{\partial e_{jk}}
     #   \delta_{nj} \delta_{ck} d e_{jk}
     #   +
-    #   \sum_{j=0}^{N} 
+    #   \sum_{j=0}^{N}
     #   \frac{d \mathbb{P}_{nc}}{d i_{j}} \delta_{nj} d i_{j}
     # = \frac{\partial \mathbb{P}_{nc}}{\partial e_{nc}} d e_{nc}
     #   +
@@ -491,16 +494,16 @@ def verbose_manual_backprop(
     # Inserting this into the equation above, we get
     #
     # dl
-    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}}
     #   (\frac{\partial \mathbb{P}_{nc}}{\partial e_{nc}} d e_{nc}
     #   +
     #   \frac{d \mathbb{P}_{nc}}{d i_{n}} d i_{n})
-    #  
+    #
     # As a specific i_{k} is independent off all other i_{l}, and because e_{jk}
     # does not depend on any i_{l}, we get that
     #
-    # \frac{dl}{d i_{n}} 
-    # = \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    # \frac{dl}{d i_{n}}
+    # = \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}}
     #   \frac{d \mathbb{P}_{nc}}{d i_{n}}
     #
     # Furthermore, we have that
@@ -510,22 +513,22 @@ def verbose_manual_backprop(
     #
     # So
     #
-    # \frac{dl}{d i_{n}} 
+    # \frac{dl}{d i_{n}}
     # = \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}} e_{nc}
     dl_d_counts_sum_inv = (dl_d_probabilities * counts).sum(dim=1, keepdim=True)
-    # Note how we in the previous derivation found \frac{dl}{d \mathbb{P}(x_{nc})} 
+    # Note how we in the previous derivation found \frac{dl}{d \mathbb{P}(x_{nc})}
     # instead of \frac{\partial l}{\partial \mathbb{P}_{nc}}.
     # However, as \mathbb{P}_{nc} is a direct input function to l, there is no
     # difference between the total and the partial derivative.
     # Also, we do not need to go through \frac{d l}{d u_{nc}} when using the chain
     # rule as this is already baked into \frac{d l}{d \mathbb{P}_{nc}}.
     # So when we have the total derivative of \mathbb{P}, we've obtained it by
-    # "following every route" out of \mathbb{P}. 
+    # "following every route" out of \mathbb{P}.
     #
     # There is also a more intuitive explanation of the sum:
     # counts (a.k.a e_{nc}) has dimension (N,C) and counts_sum_inv
     # (a.k.a i_{n}) has dimension (N, 1).
-    # In other words we have an element-wise multiplication going on, where i_{n} 
+    # In other words we have an element-wise multiplication going on, where i_{n}
     # has been stretched (broadcasted) in the "classes" dimension.
     # Standard broadcasting rules can be found at
     # https://pytorch.org/docs/stable/notes/broadcasting.html
@@ -566,17 +569,17 @@ def verbose_manual_backprop(
     # \end{bmatrix}
     #
     # Since i_{n} has been replicated, it will have C contributions to the final
-    # loss. 
+    # loss.
     # To illustrate this we can use an example with three classes.
     # If we consider batch n=0, we see that the contribution on the final loss
     # becomes
     #
     #      .--> mul --> e_{00} --> ... --.
-    #     /                               \ 
+    #     /                               \
     # i_{0} --> mul --> e_{01} --> ... ----+-> l
-    #     \                               /  
+    #     \                               /
     #      .--> mul --> e_{02} --> ... --.
-    # 
+    #
     # Intuitively, we see that if we change the value of i_{0} a bit, the value
     # of l has three paths, and all these paths must be accounted for.
     # We do this through summing the contributions.
@@ -585,11 +588,11 @@ def verbose_manual_backprop(
     #
     # s_{n} = \sum_{C} \exp(x_{nc} - \max_{C}(x_{nc})) = \text{counts_sum}
     #
-    # We have that 
+    # We have that
     #
     # i_{n} = \frac{1}{s_{n}}
     #
-    # Using the differentials, we can start from the point of previous 
+    # Using the differentials, we can start from the point of previous
     # derivation, where we found that
     #
     # dl
@@ -598,48 +601,48 @@ def verbose_manual_backprop(
     # We can now expand the basis d i_{n} in terms of s_{n}.
     # We find that
     #
-    # d i_{n} 
-    # = \sum_{k=0}^{N} \frac{\partial i_{n}}{\partial s_{k}} d s_{k}  
-    # = \sum_{k=0}^{N} \frac{d i_{n}}{d s_{k}} \delta_{nk} d s_{k}  
-    # = \frac{d i_{n}}{d s_{n}} d s_{n}  
+    # d i_{n}
+    # = \sum_{k=0}^{N} \frac{\partial i_{n}}{\partial s_{k}} d s_{k}
+    # = \sum_{k=0}^{N} \frac{d i_{n}}{d s_{k}} \delta_{nk} d s_{k}
+    # = \frac{d i_{n}}{d s_{n}} d s_{n}
     #
     # where we have used that i_{l} only depend on s_{l}.
     # Plugging this into the equation above, we get
     #
     # dl
-    # = \sum_{n=0}^{N} \frac{\partial l}{\partial i_{n}} 
+    # = \sum_{n=0}^{N} \frac{\partial l}{\partial i_{n}}
     #   \frac{d i_{n}}{d s_{n}} d s_{n})
     #
     # where
     #
-    # \frac{d i_{n}}{d s_{n}} 
-    # = \frac{d }{d s_{n}} \frac{1}{s_{n}} 
-    # = - (\frac{1}{s_{n}})^2 
-    # = - counts_sum^(-2) 
+    # \frac{d i_{n}}{d s_{n}}
+    # = \frac{d }{d s_{n}} \frac{1}{s_{n}}
+    # = - (\frac{1}{s_{n}})^2
+    # = - counts_sum^(-2)
     #
     # plugging this into the above expression yields
     #
     # dl
-    # = - \sum_{n=0}^{N} \frac{\partial l}{\partial i_{n}} \frac{1}{s_{n}^2} 
+    # = - \sum_{n=0}^{N} \frac{\partial l}{\partial i_{n}} \frac{1}{s_{n}^2}
     #   d s_{n}
     #
     # As s_{n} has no other dependency on s_{i}, we get that
     #
-    # \frac{dl}{d s_{n}} = - \frac{\partial l}{\partial i_{n}} \frac{1}{s_{n}^2} 
-    dl_d_counts_sum = -dl_d_counts_sum_inv * (counts_sum**(-2))
+    # \frac{dl}{d s_{n}} = - \frac{\partial l}{\partial i_{n}} \frac{1}{s_{n}^2}
+    dl_d_counts_sum = -dl_d_counts_sum_inv * (counts_sum ** (-2))
 
-    # Next, we can use what we've just found in order to investigate how the 
-    # final loss is changing when we change 
+    # Next, we can use what we've just found in order to investigate how the
+    # final loss is changing when we change
     #
     # e_{nc} = \exp(x_{nc} - \max_{C}(x_{nc}) ) = \exp(o_{nc}) = \text{counts}
     #
-    # From above, we know that 
+    # From above, we know that
     #
     # \mathbb{P}(x_{nc}) = e_{nc} \cdot i_{n}(s_{n}(e_{nc}))
     #
     # So we need to calculate
     #
-    # \frac{d l(e_{nc}, i_{n}(s_{n}(e_{nc})))}{d e_{nc}} 
+    # \frac{d l(e_{nc}, i_{n}(s_{n}(e_{nc})))}{d e_{nc}}
     #
     # We can see that the dependency diagram is
     #
@@ -654,19 +657,19 @@ def verbose_manual_backprop(
     # Imagine we are moving on a mountain.
     # The height is given by h(x, y), and there is a road so that we can express
     # y in terms of x, i.e. h(x, y(x)).
-    # In this setup the partial derivative answers the question: 
+    # In this setup the partial derivative answers the question:
     # How does the height change if I only change x, and let y be unchanged
-    # The total derivative answers the question: 
+    # The total derivative answers the question:
     # How does the height change if I change x and at the same time update y(x).
     # I.e.:
     # Partial derivative: Do not follow the road
     # Total derivative: Follow the road
     #
-    # Using the differentials, we again start from the point of previous 
+    # Using the differentials, we again start from the point of previous
     # derivation, where we found that
     #
     # dl
-    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}}
     #   (\frac{\partial \mathbb{P}_{nc}}{\partial e_{nc}} d e_{nc}
     #   +
     #   \frac{d \mathbb{P}_{nc}}{d i_{n}} d i_{n})
@@ -675,75 +678,75 @@ def verbose_manual_backprop(
     # and see that
     #
     # dl
-    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}}
     #   (\frac{\partial \mathbb{P}_{nc}}{\partial e_{nc}} d e_{nc}
     #   +
     #   \frac{d \mathbb{P}_{nc}}{d i_{n}} \frac{d i_{n}}{d s_{n}} d s_{n})
-    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}}
     #   \frac{\partial \mathbb{P}_{nc}}{\partial e_{nc}} d e_{nc}
     #   +
-    #   \sum_{n=0}^{N} 
-    #   (\sum_{c=0}^{C} 
-    #     \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    #   \sum_{n=0}^{N}
+    #   (\sum_{c=0}^{C}
+    #     \frac{\partial l}{\partial \mathbb{P}_{nc}}
     #     \frac{d \mathbb{P}_{nc}}{d i_{n}})
     #    \frac{d i_{n}}{d s_{n}} d s_{n}
     #
     # Using
     #
-    # \frac{dl}{d i_{n}} 
-    # = \sum_{c=0}^{C} 
-    #   \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    # \frac{dl}{d i_{n}}
+    # = \sum_{c=0}^{C}
+    #   \frac{\partial l}{\partial \mathbb{P}_{nc}}
     #   \frac{d \mathbb{P}_{nc}}{d i_{n}}
     #
     # gives us
     #
     # dl
-    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}}
     #   \frac{\partial \mathbb{P}_{nc}}{\partial e_{nc}} d e_{nc}
     #   +
-    #   \sum_{n=0}^{N} 
-    #   \frac{dl}{d i_{n}} 
-    #   \frac{d i_{n}}{d s_{n}} 
+    #   \sum_{n=0}^{N}
+    #   \frac{dl}{d i_{n}}
+    #   \frac{d i_{n}}{d s_{n}}
     #   d s_{n}
     #
     # And, using
     #
-    # \frac{dl}{d s_{n}} 
-    # = \frac{dl}{d i_{n}} \frac{d i_{n}}{d s_{n}} 
+    # \frac{dl}{d s_{n}}
+    # = \frac{dl}{d i_{n}} \frac{d i_{n}}{d s_{n}}
     #
     # gives us
     #
     # dl
-    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}}
     #   \frac{\partial \mathbb{P}_{nc}}{\partial e_{nc}} d e_{nc}
     #   +
-    #   \sum_{n=0}^{N} 
+    #   \sum_{n=0}^{N}
     #   \frac{d l}{d s_{n}}
     #   d s_{n}
     #
     # We can now expand d s_{n} in terms of e_{nc}
     #
-    # d s_{n} 
-    # = \sum_{k=0}^{N} \sum_{l=0}^{C} \frac{\partial s_{n}}{\partial e_{kl}} 
+    # d s_{n}
+    # = \sum_{k=0}^{N} \sum_{l=0}^{C} \frac{\partial s_{n}}{\partial e_{kl}}
     #   d e_{kl}
     #
     # Again, using that these are element-wise operations, i.e. that s_{n} will
     # depend on all classes, we have that
     #
-    # d s_{n} 
-    # = \sum_{k=0}^{N} \sum_{l=0}^{C} 
+    # d s_{n}
+    # = \sum_{k=0}^{N} \sum_{l=0}^{C}
     #    \frac{d s_{n}}{d e_{kl}} \delta_{kn} d e_{kl}
-    # = \sum_{l=0}^{C} \frac{\partial s_{n}}{\partial e_{nl}} d e_{nl}  
+    # = \sum_{l=0}^{C} \frac{\partial s_{n}}{\partial e_{nl}} d e_{nl}
     #
     # so
     #
     # dl
-    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}}
     #   \frac{\partial \mathbb{P}_{nc}}{\partial e_{nc}} d e_{nc}
     #   +
-    #   \sum_{n=0}^{N} 
+    #   \sum_{n=0}^{N}
     #   \frac{d l}{d s_{n}}
-    #   \sum_{l=0}^{C} \frac{\partial s_{n}}{\partial e_{nl}} d e_{nl} 
+    #   \sum_{l=0}^{C} \frac{\partial s_{n}}{\partial e_{nl}} d e_{nl}
     #
     # where
     #
@@ -759,10 +762,10 @@ def verbose_manual_backprop(
     # Plugging this in above yields
     #
     # dl
-    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial \mathbb{P}_{nc}}
     #   \frac{\partial \mathbb{P}_{nc}}{\partial e_{nc}} d e_{nc}
     #   +
-    #   \sum_{n=0}^{N} 
+    #   \sum_{n=0}^{N}
     #   \frac{d l}{d s_{n}}
     #   \sum_{l=0}^{C} d e_{nl}
     #
@@ -770,7 +773,7 @@ def verbose_manual_backprop(
     #
     # dl
     # = \sum_{n=0}^{N} \sum_{c=0}^{C} (
-    #   \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    #   \frac{\partial l}{\partial \mathbb{P}_{nc}}
     #   \frac{\partial \mathbb{P}_{nc}}{\partial e_{nc}} d e_{nc}
     #   +
     #   \frac{d l}{d s_{n}} d e_{nc})
@@ -787,7 +790,7 @@ def verbose_manual_backprop(
     #
     # dl
     # = \sum_{n=0}^{N} \sum_{c=0}^{C} (
-    #   \frac{\partial l}{\partial \mathbb{P}_{nc}} 
+    #   \frac{\partial l}{\partial \mathbb{P}_{nc}}
     #   i_{n} d e_{nc}
     #   +
     #   \frac{d l}{d s_{n}} d e_{nc})
@@ -798,7 +801,9 @@ def verbose_manual_backprop(
     # = \frac{\partial l}{\partial \mathbb{P}_{nc}} i_{n}
     #   +
     #   \frac{d l}{d s_{n}}
-    dl_d_counts = dl_d_probabilities * counts_sum_inv + dl_d_counts_sum*torch.ones_like(counts)
+    dl_d_counts = (
+        dl_d_probabilities * counts_sum_inv + dl_d_counts_sum * torch.ones_like(counts)
+    )
     # Notice that the + \frac{d l}{d s_{n}} part is the same scalar for every
     # c in that batch-row n.
     # Hence, we must go from (N,1) to (N,C) which we can do by the ones_like
@@ -814,7 +819,7 @@ def verbose_manual_backprop(
     # \frac{d }{d e_{10}} (e_{00} + e_{01} + \ldots e_{10} \ldots) = 1
     #
     # i.e.
-    # 
+    #
     # \frac{d s_{n}}{d e_{nc}} = torch.ones_like(counts)
 
     # Next, we can calculate the contribution on the final loss is changing when
@@ -826,34 +831,34 @@ def verbose_manual_backprop(
     #
     # l -> l(u(\mathbb{P}(e(o(x, m(x))), i(s(e(o(x, m(x)))))))),
     #
-    # i.e. that there are two paths the calculation of the loss can take from 
+    # i.e. that there are two paths the calculation of the loss can take from
     # o_{nc}, one from the calculation of e(o(x, m(x))) and the other from
-    # i(s(e(o(x, m(x))))). 
+    # i(s(e(o(x, m(x))))).
     # Both dependencies of o_{nc} goes through e_{nc}. We already know about all
     # the contributions on l of e_{nc} through the total derivative.
     # Hence, by expanding in the basis of o_{nc} we get
-    # 
-    # dl  
+    #
+    # dl
     # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial e_{nc}} d e_{nc}
     #
     # where
     #
-    # de_{nc} 
-    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{\partial e_{nc}}{\partial o_{ij}} 
+    # de_{nc}
+    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{\partial e_{nc}}{\partial o_{ij}}
     #   d o_{ij}
     #
     # due to the direct dependency we get that
     #
-    # de_{nc} 
-    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{d e_{nc}}{d o_{ij}} 
+    # de_{nc}
+    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{d e_{nc}}{d o_{ij}}
     #   \delta_{ni}\delta_{cj}
     #   d o_{ij}
     # = \frac{d e_{nc}}{d o_{nc}} d o_{nc}
     #
     # inserting this above gives
     #
-    # dl  
-    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial e_{nc}} 
+    # dl
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial e_{nc}}
     #   \frac{d e_{nc}}{d o_{nc}} d o_{nc}
     #
     # As o_{nc} is independent of o_{ij}, we get that
@@ -863,8 +868,8 @@ def verbose_manual_backprop(
     #
     # where
     #
-    # \frac{d e_{nc}}{d o_{nc}} 
-    # = \frac{d}{d o_{nc}} \exp(o_{nc}) 
+    # \frac{d e_{nc}}{d o_{nc}}
+    # = \frac{d}{d o_{nc}} \exp(o_{nc})
     # = \exp(o_{nc}) = e_{nc} = \text{counts}
     #
     # so
@@ -873,37 +878,37 @@ def verbose_manual_backprop(
     # = \frac{\partial l}{\partial e_{nc}} e_{nc}
     dl_d_normalized_logits = dl_d_counts * counts
 
-    # We can use the same logic to calculate the contribution coming from 
+    # We can use the same logic to calculate the contribution coming from
     #
     # m_{n} = \max_{C}(x_{nc}) = \text{logits_maxes}
     #
     # as all paths on m goes through o, we get that
     #
-    # dl  
-    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}} d o_{nc} 
+    # dl
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}} d o_{nc}
     #
     # Expanding in the basis of m_{n} gives
     #
-    # d o_{nc} 
-    # = \sum_{i=0}^{N} \frac{\partial o_{nc}}{\partial m_{i}} d m_{i} 
+    # d o_{nc}
+    # = \sum_{i=0}^{N} \frac{\partial o_{nc}}{\partial m_{i}} d m_{i}
     #
     # As the maxes depend on all classes, we have that
-    # d o_{nc} 
-    # = \sum_{i=0}^{N} \frac{d o_{nc}}{d m_{i}} \delta_{in} d m_{i} 
-    # = \frac{d o_{nc}}{d m_{n}} d m_{n} 
-    # 
+    # d o_{nc}
+    # = \sum_{i=0}^{N} \frac{d o_{nc}}{d m_{i}} \delta_{in} d m_{i}
+    # = \frac{d o_{nc}}{d m_{n}} d m_{n}
+    #
     # Inserting in the above, we get
     #
-    # dl  
-    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}} 
-    #   \frac{d o_{nc}}{d m_{n}} d m_{n}  
+    # dl
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}}
+    #   \frac{d o_{nc}}{d m_{n}} d m_{n}
     #
     # Again, for a fixed batch, the max function does not depend on any other
     # batches, so
     #
     # \frac{dl}{d m_{n}}
-    # = \sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}} 
-    #   \frac{d o_{nc}}{d m_{n}}   
+    # = \sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}}
+    #   \frac{d o_{nc}}{d m_{n}}
     #
     # We have that
     #
@@ -912,13 +917,13 @@ def verbose_manual_backprop(
     # so
     #
     # \frac{dl}{d m_{n}}
-    # = -\sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}} 
+    # = -\sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}}
     dl_d_normalized_logits_clone = dl_d_normalized_logits.clone()
     dl_d_logits_maxes = -dl_d_normalized_logits.sum(1, keepdim=True)
-    # NOTE: We will reuse the dl_d_normalized_logits, so we'll clone it to ensure 
+    # NOTE: We will reuse the dl_d_normalized_logits, so we'll clone it to ensure
     #       that there are no inplace operations
     #
-    # Another way to see this is to notice that we are dealing with a 
+    # Another way to see this is to notice that we are dealing with a
     # broadcasting operation.
     # If we write out the elements in the matrix explicitly, we get that
     #
@@ -926,15 +931,15 @@ def verbose_manual_backprop(
     # \frac{d }{d m_{1}} (x_{1c} - m_{1}) = -1
     # \ldots
     #
-    # However, as with the calculation of \frac{d l}{d i_{n}} 
+    # However, as with the calculation of \frac{d l}{d i_{n}}
     # (a.k.a dl_d_counts_sum_inv)
     # we see that we will have a broadcasting when calculating x_{nc} - m_{n}
     # i.e. using 3 classes again, we will have a graph looking like
     #
     #      .--> minus --> x_{00} --> ... --.
-    #     /                                 \ 
+    #     /                                 \
     # m_{0} --> minus --> x_{01} --> ... ----+-> l
-    #     \                                 /  
+    #     \                                 /
     #      .--> minus --> x_{02} --> ... --.
     #
     # which means that the contribution must be summed over the classes dimension
@@ -950,18 +955,18 @@ def verbose_manual_backprop(
     #
     # Using the standard approach with the differentials, we have that
     #
-    # dl 
-    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}} 
+    # dl
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}}
     #   d o_{nc}
     #
     # where
     #
     # d o_{nc}
-    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{\partial o_{nc}}{\partial x_{ij}} 
+    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{\partial o_{nc}}{\partial x_{ij}}
     #   d x_{ij}
     #   +
     #   \sum_{i=0}^{N} \frac{\partial o_{nc}}{\partial m_{i}} d m_{i}
-    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{\partial o_{nc}}{\partial x_{ij}} 
+    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{\partial o_{nc}}{\partial x_{ij}}
     #   \delta_{in}\delta_{jc}
     #   d x_{ij}
     #   +
@@ -975,23 +980,23 @@ def verbose_manual_backprop(
     # direct dependency of m_{n} on o_{nc}
     #
     # Inserting this into the above equation, we get
-    # 
-    # dl 
-    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}} 
+    #
+    # dl
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}}
     #   \frac{\partial o_{nc}}{\partial x_{nc}} d x_{nc}
     #   +
-    #   \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}} 
+    #   \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}}
     #   \frac{d o_{nc}}{d m_{n}} d m_{n}
     #
-    # Using the previous result of 
+    # Using the previous result of
     #
     # \frac{dl}{d m_{n}}
-    # = -\sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}} 
+    # = -\sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}}
     #
     # gives
     #
-    # dl 
-    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}} 
+    # dl
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}}
     #   \frac{\partial o_{nc}}{\partial x_{nc}} d x_{nc}
     #   -
     #   \sum_{n=0}^{N} \frac{dl}{d m_{n}}
@@ -1000,29 +1005,29 @@ def verbose_manual_backprop(
     # Finally, we can expand d m_{n} in terms of d x_{nc}
     #
     # d m_{n}
-    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{\partial m_{n}}{\partial x_{ij}} 
+    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{\partial m_{n}}{\partial x_{ij}}
     #   d x_{ij}
-    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{\partial m_{n}}{\partial x_{ij}} \delta_{in} 
+    # = \sum_{i=0}^{N} \sum_{j=0}^{C} \frac{\partial m_{n}}{\partial x_{ij}} \delta_{in}
     #   d x_{ij}
     # = \sum_{j=0}^{C} \frac{\partial m_{n}}{\partial x_{nj}} d x_{nj}
-    # = \sum_{j=0}^{C} \frac{\partial }{\partial x_{nj}} \max_{J} (x_{nj}) 
+    # = \sum_{j=0}^{C} \frac{\partial }{\partial x_{nj}} \max_{J} (x_{nj})
     #   d x_{nj}
-    # = \sum_{c=0}^{C} \frac{\partial }{\partial x_{nc}} \max_{C} (x_{nc}) 
+    # = \sum_{c=0}^{C} \frac{\partial }{\partial x_{nc}} \max_{C} (x_{nc})
     #   d x_{nc}
     #
     # Where we have used that j is just an index, and could be named anything
     # Using the definition of max, we have that
     #
-    # \max(a,b) 
-    # = \begin{cases} 
-    #    a, &{\text{if }} a \geq b \\ 
+    # \max(a,b)
+    # = \begin{cases}
+    #    a, &{\text{if }} a \geq b \\
     #    b, &{\text{if }} a \leq b
     # \end{cases}
     #
     # so
     #
-    # \frac{\partial }{\partial a} \max(a, b) 
-    # = \begin{cases} 
+    # \frac{\partial }{\partial a} \max(a, b)
+    # = \begin{cases}
     #    1, &{\text{if }} a \geq b \\
     #    0, &{\text{if }} a \leq b
     # \end{cases}
@@ -1030,8 +1035,8 @@ def verbose_manual_backprop(
     # In our case we have max of array.
     # Instead of writing all possible cases, we can write it compactly as
     #
-    # \frac{\partial }{\partial x_i} \max_k(x_i) 
-    # = \begin{cases} 
+    # \frac{\partial }{\partial x_i} \max_k(x_i)
+    # = \begin{cases}
     #    1, & i=\arg \max_{k} x_{k} \\
     #    0, &{\text{otherwise}}
     # \end{cases}
@@ -1044,22 +1049,22 @@ def verbose_manual_backprop(
     #
     # substituting back to dl gives us
     #
-    # dl 
-    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}} 
+    # dl
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial o_{nc}}
     #   \frac{\partial o_{nc}}{\partial x_{nc}} d x_{nc}
     #   -
     #   \sum_{n=0}^{N} \frac{dl}{d m_{n}}
-    #   \frac{d o_{nc}}{d m_{n}} \sum_{c=0}^{C} \{c=\arg \max_{C}x_{nc} \} 
+    #   \frac{d o_{nc}}{d m_{n}} \sum_{c=0}^{C} \{c=\arg \max_{C}x_{nc} \}
     #   d x_{nc}
     #
     # Which gives
     #
     # \frac{dl}{x_{nc}}
-    # = \frac{\partial l}{\partial o_{nc}} 
+    # = \frac{\partial l}{\partial o_{nc}}
     #   \frac{\partial o_{nc}}{\partial x_{nc}}
     #   -
     #   \frac{dl}{d m_{n}}
-    #   \frac{d o_{nc}}{d m_{n}} \{c=\arg \max_{C}x_{nc} \} 
+    #   \frac{d o_{nc}}{d m_{n}} \{c=\arg \max_{C}x_{nc} \}
     #
     # Using that
     #
@@ -1076,16 +1081,18 @@ def verbose_manual_backprop(
     # gives
     #
     # \frac{dl}{x_{nc}}
-    # = \frac{\partial l}{\partial o_{nc}} 
+    # = \frac{\partial l}{\partial o_{nc}}
     #   -
-    #   \frac{d o_{nc}}{d m_{n}} \{c=\arg \max_{C}x_{nc} \} 
-    dl_d_logits = dl_d_normalized_logits_clone + dl_d_logits_maxes*(F.one_hot(logits.max(1).indices, num_classes=logits.shape[1]))
+    #   \frac{d o_{nc}}{d m_{n}} \{c=\arg \max_{C}x_{nc} \}
+    dl_d_logits = dl_d_normalized_logits_clone + dl_d_logits_maxes * (
+        F.one_hot(logits.max(1).indices, num_classes=logits.shape[1])
+    )
     # Where
     #
     # \frac{\partial l}{\partial o_{nc}} = dl_d_normalized_logits
     # \frac{d o_{nc}}{d m_{n}} = dl_d_logits_maxes
     #
-    # We can also see the one-hot part of the expression by considering 2 
+    # We can also see the one-hot part of the expression by considering 2
     # classes and a batch size of 3.
     # This gives
     #
@@ -1093,16 +1100,16 @@ def verbose_manual_backprop(
     # \begin{bmatrix}
     #   \frac{d }{d x_{00}} m_{n} & \frac{d }{d x_{01}} m_{n} \\
     #   \frac{d }{d x_{10}} m_{n} & \frac{d }{d x_{11}} m_{n} \\
-    #   \frac{d }{d x_{20}} m_{n} & \frac{d }{d x_{21}} m_{n} 
+    #   \frac{d }{d x_{20}} m_{n} & \frac{d }{d x_{21}} m_{n}
     # \end{bmatrix}
     # =
     # \begin{bmatrix}
-    #   \frac{d }{d x_{00}} \max(x_{00}, x_{01}) & 
+    #   \frac{d }{d x_{00}} \max(x_{00}, x_{01}) &
     #     \frac{d }{d x_{01}} \max(x_{00}, x_{01}) \\
-    #   \frac{d }{d x_{10}} \max(x_{10}, x_{11}) & 
+    #   \frac{d }{d x_{10}} \max(x_{10}, x_{11}) &
     #     \frac{d }{d x_{11}} \max(x_{10}, x_{11}) \\
-    #   \frac{d }{d x_{20}} \max(x_{20}, x_{21}) & 
-    #     \frac{d }{d x_{21}} \max(x_{20}, x_{21}) 
+    #   \frac{d }{d x_{20}} \max(x_{20}, x_{21}) &
+    #     \frac{d }{d x_{21}} \max(x_{20}, x_{21})
     # \end{bmatrix}
     #
     # Using the definition of max, we see that
@@ -1122,93 +1129,93 @@ def verbose_manual_backprop(
     # Expanding dl in terms of x_{nc}, we get
     #
     # dl
-    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial x_{nc}} 
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial x_{nc}}
     #   d x_{nc}
     #
     # where
     #
     # d x_{nc} (h_{nh}, w2_{hc}, b2_{c})
-    # = \sum_{i=0}^{N} \sum_{j=0}^{H} \frac{\partial x_{nc}}{\partial h_{ij}} 
+    # = \sum_{i=0}^{N} \sum_{j=0}^{H} \frac{\partial x_{nc}}{\partial h_{ij}}
     #   d h_{ij}
     #   +
-    #   \sum_{k=0}^{H} \sum_{l=0}^{C} \frac{\partial x_{nc}}{\partial w2_{kl}} 
+    #   \sum_{k=0}^{H} \sum_{l=0}^{C} \frac{\partial x_{nc}}{\partial w2_{kl}}
     #   d w2_{kl}
     #   +
-    #   \sum_{m=0}^{C} \frac{\partial x_{nc}}{\partial b2_{m}} 
+    #   \sum_{m=0}^{C} \frac{\partial x_{nc}}{\partial b2_{m}}
     #   d b2_{m}
     #
-    # From the above expression we can see the dependencies of between the 
+    # From the above expression we can see the dependencies of between the
     # various elements.
     # For example, for a given row r of x_{nc}, only the same row r in h_{nh}
     # will be a dependency.
     # For a given column c of x_{nc}, only the same column c in w2_{hc} will
     # be a dependency
-    # Finally, for a given column c of x_{nc}, only the same column c in b_{c} 
+    # Finally, for a given column c of x_{nc}, only the same column c in b_{c}
     # will be a dependency.
     # Hence
     #
     # d x_{nc} (h_{nh}, w2_{hc}, b2_{c})
-    # = \sum_{i=0}^{N} \sum_{j=0}^{H} \frac{\partial x_{nc}}{\partial h_{ij}} 
+    # = \sum_{i=0}^{N} \sum_{j=0}^{H} \frac{\partial x_{nc}}{\partial h_{ij}}
     #   \delta_{ni}
     #   d h_{ij}
     #   +
-    #   \sum_{k=0}^{H} \sum_{l=0}^{C} \frac{\partial x_{nc}}{\partial w2_{kl}} 
+    #   \sum_{k=0}^{H} \sum_{l=0}^{C} \frac{\partial x_{nc}}{\partial w2_{kl}}
     #   \delta_{cl}
     #   d w2_{kl}
     #   +
-    #   \sum_{m=0}^{C} \frac{\partial x_{nc}}{\partial b2_{m}} 
+    #   \sum_{m=0}^{C} \frac{\partial x_{nc}}{\partial b2_{m}}
     #   \delta_{cm}
     #   d b2_{m}
-    # = \sum_{j=0}^{H} \frac{\partial x_{nc}}{\partial h_{nj}} 
+    # = \sum_{j=0}^{H} \frac{\partial x_{nc}}{\partial h_{nj}}
     #   d h_{nj}
     #   +
-    #   \sum_{k=0}^{N} \frac{\partial x_{nc}}{\partial w2_{kc}} 
+    #   \sum_{k=0}^{N} \frac{\partial x_{nc}}{\partial w2_{kc}}
     #   d w2_{kc}
     #   +
-    #   \frac{\partial x_{nc}}{\partial b2_{c}} 
+    #   \frac{\partial x_{nc}}{\partial b2_{c}}
     #   d b2_{c}
     #
     # By writing out the expression of x_{nc} we get
     #
     # d x_{nc} (h_{nh}, w2_{hc}, b2_{c})
-    # = \sum_{j=0}^{H} \frac{\partial }{\partial h_{nj}} 
+    # = \sum_{j=0}^{H} \frac{\partial }{\partial h_{nj}}
     #   (\sum_{h=0}^{H} h_{nh}w2_{hc} + b2_{c})
     #   d h_{nj}
     #   +
-    #   \sum_{k=0}^{N} \frac{\partial }{\partial w2_{kc}} 
+    #   \sum_{k=0}^{N} \frac{\partial }{\partial w2_{kc}}
     #   (\sum_{h=0}^{H} h_{nh}w2_{hc} + b2_{c})
     #   d w2_{kc}
     #   +
-    #   \frac{\partial }{\partial b2_{c}} 
+    #   \frac{\partial }{\partial b2_{c}}
     #   (\sum_{h=0}^{H} h_{nh}w2_{hc} + b2_{c})
     #   d b2_{c}
     #
     # Again, using that there are no cross-dependencies between the variables
     # gives
     #
-    # d x_{nc} 
-    # = \sum_{j=0}^{H} \frac{\partial }{\partial h_{nj}} 
+    # d x_{nc}
+    # = \sum_{j=0}^{H} \frac{\partial }{\partial h_{nj}}
     #   (\sum_{h=0}^{H} h_{nh}w2_{hc} + b2_{c})
     #   \delta_{jh}
     #   d h_{nj}
     #   +
-    #   \sum_{k=0}^{N} \frac{\partial }{\partial w2_{kc}} 
+    #   \sum_{k=0}^{N} \frac{\partial }{\partial w2_{kc}}
     #   (\sum_{h=0}^{H} h_{nh}w2_{hc} + b2_{c})
     #   \delta_{kh}
     #   d w2_{kc}
     #   +
-    #   \frac{\partial }{\partial b2_{c}} 
+    #   \frac{\partial }{\partial b2_{c}}
     #   (\sum_{h=0}^{H} h_{nh}w2_{hc} + b2_{c})
     #   d b2_{c}
-    # = \frac{\partial }{\partial h_{nh}} 
+    # = \frac{\partial }{\partial h_{nh}}
     #   (\sum_{h=0}^{H} h_{nh}w2_{hc} + b2_{c})
     #   d h_{nh}
     #   +
-    #   \frac{\partial }{\partial w2_{hc}} 
+    #   \frac{\partial }{\partial w2_{hc}}
     #   (\sum_{h=0}^{H} h_{nh}w2_{hc} + b2_{c})
     #   d w2_{hc}
     #   +
-    #   \frac{\partial }{\partial b2_{c}} 
+    #   \frac{\partial }{\partial b2_{c}}
     #   (\sum_{h=0}^{H} h_{nh}w2_{hc} + b2_{c})
     #   d b2_{c}
     # = \sum_{h=0}^{H} w2_{hc}
@@ -1222,7 +1229,7 @@ def verbose_manual_backprop(
     # Inserting this back int dl gives us
     #
     # dl
-    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial x_{nc}} 
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial x_{nc}}
     #   (\sum_{h=0}^{H} w2_{hc} d h_{nh}
     #    +
     #    \sum_{h=0}^{H} h_{nh} d w2_{hc}
@@ -1233,8 +1240,8 @@ def verbose_manual_backprop(
     # of h, and not between any of the elements of h, w2 and b2, we get
     #
     # \frac{dl}{d h_{nh}}
-    # = \sum_{c=0}^{C} \frac{\partial l}{\partial x_{nc}} w2_{hc} 
-    dl_d_h = dl_d_logits@w2.T
+    # = \sum_{c=0}^{C} \frac{\partial l}{\partial x_{nc}} w2_{hc}
+    dl_d_h = dl_d_logits @ w2.T
     # Where we have used the definition of the transpose and the definition of
     # the matrix multiplication
 
@@ -1242,7 +1249,7 @@ def verbose_manual_backprop(
     # Starting from
     #
     # dl
-    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial x_{nc}} 
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial x_{nc}}
     #   (\sum_{h=0}^{H} w2_{hc} d h_{nh}
     #    +
     #    \sum_{h=0}^{H} h_{nh} d w2_{hc}
@@ -1252,13 +1259,13 @@ def verbose_manual_backprop(
     # using the same arguments as above, we get
     #
     # \frac{dl}{d w2_{hc}}
-    # = \sum_{c=0}^{C} \frac{\partial l}{\partial x_{nc}} h_{nh} 
-    dl_d_w2 = h.T@dl_d_logits
+    # = \sum_{c=0}^{C} \frac{\partial l}{\partial x_{nc}} h_{nh}
+    dl_d_w2 = h.T @ dl_d_logits
 
     # Finally, the derivative w.r.t b2 can be obtained from
     #
     # dl
-    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial x_{nc}} 
+    # = \sum_{n=0}^{N} \sum_{c=0}^{C} \frac{\partial l}{\partial x_{nc}}
     #   (\sum_{h=0}^{H} w2_{hc} d h_{nh}
     #    +
     #    \sum_{h=0}^{H} h_{nh} d w2_{hc}
@@ -1282,20 +1289,20 @@ def verbose_manual_backprop(
     #
     # so
     #
-    # dl 
-    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    # dl
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H}
     #   \frac{\partial l}{\partial h_{nh}} d h_{nh}
     #
     # where
     #
-    # d h_{nh} 
-    # = \sum_{i=0}^{N} \sum_{j=0}^{H} 
+    # d h_{nh}
+    # = \sum_{i=0}^{N} \sum_{j=0}^{H}
     #   \frac{\partial h_{nh}}{\partial a_{ij}} d a_{ij}
-    # = \sum_{i=0}^{N} \sum_{j=0}^{H} 
-    #   \frac{d h_{nh}}{d a_{ij}} 
+    # = \sum_{i=0}^{N} \sum_{j=0}^{H}
+    #   \frac{d h_{nh}}{d a_{ij}}
     #   \delta_{in} \delta_{hj}
     #   d a_{ij}
-    # = \frac{d h_{nh}}{d a_{nh}} 
+    # = \frac{d h_{nh}}{d a_{nh}}
     #   d a_{nh}
     # = \frac{d }{d a_{nh}} \tanh(a_{nh})
     #   d a_{nh}
@@ -1304,28 +1311,28 @@ def verbose_manual_backprop(
     # substituting back to dl yields
     #
     # dl
-    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
-    #   \frac{\partial l}{\partial h_{nh}} 
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H}
+    #   \frac{\partial l}{\partial h_{nh}}
     #   (1 - \tanh^2(a_{nh})) d a_{nh}
     #
     # which gives
     #
     # \frac{dl}{d a_{nh}}
-    # = \frac{\partial l}{\partial h_{nh}} 
-    #   (1 - \tanh^2(a_{nh})) 
-    dl_d_h_pre_activation = dl_d_h*(1.0-torch.tanh(h_pre_activation)**2)
+    # = \frac{\partial l}{\partial h_{nh}}
+    #   (1 - \tanh^2(a_{nh}))
+    dl_d_h_pre_activation = dl_d_h * (1.0 - torch.tanh(h_pre_activation) ** 2)
 
     # Calculate the derivatives of the batch norm layer (of the first layer)
 
     # Let us start by writing the equations for the batch normalization
     #
     # d_{nh} = \text{h_pre_batch_norm}
-    # \mu_{h} = \frac{1}{n} \sum_{n=0}^{N} d_{nh} 
+    # \mu_{h} = \frac{1}{n} \sum_{n=0}^{N} d_{nh}
     #         = \text{batch_normalization_mean}
     # f_{nh} = d_{nh}-\mu_{h} = \text{batch_norm_diff}
     # g_{nh} = (d_{nh}-\mu_{h})^{2} = f_{nh}^{2} = \text{batch_norm_diff_squared}
     # \sigma_{h} = \frac{1}{n-1} \sum_{n=0}^{N} (d_{nh}-\mu_{h})^{2}
-    #            = \frac{1}{n-1} \sum_{n=0}^{N} g_{nh} 
+    #            = \frac{1}{n-1} \sum_{n=0}^{N} g_{nh}
     #            = \text{batch_normalization_var}
     # j_{h} = \frac{1}{
     #           \sqrt{\frac{1}{n-1} \sum_{n=0}^{N} (d_{nh}-\mu_{h})^{2}}
@@ -1340,17 +1347,17 @@ def verbose_manual_backprop(
     #
     # We start by calculating the total derivative of l with respect to k_{nh}
     #
-    # dl 
-    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    # dl
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H}
     #   \frac{\partial l}{\partial a_{nh}} d a_{nh}
     #
     # where
     #
     # d a_{nh}
-    # = \sum_{i=0}^{N} \sum_{j=0}^{H} 
+    # = \sum_{i=0}^{N} \sum_{j=0}^{H}
     #   \frac{\partial a_{nh}}{\partial k_{ij}} d k_{ij}
-    # = \sum_{i=0}^{N} \sum_{j=0}^{H} 
-    #   \frac{d a_{nh}}{d k_{ij}} 
+    # = \sum_{i=0}^{N} \sum_{j=0}^{H}
+    #   \frac{d a_{nh}}{d k_{ij}}
     #   \delta_{ni} \delta_{jh}
     #   d k_{ij}
     # = \frac{d a_{nh}}{d k_{nh}} d k_{nh}
@@ -1360,37 +1367,37 @@ def verbose_manual_backprop(
     # where we've used the normal argumentation as in previous derivations.
     # Substituting into dl yields
     #
-    # dl 
-    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    # dl
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H}
     #   \frac{\partial l}{\partial a_{nh}} \gamma_{h} d k_{nh}
     #
     # so
     #
     # \frac{dl}{d k_{nh}}
     # = \frac{\partial l}{\partial a_{nh}} \gamma_{h} d k_{nh}
-    dl_d_batch_normalization_raw = dl_d_h_pre_activation*batch_normalization_gain
+    dl_d_batch_normalization_raw = dl_d_h_pre_activation * batch_normalization_gain
 
     # Furthermore, we have that
     #
-    # dl 
-    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    # dl
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H}
     #   \frac{\partial l}{\partial k_{nh}} d k_{nh}
     #
     # where
     #
-    # d k_{nh} 
-    # = \sum_{i=0}^{N} \sum_{j=0}^{H} 
+    # d k_{nh}
+    # = \sum_{i=0}^{N} \sum_{j=0}^{H}
     #   \frac{\partial a_{nh}}{\partial f_{ij}} d f_{ij}
     #   +
-    #   \sum_{j=0}^{H} 
+    #   \sum_{j=0}^{H}
     #   \frac{\partial a_{nh}}{\partial j_{j}} d j_{j}
-    # = \sum_{i=0}^{N} \sum_{j=0}^{H} 
-    #   \frac{d a_{nh}}{d f_{ij}} 
+    # = \sum_{i=0}^{N} \sum_{j=0}^{H}
+    #   \frac{d a_{nh}}{d f_{ij}}
     #   \delta_{in} \delta_{jh}
     #   d f_{ij}
     #   +
-    #   \sum_{j=0}^{H} 
-    #   \frac{d a_{nh}}{d j_{j}} 
+    #   \sum_{j=0}^{H}
+    #   \frac{d a_{nh}}{d j_{j}}
     #   \delta_{jh}
     #   d j_{j}
     # = \frac{d a_{nh}}{d f_{nh}} d f_{nh}
@@ -1403,27 +1410,29 @@ def verbose_manual_backprop(
     #
     # substituting above yields
     #
-    # dl 
-    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    # dl
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H}
     #   \frac{\partial l}{\partial k_{nh}} (j_{h} d f_{nh} + f_{nh} d j_{h})
     #
     # this gives
     #
     # \frac{dl}{d j_{h}}
     # = \sum_{n=0}^{N} \frac{\partial l}{\partial k_{nh}} f_{nh}
-    dl_d_inv_batch_normalization_std = (dl_d_batch_normalization_raw*batch_normalization_diff).sum(0, keepdim=True)
+    dl_d_inv_batch_normalization_std = (
+        dl_d_batch_normalization_raw * batch_normalization_diff
+    ).sum(0, keepdim=True)
 
     # Let us continue from
     #
-    # dl 
-    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    # dl
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H}
     #   \frac{\partial l}{\partial k_{nh}} (j_{h} d f_{nh} + f_{nh} d j_{h})
     #
     # Notice that j_{h} actually has a dependency on f_{nh} through \sigma_{h}
     # and g_{nh},so we need to expand d j_{h}.
     # We have
     #
-    # d j_{h} 
+    # d j_{h}
     # = \sum_{i=0}^{H} \frac{\partial j_{h}}{\partial \sigma_{i}} d \sigma_{i}
     # = \sum_{i=0}^{H} \frac{d j_{h}}{\d \sigma_{i}} \delta_{ih} d \sigma_{i}
     # = \frac{d j_{h}}{\d \sigma_{h}} d \sigma_{h}
@@ -1431,89 +1440,89 @@ def verbose_manual_backprop(
     # where
     #
     # d \sigma_{h}
-    # = \sum_{i=0}^{N} \sum_{j=0}^{H} 
-    #   \frac{\partial \sigma_{h}}{\partial g_{ij}} 
+    # = \sum_{i=0}^{N} \sum_{j=0}^{H}
+    #   \frac{\partial \sigma_{h}}{\partial g_{ij}}
     #   d g_{ij}
-    # = \sum_{i=0}^{N} \sum_{j=0}^{H} 
-    #   \frac{d \sigma_{h}}{d g_{ij}} 
+    # = \sum_{i=0}^{N} \sum_{j=0}^{H}
+    #   \frac{d \sigma_{h}}{d g_{ij}}
     #   \delta_{hj}
     #   d g_{ij}
-    # = \sum_{i=0}^{N} 
-    #   \frac{d \sigma_{h}}{d g_{ih}} 
+    # = \sum_{i=0}^{N}
+    #   \frac{d \sigma_{h}}{d g_{ih}}
     #   d g_{ih}
     #
     # and
     #
     # d g_{ih}
-    # = \sum_{j=0}^{N} \sum_{k=0}^{H} 
-    #   \frac{\partial g_{ih}}{\partial f_{jk}} 
+    # = \sum_{j=0}^{N} \sum_{k=0}^{H}
+    #   \frac{\partial g_{ih}}{\partial f_{jk}}
     #   d f_{jk}
-    # = \sum_{j=0}^{N} \sum_{k=0}^{H} 
-    #   \frac{d g_{ih}}{d f_{jk}} 
+    # = \sum_{j=0}^{N} \sum_{k=0}^{H}
+    #   \frac{d g_{ih}}{d f_{jk}}
     #   \delta_{ij} \delta_{hk}
     #   d f_{jk}
-    # = \frac{d g_{jh}}{d f_{jh}} 
+    # = \frac{d g_{jh}}{d f_{jh}}
     #   d f_{jh}
     #
     # Putting it all together yields
     #
-    # dl 
-    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
-    #   \frac{\partial l}{\partial k_{nh}} 
+    # dl
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H}
+    #   \frac{\partial l}{\partial k_{nh}}
     #   (
-    #     j_{h} d f_{nh} 
-    #     + 
+    #     j_{h} d f_{nh}
+    #     +
     #     f_{nh} d j_{h}
     #   )
-    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
-    #   \frac{\partial l}{\partial k_{nh}} 
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H}
+    #   \frac{\partial l}{\partial k_{nh}}
     #   (
-    #     j_{h} d f_{nh} 
-    #     + 
+    #     j_{h} d f_{nh}
+    #     +
     #     f_{nh} \frac{d j_{h}}{\d \sigma_{h}} d \sigma_{h}
     #   )
-    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
-    #   \frac{\partial l}{\partial k_{nh}} 
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H}
+    #   \frac{\partial l}{\partial k_{nh}}
     #   (
-    #     j_{h} d f_{nh} 
-    #     + 
-    #     f_{nh} \frac{d j_{h}}{\d \sigma_{h}} 
-    #     \sum_{i=0}^{N} 
-    #     \frac{d \sigma_{h}}{d g_{ih}} 
+    #     j_{h} d f_{nh}
+    #     +
+    #     f_{nh} \frac{d j_{h}}{\d \sigma_{h}}
+    #     \sum_{i=0}^{N}
+    #     \frac{d \sigma_{h}}{d g_{ih}}
     #     d g_{ih}
     #   )
-    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
-    #   \frac{\partial l}{\partial k_{nh}} 
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H}
+    #   \frac{\partial l}{\partial k_{nh}}
     #   (
-    #     j_{h} d f_{nh} 
-    #     + 
-    #     f_{nh} \frac{d j_{h}}{\d \sigma_{h}} 
-    #     \sum_{i=0}^{N} 
-    #     \frac{d \sigma_{h}}{d g_{ih}} 
-    #     \frac{d g_{jh}}{d f_{jh}} 
+    #     j_{h} d f_{nh}
+    #     +
+    #     f_{nh} \frac{d j_{h}}{\d \sigma_{h}}
+    #     \sum_{i=0}^{N}
+    #     \frac{d \sigma_{h}}{d g_{ih}}
+    #     \frac{d g_{jh}}{d f_{jh}}
     #     d f_{jh}
     #   )
     #
-    # We could calculate all this at once, or we can make use of some 
+    # We could calculate all this at once, or we can make use of some
     # re-writings
     # Let's go with the second option.
-    # Let's start with how l varies when we vary \sigma_{h} 
+    # Let's start with how l varies when we vary \sigma_{h}
     #
-    # dl 
-    # = \sum_{h=0}^{H} 
+    # dl
+    # = \sum_{h=0}^{H}
     #   \frac{\partial l}{\partial j_{h}} d j_{h}
-    # = \sum_{h=0}^{H} 
-    #   \frac{\partial l}{\partial j_{h}} 
-    #   \frac{d j_{h}}{\d \sigma_{h}} 
+    # = \sum_{h=0}^{H}
+    #   \frac{\partial l}{\partial j_{h}}
+    #   \frac{d j_{h}}{\d \sigma_{h}}
     #   d \sigma_{h}
-    # = \sum_{h=0}^{H} 
-    #   \frac{\partial l}{\partial j_{h}} 
-    #   \frac{d }{\d \sigma_{h}} 
+    # = \sum_{h=0}^{H}
+    #   \frac{\partial l}{\partial j_{h}}
+    #   \frac{d }{\d \sigma_{h}}
     #   (\frac{1}{\sqrt{\sigma_{h}} + \epsilon}
     #   d \sigma_{h}
-    # = - \sum_{h=0}^{H} 
-    #   \frac{\partial l}{\partial j_{h}} 
-    #   \frac{d }{\d \sigma_{h}} 
+    # = - \sum_{h=0}^{H}
+    #   \frac{\partial l}{\partial j_{h}}
+    #   \frac{d }{\d \sigma_{h}}
     #   (\frac{1}{2(\sqrt{\sigma_{h}} + \epsilon)^{\frac{3}{2}}}
     #   d \sigma_{h}
     #
@@ -1521,37 +1530,39 @@ def verbose_manual_backprop(
     # This gives
     #
     # \frac{dl}{d \sigma_{h}}
-    # = - \frac{\partial l}{\partial j_{h}} 
-    #   \frac{d }{\d \sigma_{h}} 
+    # = - \frac{\partial l}{\partial j_{h}}
+    #   \frac{d }{\d \sigma_{h}}
     #   (\frac{1}{2(\sqrt{\sigma_{h}} + \epsilon)^{\frac{3}{2}}}
-    dl_d_batch_normalization_var = -dl_d_inv_batch_normalization_std*(0.5 * (batch_normalization_var + 1e-5) ** (-1.5)) 
+    dl_d_batch_normalization_var = -dl_d_inv_batch_normalization_std * (
+        0.5 * (batch_normalization_var + 1e-5) ** (-1.5)
+    )
 
     # We can use this result to see how l changes when we change g_{nh}
     #
     # We have
     #
-    # dl 
-    # = \sum_{h=0}^{H} 
+    # dl
+    # = \sum_{h=0}^{H}
     #   \frac{\partial l}{\partial \sigma_{h}} d \sigma_{h}
-    # = \sum_{h=0}^{H} 
+    # = \sum_{h=0}^{H}
     #   \frac{\partial l}{\partial \sigma_{h}}
-    #   \sum_{i=0}^{N} 
-    #   \frac{d \sigma_{h}}{d g_{ih}} 
+    #   \sum_{i=0}^{N}
+    #   \frac{d \sigma_{h}}{d g_{ih}}
     #   d g_{ih}
-    # = \sum_{h=0}^{H} 
+    # = \sum_{h=0}^{H}
     #   \frac{\partial l}{\partial \sigma_{h}}
-    #   \sum_{i=0}^{N} 
-    #   \frac{d}{d g_{ih}} \frac{1}{n-1} \sum_{j=0}^{N} g_{jh} 
+    #   \sum_{i=0}^{N}
+    #   \frac{d}{d g_{ih}} \frac{1}{n-1} \sum_{j=0}^{N} g_{jh}
     #   d g_{ih}
-    # = \sum_{h=0}^{H} 
+    # = \sum_{h=0}^{H}
     #   \frac{\partial l}{\partial \sigma_{h}}
-    #   \sum_{i=0}^{N} 
-    #   \frac{1}{n-1} \sum_{j=0}^{N} \delta_{ji} 
+    #   \sum_{i=0}^{N}
+    #   \frac{1}{n-1} \sum_{j=0}^{N} \delta_{ji}
     #   d g_{ih}
-    # = \sum_{h=0}^{H} 
-    #   \sum_{i=0}^{N} 
+    # = \sum_{h=0}^{H}
+    #   \sum_{i=0}^{N}
     #   \frac{\partial l}{\partial \sigma_{h}}
-    #   \frac{1}{n-1} 
+    #   \frac{1}{n-1}
     #   d g_{ih}
     #
     # where we have used the definition of d \sigma_{h} from above.
@@ -1559,50 +1570,54 @@ def verbose_manual_backprop(
     #
     # \frac{dl}{d g_{nh}}
     # = \frac{\partial l}{\partial \sigma_{h}}
-    #   \frac{1}{n-1} 
-    dl_d_batch_normalization_diff_squared = dl_d_batch_normalization_var * (1.0 / (batch_size-1)) * torch.ones_like(batch_normalization_diff_squared) 
-    # where we again have used the "broadcasting" trick where we go from (1,H) 
+    #   \frac{1}{n-1}
+    dl_d_batch_normalization_diff_squared = (
+        dl_d_batch_normalization_var
+        * (1.0 / (batch_size - 1))
+        * torch.ones_like(batch_normalization_diff_squared)
+    )
+    # where we again have used the "broadcasting" trick where we go from (1,H)
     # to (N,H) by using the ones_like multiplication
 
     # We can now rewrite
     #
     # dl
-    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
-    #   \frac{\partial l}{\partial k_{nh}} 
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H}
+    #   \frac{\partial l}{\partial k_{nh}}
     #   (
-    #     j_{h} d f_{nh} 
-    #     + 
-    #     f_{nh} \frac{d j_{h}}{\d \sigma_{h}} 
-    #     \sum_{i=0}^{N} 
-    #     \frac{d \sigma_{h}}{d g_{ih}} 
-    #     \frac{d g_{jh}}{d f_{jh}} 
+    #     j_{h} d f_{nh}
+    #     +
+    #     f_{nh} \frac{d j_{h}}{\d \sigma_{h}}
+    #     \sum_{i=0}^{N}
+    #     \frac{d \sigma_{h}}{d g_{ih}}
+    #     \frac{d g_{jh}}{d f_{jh}}
     #     d f_{jh}
     #   )
-    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
-    #   \frac{\partial l}{\partial k_{nh}} 
-    #   j_{h} d f_{nh} 
-    #     + 
-    #   \sum_{n=0}^{N} \sum_{h=0}^{H} 
-    #   \frac{\partial l}{\partial k_{nh}} 
-    #   f_{nh} \frac{d j_{h}}{\d \sigma_{h}} 
-    #   \sum_{i=0}^{N} 
-    #   \frac{d \sigma_{h}}{d g_{ih}} 
-    #   \frac{d g_{jh}}{d f_{jh}} 
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H}
+    #   \frac{\partial l}{\partial k_{nh}}
+    #   j_{h} d f_{nh}
+    #     +
+    #   \sum_{n=0}^{N} \sum_{h=0}^{H}
+    #   \frac{\partial l}{\partial k_{nh}}
+    #   f_{nh} \frac{d j_{h}}{\d \sigma_{h}}
+    #   \sum_{i=0}^{N}
+    #   \frac{d \sigma_{h}}{d g_{ih}}
+    #   \frac{d g_{jh}}{d f_{jh}}
     #   d f_{jh}
-    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
-    #   \frac{\partial l}{\partial k_{nh}} 
-    #   j_{h} d f_{nh} 
-    #     + 
-    #   \sum_{h=0}^{H}  
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H}
+    #   \frac{\partial l}{\partial k_{nh}}
+    #   j_{h} d f_{nh}
+    #     +
+    #   \sum_{h=0}^{H}
     #   \frac{d l}{d j_{h}}
-    #   \frac{d j_{h}}{\d \sigma_{h}} 
-    #   \sum_{i=0}^{N} 
-    #   \frac{1}{n-1} 
+    #   \frac{d j_{h}}{\d \sigma_{h}}
+    #   \sum_{i=0}^{N}
+    #   \frac{1}{n-1}
     #   2 f_{jh}
     #   d f_{jh}
     #
-    # where we've used that 
-    # 
+    # where we've used that
+    #
     # \frac{dl}{d j_{h}}
     # = \sum_{n=0}^{N} \frac{\partial l}{\partial k_{nh}} f_{nh}
     #
@@ -1612,36 +1627,36 @@ def verbose_manual_backprop(
     #
     # from the definition, and that
     #
-    # \frac{d \sigma_{h}}{d g_{ih}} = \frac{1}{n-1} 
+    # \frac{d \sigma_{h}}{d g_{ih}} = \frac{1}{n-1}
     #
     # using the same argumentation as we used when deriving
     # \frac{dl}{d g_{nh}}
     #
     # Inserting that (by definition)
     #
-    # \frac{dl}{d \sigma_{h}} 
-    # = \frac{\partial l}{\partial j_{h}} 
-    #   \frac{d j_{h}}{\d \sigma_{h}} 
+    # \frac{dl}{d \sigma_{h}}
+    # = \frac{\partial l}{\partial j_{h}}
+    #   \frac{d j_{h}}{\d \sigma_{h}}
     #
     # yields
     #
     # dl
-    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
-    #   \frac{\partial l}{\partial k_{nh}} 
-    #   j_{h} d f_{nh} 
-    #     + 
-    #   \sum_{h=0}^{H} 
-    #   \frac{dl}{d \sigma_{h}} 
-    #   \sum_{i=0}^{N} 
-    #   \frac{1}{n-1} 
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H}
+    #   \frac{\partial l}{\partial k_{nh}}
+    #   j_{h} d f_{nh}
+    #     +
+    #   \sum_{h=0}^{H}
+    #   \frac{dl}{d \sigma_{h}}
+    #   \sum_{i=0}^{N}
+    #   \frac{1}{n-1}
     #   2 f_{jh}
     #   d f_{jh}
-    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
-    #   \frac{\partial l}{\partial k_{nh}} 
-    #   j_{h} d f_{nh} 
-    #     + 
-    #   \sum_{h=0}^{H} 
-    #   \sum_{i=0}^{N} 
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H}
+    #   \frac{\partial l}{\partial k_{nh}}
+    #   j_{h} d f_{nh}
+    #     +
+    #   \sum_{h=0}^{H}
+    #   \sum_{i=0}^{N}
     #   \frac{dl}{d g_{nh}}
     #   2 f_{jh}
     #   d f_{jh}
@@ -1650,25 +1665,24 @@ def verbose_manual_backprop(
     #
     # \frac{dl}{d g_{nh}}
     # = \frac{\partial l}{\partial \sigma_{h}}
-    #   \frac{1}{n-1} 
+    #   \frac{1}{n-1}
     #
     # finally, we get
     #
     # \frac{dl}{d f_{nh}}
-    # = \frac{\partial l}{\partial k_{nh}} j_{h} 
-    #   + 
+    # = \frac{\partial l}{\partial k_{nh}} j_{h}
+    #   +
     #   \frac{dl}{d g_{nh}} 2 f_{nh}
     dl_d_batch_normalization_diff = (
-        dl_d_batch_normalization_raw*inv_batch_normalization_std
-        +
-        dl_d_batch_normalization_diff_squared*2*batch_normalization_diff
-        )
+        dl_d_batch_normalization_raw * inv_batch_normalization_std
+        + dl_d_batch_normalization_diff_squared * 2 * batch_normalization_diff
+    )
 
     # We now continue with how l changes when we nudges \mu_{h}
     # Using our normal approach yields
     #
-    # dl = \sum_{n=0}^{N} \sum_{h=0}^{H} 
-    #      \frac{\partial l}{\partial f_{nh}} d f_{nh} 
+    # dl = \sum_{n=0}^{N} \sum_{h=0}^{H}
+    #      \frac{\partial l}{\partial f_{nh}} d f_{nh}
     #
     # where
     #
@@ -1699,130 +1713,132 @@ def verbose_manual_backprop(
     #
     # So
     #
-    # dl = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    # dl = \sum_{n=0}^{N} \sum_{h=0}^{H}
     #      \frac{\partial l}{\partial f_{nh}} (d d_{nh} - d \mu_{h})
     #
     # Hence, we get
     #
-    # \frac{dl}{d \mu_{h}} 
+    # \frac{dl}{d \mu_{h}}
     #  = - \sum_{n=0}^{N} \frac{\partial l}{\partial f_{nh}}
     dl_d_batch_normalization_diff_clone = dl_d_batch_normalization_diff.clone()
-    dl_d_batch_normalization_mean = -dl_d_batch_normalization_diff_clone.sum(0, keepdim=True)
+    dl_d_batch_normalization_mean = -dl_d_batch_normalization_diff_clone.sum(
+        0, keepdim=True
+    )
 
     # Continuing from
     #
-    # dl = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    # dl = \sum_{n=0}^{N} \sum_{h=0}^{H}
     #      \frac{\partial l}{\partial f_{nh}} (d d_{nh} - d \mu_{h})
     #
     # Notice that \mu_{h} = \frac{1}{n} \sum_{n=0}^{N} d_{nh}, so we can expand
     # d \mu_{h} is the basis of d_{nh}.
     # We have
     #
-    # d \mu_{h} 
-    # = \sum_{i=0}^{N} \sum_{j=0}^{H} 
+    # d \mu_{h}
+    # = \sum_{i=0}^{N} \sum_{j=0}^{H}
     #   \frac{\partial \mu_{h}}{\partial d_{ij}} d d_{ij}
-    # = \sum_{i=0}^{N} \sum_{j=0}^{H} 
+    # = \sum_{i=0}^{N} \sum_{j=0}^{H}
     #   \frac{d \mu_{h}}{d d_{ij}} d d_{ij}
     #   \delta_{jh}
     # = \sum_{i=0}^{N} \frac{d \mu_{h}}{d d_{ij}} d d_{ih}
-    # = \sum_{i=0}^{N} 
-    #   \frac{d }{d d_{ij}} \frac{1}{n} \sum_{k=0}^{N} d_{kh} 
+    # = \sum_{i=0}^{N}
+    #   \frac{d }{d d_{ij}} \frac{1}{n} \sum_{k=0}^{N} d_{kh}
     #   d d_{ih}
     # = \sum_{i=0}^{N} \frac{1}{n} d d_{ih}
-    # 
+    #
     # Inserting this above yields
     #
-    # dl 
-    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
-    #   \frac{\partial l}{\partial f_{nh}} 
+    # dl
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H}
+    #   \frac{\partial l}{\partial f_{nh}}
     #   (d d_{nh} - \sum_{i=0}^{N} \frac{1}{n} d d_{ih})
-    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
-    #   \frac{\partial l}{\partial f_{nh}} d d_{nh} 
-    #   - 
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H}
+    #   \frac{\partial l}{\partial f_{nh}} d d_{nh}
+    #   -
     #   \frac{1}{n}
-    #   \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    #   \sum_{n=0}^{N} \sum_{h=0}^{H}
     #   \frac{\partial l}{\partial f_{nh}}
     #   \sum_{i=0}^{N} d d_{ih})
-    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
-    #   \frac{\partial l}{\partial f_{nh}} d d_{nh} 
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H}
+    #   \frac{\partial l}{\partial f_{nh}} d d_{nh}
     #   +
     #   \frac{1}{n}
-    #   \sum_{h=0}^{H} 
-    #   \frac{dl}{d \mu_{h}} 
+    #   \sum_{h=0}^{H}
+    #   \frac{dl}{d \mu_{h}}
     #   \sum_{i=0}^{N} d d_{ih})
-    # = \sum_{n=0}^{N} \sum_{h=0}^{H} 
-    #   \frac{\partial l}{\partial f_{nh}} d d_{nh} 
+    # = \sum_{n=0}^{N} \sum_{h=0}^{H}
+    #   \frac{\partial l}{\partial f_{nh}} d d_{nh}
     #   +
     #   \frac{1}{n}
-    #   \sum_{h=0}^{H} \sum_{n=0}^{N} 
-    #   \frac{dl}{d \mu_{h}} 
+    #   \sum_{h=0}^{H} \sum_{n=0}^{N}
+    #   \frac{dl}{d \mu_{h}}
     #   d d_{nh})
     #
     # so
     #
-    # \frac{dl}{d d_{nh}} 
+    # \frac{dl}{d d_{nh}}
     # = \frac{\partial l}{\partial f_{nh}}
     #   +
-    #   \frac{1}{n} \frac{dl}{d \mu_{h}} 
+    #   \frac{1}{n} \frac{dl}{d \mu_{h}}
     dl_d_batch_normalization_diff_clone_2 = dl_d_batch_normalization_diff.clone()
-    dl_d_h_pre_batch_norm = \
-        (
-         dl_d_batch_normalization_diff_clone_2
-         + 
-           
-           dl_d_batch_normalization_mean*
-(1.0/batch_size)*torch.ones_like(h_pre_batch_norm)
-        )
-    # Where we again have multiplied with torch.ones_like to get the correct 
+    dl_d_h_pre_batch_norm = (
+        dl_d_batch_normalization_diff_clone_2
+        + dl_d_batch_normalization_mean
+        * (1.0 / batch_size)
+        * torch.ones_like(h_pre_batch_norm)
+    )
+    # Where we again have multiplied with torch.ones_like to get the correct
     # dimension
 
-    # We note that the scalar parameters \gamma_{h} and \beta_{h} are the 
+    # We note that the scalar parameters \gamma_{h} and \beta_{h} are the
     # trainable parameters
     #
     # We get
     #
-    # dl = \sum_{n=0}^{N} \sum_{h=0}^{H} 
+    # dl = \sum_{n=0}^{N} \sum_{h=0}^{H}
     #      \frac{\partial l}{\partial a_{nh}} d a_{nh}
     #
     # where
     #
-    # d a_{nh} 
+    # d a_{nh}
     #  = \frac{\partial a_{nh}}{\partial \gamma_{h}} d \gamma_{h}
     #  + \frac{\partial a_{nh}}{\partial \beta_{h}} d \beta_{h}
     #
     # so
     #
-    # dl = \sum_{n=0}^{N} \sum_{h=0}^{H} 
-    #      \frac{\partial l}{\partial a_{nh}} 
+    # dl = \sum_{n=0}^{N} \sum_{h=0}^{H}
+    #      \frac{\partial l}{\partial a_{nh}}
     #      (\frac{\partial a_{nh}}{\partial \gamma_{h}} d \gamma_{h}
     #      + \frac{\partial a_{nh}}{\partial \beta_{h}} d \beta_{h})
-    #   = \sum_{n=0}^{N} \sum_{h=0}^{H} 
-    #      \frac{\partial l}{\partial a_{nh}} 
-    #      (\frac{\partial }{\partial \gamma_{h}}(\gamma_{h} k_{nh} + \beta_{h}) 
+    #   = \sum_{n=0}^{N} \sum_{h=0}^{H}
+    #      \frac{\partial l}{\partial a_{nh}}
+    #      (\frac{\partial }{\partial \gamma_{h}}(\gamma_{h} k_{nh} + \beta_{h})
     #       d \gamma_{h}
     #      + \frac{\partial }{\partial \beta_{h}} (\gamma_{h} k_{nh} + \beta_{h})
     #       d \beta_{h})
-    #   = \sum_{n=0}^{N} \sum_{h=0}^{H} 
-    #      \frac{\partial l}{\partial a_{nh}} 
+    #   = \sum_{n=0}^{N} \sum_{h=0}^{H}
+    #      \frac{\partial l}{\partial a_{nh}}
     #      (k_{nh} d \gamma_{h} + d \beta_{h})
     #
     # and
     #
-    # \frac{dl}{d \gamma_{h}} 
+    # \frac{dl}{d \gamma_{h}}
     # = \sum_{n=0}^{N} \frac{\partial l}{\partial a_{nh}} k_{nh}
-    dl_d_batch_normalization_gain = (dl_d_h_pre_activation * batch_normalization_raw).sum(0,keepdim=True)
+    dl_d_batch_normalization_gain = (
+        dl_d_h_pre_activation * batch_normalization_raw
+    ).sum(0, keepdim=True)
 
     # Continuing from
     #
-    # dl = \sum_{n=0}^{N} \sum_{h=0}^{H} 
-    #      \frac{\partial l}{\partial a_{nh}} 
+    # dl = \sum_{n=0}^{N} \sum_{h=0}^{H}
+    #      \frac{\partial l}{\partial a_{nh}}
     #      (k_{nh} d \gamma_{h} + d \beta_{h})
     #
     # so
     #
-    # \frac{dl}{d \beta_{h}} 
-    # = \sum_{n=0}^{N} \frac{\partial l}{\partial a_{nh}} 
-    dl_d_batch_normalization_bias = (dl_d_h_pre_activation).sum(0,keepdim=True)
+    # \frac{dl}{d \beta_{h}}
+    # = \sum_{n=0}^{N} \frac{\partial l}{\partial a_{nh}}
+    dl_d_batch_normalization_bias = (dl_d_h_pre_activation).sum(0, keepdim=True)
 
     # Calculate the derivatives of the first layer
 
@@ -1831,7 +1847,7 @@ def verbose_manual_backprop(
     #
     # d_{nh} = \sum_{h=0}^{H} c_{nf}w1_{fh} + b1_{h}
     #
-    # Where 
+    # Where
     #
     # c_{nf} = \text{concatenated_embedding}
     # f = b\cdot e = \text{block_size}\cdot \text{embedding_size}
@@ -1839,8 +1855,8 @@ def verbose_manual_backprop(
     # Using the same formula for the derivative of the linear layer gives
     #
     # \frac{dl}{d w1_{fh}}
-    # = \sum_{h=0}^{H} \frac{\partial l}{\partial d_{nh}} c_{nf} 
-    dl_d_w1 = concatenated_embedding.T@dl_d_h_pre_batch_norm
+    # = \sum_{h=0}^{H} \frac{\partial l}{\partial d_{nh}} c_{nf}
+    dl_d_w1 = concatenated_embedding.T @ dl_d_h_pre_batch_norm
 
     # For the bias, we get that
     #
@@ -1853,8 +1869,8 @@ def verbose_manual_backprop(
     # Finally, from the calculation of the linear layer, we have that
     #
     # \frac{dl}{d c_{nf}}
-    # = \sum_{h=0}^{H} \frac{\partial l}{\partial d_{nh}} w1_{fh} 
-    dl_d_concatenated_embedding = dl_d_h_pre_batch_norm@w1.T
+    # = \sum_{h=0}^{H} \frac{\partial l}{\partial d_{nh}} w1_{fh}
+    dl_d_concatenated_embedding = dl_d_h_pre_batch_norm @ w1.T
 
     # We also want to find the gradient of the embedding layer c
     # In order to that we have to go through the concatenated embedding layer
@@ -1865,16 +1881,18 @@ def verbose_manual_backprop(
     # Formally we have that
     #
     # dl
-    # = \sum_{n=0}^{N} \sum_{l=0}^{B\cdot E} 
+    # = \sum_{n=0}^{N} \sum_{l=0}^{B\cdot E}
     #   \frac{\partial l}{\partial c_{nf}} d c_{nf}
-    # = \sum_{n=0}^{N} \sum_{b=0}^{B} \sum_{e=0}^{E} 
+    # = \sum_{n=0}^{N} \sum_{b=0}^{B} \sum_{e=0}^{E}
     #   \frac{\partial l}{\partial v_{nbe}} d v_{nbe}
     #
     # as c_{n(b\cdot e)} = v_{nbe}
     #
     # Hence
-    # \frac{dl}{v_{nij}} = \frac{\partial l}{\partial v_{nbe}} 
-    dl_d_embedding = dl_d_concatenated_embedding.view(batch_size, -1, embedding.shape[2])
+    # \frac{dl}{v_{nij}} = \frac{\partial l}{\partial v_{nbe}}
+    dl_d_embedding = dl_d_concatenated_embedding.view(
+        batch_size, -1, embedding.shape[2]
+    )
 
     # At last, we can find how l changes when we change the embedding weights
     # The embedding is defined as c[input] data
@@ -1884,47 +1902,47 @@ def verbose_manual_backprop(
     # Formally we have that
     #
     # dl
-    # = \sum_{n=0}^{N} \sum_{b=0}^{B} \sum_{e=0}^{E} 
+    # = \sum_{n=0}^{N} \sum_{b=0}^{B} \sum_{e=0}^{E}
     #   \frac{\partial l}{\partial v_{nbe}} d v_{nbe}
     #
     # where
     #
-    # d v_{nbe} 
+    # d v_{nbe}
     # = \sum_{v=0}^{V} \sum_{k=0}^{E}
     #   \frac{\partial v_{nbe}}{\partial c_{vk}} d c_{vk}
     #
     # Where V is the vocab size.
     # Since v_{nbe} is nothing but a selection of c_{vk}, we have that
     #
-    # \frac{\partial v_{nbe}}{\partial c_{vk}} 
-    # = \frac{\partial c_{x_{nb}e}}{\partial c_{vk}} 
+    # \frac{\partial v_{nbe}}{\partial c_{vk}}
+    # = \frac{\partial c_{x_{nb}e}}{\partial c_{vk}}
     # = \delta_{vx_{nb}}\delta_{ek}
     #
     # Putting it all together gives
     #
     # dl
-    # = \sum_{n=0}^{N} \sum_{b=0}^{B} \sum_{e=0}^{E} 
+    # = \sum_{n=0}^{N} \sum_{b=0}^{B} \sum_{e=0}^{E}
     #   \frac{\partial l}{\partial v_{nbe}}
     #   \sum_{v=0}^{V} \sum_{k=0}^{E}
     #   \delta_{vx_{nb}}\delta_{ek}
     #   d c_{vk}
-    # = \sum_{n=0}^{N} \sum_{b=0}^{B} \sum_{e=0}^{E} 
+    # = \sum_{n=0}^{N} \sum_{b=0}^{B} \sum_{e=0}^{E}
     #   \frac{\partial l}{\partial v_{nbe}}
-    #   \sum_{v=0}^{V} 
+    #   \sum_{v=0}^{V}
     #   \delta_{vx_{nb}}
     #   d c_{vk}
     #
     # Reading off the gradients gives
     #
     # \frac{dl}{d c_{vk}}
-    # = \sum_{n=0}^{N} \sum_{b=0}^{B} \sum_{e=0}^{E} \sum_{v=0}^{V} 
+    # = \sum_{n=0}^{N} \sum_{b=0}^{B} \sum_{e=0}^{E} \sum_{v=0}^{V}
     #   \delta_{vx_{nb}}
     #   \frac{\partial l}{\partial v_{nbe}}
     dl_d_c = torch.zeros_like(c)
     for i in range(input_data.shape[0]):
         for j in range(input_data.shape[1]):
-            idx = input_data[i,j]
-            dl_d_c[idx] += dl_d_embedding[i,j]
+            idx = input_data[i, j]
+            dl_d_c[idx] += dl_d_embedding[i, j]
 
     gradients: Dict[str, torch.Tensor] = {}
     gradients["dl_d_log_probabilities"] = dl_d_log_probabilities

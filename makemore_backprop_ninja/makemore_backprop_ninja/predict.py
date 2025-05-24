@@ -100,8 +100,7 @@ def predict_neural_network(
             batch_normalization_gain * batch_normalization_raw
         ) + batch_normalization_bias
 
-
-        # NOTE: batch_normalization_mean is is not used in any calculations of the 
+        # NOTE: batch_normalization_mean is is not used in any calculations of the
         #       backprop
         #       However, we still need the variable to compare the gradients
         intermediate_variables["batch_normalization_mean"] = batch_normalization_mean
