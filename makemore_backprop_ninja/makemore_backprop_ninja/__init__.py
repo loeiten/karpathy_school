@@ -1,4 +1,4 @@
-"""Package containing makemore_agb."""
+"""Package containing makemore_backprop_ninja."""
 
 from typing import Dict, Literal
 
