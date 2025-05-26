@@ -4,6 +4,7 @@ from itertools import chain
 
 import pytest
 import torch
+from makemore_backprop_ninja.backprop_helpers.dataclasses import BackpropMode
 from makemore_backprop_ninja.data_classes import (
     BatchNormalizationParameters,
     ModelParams,
@@ -11,11 +12,7 @@ from makemore_backprop_ninja.data_classes import (
 )
 from makemore_backprop_ninja.models import get_explicit_model
 from makemore_backprop_ninja.preprocessing import get_dataset
-from makemore_backprop_ninja.train import (
-    BackpropMode,
-    parse_args,
-    train_neural_net_model,
-)
+from makemore_backprop_ninja.train import parse_args, train_neural_net_model
 
 from makemore_backprop_ninja import DEVICE
 

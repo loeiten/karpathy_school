@@ -2,11 +2,14 @@
 
 import argparse
 import sys
-from enum import Enum
 from typing import Dict, List, Optional, Tuple
 
 import torch
 import torch.nn.functional as F
+from makemore_backprop_ninja.backprop_helpers.dataclasses import BackpropMode
+from makemore_backprop_ninja.backprop_helpers.verbose_backprop import (
+    verbose_manual_backprop,
+)
 from makemore_backprop_ninja.data_classes import (
     BatchNormalizationParameters,
     ModelParams,
@@ -19,16 +22,10 @@ from makemore_backprop_ninja.preprocessing import get_dataset
 from tqdm import tqdm
 
 from makemore_backprop_ninja import DATASET, DEVICE
-from makemore_backprop_ninja.backprop_helpers.verbose_backprop import verbose_manual_backprop
-
-
-class BackpropMode(Enum):
-    AUTOMATIC = "AUTOMATIC"
-    VERBOSE = "VERBOSE"
 
 
 # Reducing the number of locals here will penalize the didactical purpose
-# pylint: disable-next=too-many-arguments,too-many-locals,too-complex,too-many-branches
+# pylint: disable-next=too-many-arguments,too-many-locals,too-complex,too-many-branches,too-many-positional-arguments
 def train_neural_net_model(
     model: Tuple[torch.Tensor, ...],
     batch_normalization_parameters: BatchNormalizationParameters,
@@ -153,7 +150,7 @@ def train_neural_net_model(
         # Always do the  backprop in order to compare
         loss.backward()
 
-        if backprop_mode != BackpropMode.AUTOMATIC:
+        if backprop_mode == BackpropMode.VERBOSE:
             if i % optimization_params.mini_batches_per_data_capture == 0:
                 compare_gradients(
                     model=model,
@@ -195,9 +192,6 @@ def train_neural_net_model(
     print(f"Final validation loss: {validation_loss:.3f}")
 
     return model
-
-
-
 
 
 def attach_gradients(
@@ -404,7 +398,10 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
     """
     parser = argparse.ArgumentParser(
         description="Train a model and plot its contents.",
-        epilog=("Example using batch normalization\npython3 -m makemore_backprop_ninja.train -m"),
+        epilog=(
+            "Example using batch normalization\n"
+            "python3 -m makemore_backprop_ninja.train -m"
+        ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
