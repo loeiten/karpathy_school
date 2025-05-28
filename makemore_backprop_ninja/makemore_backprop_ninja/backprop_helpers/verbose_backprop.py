@@ -99,7 +99,7 @@ def verbose_manual_backprop(
     # prediction x, we see that the loss function with the reduction can be
     # written as
     #
-    # l = - \frac{1}{N} \sum_{n=1}^{N} \sum_{c=1}^{C} y_{nc} \log(\mathbb{P}(x_{nc}))
+    # l = - \frac{1}{N} \sum_{n=0}^{N} \sum_{c=0}^{C} y_{nc} \log(\mathbb{P}(x_{nc}))
     #
     # Notice that there will be one prediction per sample per class, i.e. x = x(n,c)
     # where n is a specific batch and c a specific class
