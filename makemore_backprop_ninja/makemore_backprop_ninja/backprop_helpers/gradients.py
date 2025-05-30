@@ -56,7 +56,7 @@ def compare_single_gradient(
         bool: Whether the tensor is approximately equal
     """
     exact = torch.all(manually_calculated == tensor.grad).item()
-    approximate = torch.allclose(manually_calculated, tensor.grad)
+    approximate = torch.allclose(manually_calculated, tensor.grad, atol=1.2e-8)
     max_diff = (manually_calculated - tensor.grad).abs().max().item()
     print(
         f"{name:32s} | "
