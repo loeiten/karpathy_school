@@ -11,6 +11,9 @@ from makemore_backprop_ninja.backprop_helpers.gradients import (
     attach_gradients,
     compare_gradients,
 )
+from makemore_backprop_ninja.backprop_helpers.succinct_backprop import (
+    succinct_manual_backprop,
+)
 from makemore_backprop_ninja.backprop_helpers.verbose_backprop import (
     verbose_manual_backprop,
 )
@@ -29,7 +32,7 @@ from makemore_backprop_ninja import DATASET, DEVICE
 
 
 # Reducing the number of locals here will penalize the didactical purpose
-# pylint: disable-next=too-many-arguments,too-many-locals,too-complex,too-many-branches,too-many-positional-arguments
+# pylint: disable-next=too-many-arguments,too-many-locals,too-complex,too-many-branches,too-many-positional-arguments,too-many-statements
 def train_neural_net_model(
     model: Tuple[torch.Tensor, ...],
     batch_normalization_parameters: BatchNormalizationParameters,
@@ -150,11 +153,29 @@ def train_neural_net_model(
                 targets=targets,
                 input_data=dataset["training_input_data"][idxs],
             )
+        elif backprop_mode == BackpropMode.SUCCINCT:
+            gradients = succinct_manual_backprop(
+                model=model,
+                intermediate_variables=intermediate_variables,
+                targets=targets,
+                input_data=dataset["training_input_data"][idxs],
+            )
+            # Remove intermediate variables not used in the calculation of the
+            # gradients
+            intermediate_variables.pop("batch_normalization_mean")
+            intermediate_variables.pop("batch_normalization_diff")
+            intermediate_variables.pop("batch_normalization_diff_squared")
+            intermediate_variables.pop("batch_normalization_var")
+            intermediate_variables.pop("inv_batch_normalization_std")
+            intermediate_variables.pop("batch_normalization_raw")
 
         # Always do the  backprop in order to compare
         loss.backward()
 
-        if backprop_mode == BackpropMode.VERBOSE:
+        # Pylint is not able to see that in both non AUTOMATIC cases the
+        # gradients are defined
+        gradients = {}
+        if backprop_mode != BackpropMode.AUTOMATIC:
             if i % optimization_params.mini_batches_per_data_capture == 0:
                 compare_gradients(
                     model=model,
