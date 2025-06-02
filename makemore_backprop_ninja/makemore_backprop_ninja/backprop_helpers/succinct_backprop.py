@@ -27,4 +27,25 @@ def succinct_manual_backprop(
     Returns:
         A map of the gradients
     """
-    return {}
+   # Alias for the model weights
+    (
+        c,
+        w1,
+        _,  # We are not using b1 in any calculations
+        w2,
+        _,  # We are not using b2 in any calculations
+        batch_normalization_gain,
+        _,  # We are not using batch_normalization_bias
+    ) = model
+    # Intermediate variables from predict
+    embedding = intermediate_variables["embedding"]
+    concatenated_embedding = intermediate_variables["concatenated_embedding"]
+
+    inv_batch_normalization_std = intermediate_variables["inv_batch_normalization_std"]
+    batch_normalization_raw = intermediate_variables["batch_normalization_raw"]
+    h_pre_activation = intermediate_variables["h_pre_activation"]
+    h = intermediate_variables["h"]
+    # Intermediate variables from loss
+    logits = intermediate_variables["logits"]
+
+    batch_size = embedding.size(dim=0)
