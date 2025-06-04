@@ -204,3 +204,7 @@ def succinct_manual_backprop(
     # \frac{d l}{d x_{nj}}
     # = -\frac{1}{N}[y_{nj}-p_{nj}]
     # = \frac{1}{N}[p_{nj}-y_{nj}]
+    dl_d_logits = F.softmax(logits, 1)  # The p_{nj} part
+    dl_d_logits[range(batch_size), targets] -= 1  # -y_{nj} for the correct idxs
+    dl_d_logits /= batch_size  # 1/N
+
