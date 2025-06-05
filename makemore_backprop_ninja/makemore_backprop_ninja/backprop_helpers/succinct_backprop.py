@@ -208,3 +208,9 @@ def succinct_manual_backprop(
     dl_d_logits[range(batch_size), targets] -= 1  # -y_{nj} for the correct idxs
     dl_d_logits /= batch_size  # 1/N
 
+    # Reusing the derivation we did in verbose_manual_backprop
+    dl_d_h = dl_d_logits @ w2.T
+    dl_d_w2 = h.T @ dl_d_logits
+    dl_d_b2 = dl_d_logits.sum(0)
+    dl_d_h_pre_activation = dl_d_h * (1.0 - torch.tanh(h_pre_activation) ** 2)
+
