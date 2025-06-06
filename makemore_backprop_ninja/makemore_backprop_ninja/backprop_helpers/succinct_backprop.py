@@ -214,3 +214,28 @@ def succinct_manual_backprop(
     dl_d_b2 = dl_d_logits.sum(0)
     dl_d_h_pre_activation = dl_d_h * (1.0 - torch.tanh(h_pre_activation) ** 2)
 
+    # We can also calculate the batch norm all in one go
+    # Using the definitions as before
+    #
+    # \mu_{h} = \mu_{h}(d_{1h}, \dots ,d_{Nh})
+    #         = \frac{1}{N}\sum_{i=0}^N d_{ih}
+    # f_{nh} = f(d_{nh},\mu_{h})
+    #        = d_{nh} - \mu_{h}
+    # \sigma_{h} = s_h(f_{1h}, \dots, f_{Nh})
+    #           = \frac{1}{N-1}\sum_{i=0}^N f_{ih}^2
+    # j_{h} = j(\sigma_{h})
+    #       = \frac{1}{\sqrt{\sigma_{h} + \epsilon}}
+    # k_{nh} = k(f_{nh},j_{h})
+    #        = f_{nh}j_{h}
+    # a_{nh} = a(\gamma_{h}, k_{nh}, \beta_{h})
+    #        = \gamma_{h},k_{nh} + \beta_{h}
+    #
+    # Or, stated differently:
+    #
+    # a_{nh} =
+    # a_{nh}(\gamma_{h}, \beta_{h}, k_{nh}(f_{nh}(d_{nh}, \mu_{h}), j_{h}(\sigma_{h})))
+    #
+    # Expanding the differential gives
+    #
+    # dl
+    # = \sum_{i=0}^N \frac{\partial l}{\partial a_{ih}} d a_{ih}
