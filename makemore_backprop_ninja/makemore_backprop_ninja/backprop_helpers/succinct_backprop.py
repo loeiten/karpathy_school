@@ -462,3 +462,16 @@ def succinct_manual_backprop(
     #     k_{ih}
     #     \frac{\partial l}{\partial a_{ih}}
     #   ]
+    dl_d_h_pre_batch_norm = (
+        batch_normalization_gain
+        * inv_batch_normalization_std
+        / batch_size
+        * (
+            batch_size * dl_d_h_pre_activation
+            - dl_d_h_pre_activation.sum(0)
+            - batch_size
+            / (batch_size - 1)
+            * batch_normalization_raw
+            * (dl_d_h_pre_activation * batch_normalization_raw).sum(0)
+        )
+    )
