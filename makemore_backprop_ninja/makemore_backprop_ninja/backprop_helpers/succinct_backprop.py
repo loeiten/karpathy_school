@@ -239,3 +239,226 @@ def succinct_manual_backprop(
     #
     # dl
     # = \sum_{i=0}^N \frac{\partial l}{\partial a_{ih}} d a_{ih}
+    #
+    # where
+    #
+    # d a_{ih}
+    # = \frac{\partial a_{ih}}{\partial \gamma_{h}} d\gamma_{h}
+    #  + \frac{\partial a_{ih}}{\partial k_{ih}} d k_{ih}
+    #  + \frac{\partial a_{ih}}{\partial \beta_{h}} d\beta_{h}
+    # = \gamma_{h} d k_{ih}
+    #
+    # where we in the last step have used that \gamma and \beta are constants
+    # w.r.t d_{nh}, so d\gamma_{h} = d\beta_{h} = 0.
+    # Furthermore, we have that
+    #
+    # d k_{ih}
+    # = \frac{\partial k_{ih}}{\partial f_{ih}} d f_{ih}
+    #  + \frac{\partial k_{ih}}{\partial j_{h}} d j_{h}
+    # = j_{h} d f_{ih} + f_{ih} d j_{h}
+    #
+    # and
+    #
+    # d f_{ih}
+    # = d d_{ih} - d \mu_{h}
+    # = d d_{ih} - \frac{1}{N}\sum_{p=0}^N d d_{ph}
+    #
+    # and
+    #
+    # d j_{h}
+    # = \frac{\partial j_{h}}{\partial \sigma_{h}} d \sigma_{h}
+    # = -\frac{1}{2}(\sigma_{h}+\epsilon)^{-\frac{3}{2}} d\sigma_{h}
+    # = -\frac{1}{2} j_{h}^3 d\sigma_{h}
+    #
+    # and
+    #
+    # d\sigma_{h}
+    # = \frac{\partial \sigma_{h}}{\partial f_{jh}} d f_{jh}
+    # = \frac{1}{N-1}\sum_{j=0}^N 2 f_{jh} d f_{jh}
+    # = \frac{2}{N-1}\sum_{j=0}^N f_{jh} (d d_{jh}-d\mu_{h})
+    #
+    # Combining all the differentials gives
+    #
+    # dl
+    # = \sum_{i=0}^N \frac{\partial l}{\partial a_{ih}}\gamma_{h}
+    #    [
+    #      j_{h}(d d_{ih}-d\mu_{h})
+    #      -
+    #      \frac{j_{h}^3 f_{ih}}{2} \frac{2}{N-1}
+    #      \sum_{j=0}^N f_{jh}(d d_{jh}-d\mu_{h})
+    #    ]
+    # = \gamma_{h}
+    #   \sum_{i=0}^N \frac{\partial l}{\partial a_{ih}}
+    #   [
+    #     j_{h}(d d_{ih}-d\mu_{h})
+    #     -
+    #     \frac{j_{h}^3 f_{ih}}{N-1}
+    #     \sum_{j=0}^N f_{jh}(d d_{jh}-d\mu_{h})
+    #   ]
+    # = \gamma_{h}
+    #   \sum_{i=0}^N \frac{\partial l}{\partial a_{ih}}
+    #   [
+    #     j_{h}(d d_{ih}-\frac{1}{N}\sum_p d d_{ph})
+    #     -
+    #     \frac{j_{h}^3 f_{ih}}{N-1}
+    #     \sum_{j=0}^N f_{jh}(d d_{jh}-\frac{1}{N}\sum_p d d_{ph})
+    #   ]
+    # = \sum_{i=0}^N
+    #   [
+    #     \gamma_{h}j_{h}\frac{\partial l}{\partial a_{ih}}
+    #     d d_{ih}
+    #     -
+    #     \gamma_{h}j_{h}\frac{\partial l}{\partial a_{ih}}
+    #     \frac{1}{N}\sum_p
+    #     d d_{ph}
+    #     -
+    #     \gamma_{h}\frac{\partial l}{\partial a_{ih}}
+    #     \frac{j_{h}^3 f_{ih}}{N-1}
+    #     \sum_{j=0}^N f_{jh}d d_{jh}
+    #     -
+    #     \gamma_{h}\frac{\partial l}{\partial a_{ih}}
+    #     \frac{j_{h}^3 f_{ih}}{N-1}
+    #     \sum_{j=0}^N f_{jh}\frac{1}{N}\sum_p d d_{ph}
+    #   ]
+    #
+    # We note that
+    #
+    # \sum_j f_jh
+    # = \sum_j (d_{jh} - \mu_{h})
+    # = \sum_j d_{jh} - \sum_j\mu_{h}
+    # = N\mu_{h} - N\mu_{h}
+    # = 0
+    #
+    # At the same time, \sum_{j=0}^N f_{jh}d d_{jh} \neq 0, so
+    #
+    # dl
+    # = \gamma_{h}j_{h}
+    #   \sum_{i=0}^N
+    #   \frac{\partial l}{\partial a_{ih}}
+    #   d d_{ih}
+    #     -
+    #   \gamma_{h}j_{h}
+    #   \sum_{i=0}^N
+    #   \frac{1}{N}
+    #   \frac{\partial l}{\partial a_{ih}}
+    #   \sum_p
+    #   d d_{ph}
+    #     -
+    #   \gamma_{h}\frac{j_{h}^3 }{N-1}
+    #   \sum_{i=0}^N
+    #   \frac{\partial l}{\partial a_{ih}}
+    #   f_{ih}
+    #   \sum_{j=0}^N f_{jh}d d_{jh}
+    # = \sum_{n=0}^N
+    #   (
+    #   \gamma_{h}j_{h}
+    #   \frac{\partial l}{\partial a_{nh}}
+    #   )
+    #   d d_{nh}
+    #     -
+    #   \frac{1}{N}
+    #   \gamma_{h}j_{h}
+    #   \sum_p
+    #   (
+    #   \sum_{i=0}^N
+    #   \frac{\partial l}{\partial a_{ih}}
+    #   )
+    #   d d_{ph}
+    #     -
+    #   \gamma_{h}\frac{j_{h}^3 }{N-1}
+    #   \sum_{j=0}^N
+    #   (
+    #   \sum_{i=0}^N
+    #   \frac{\partial l}{\partial a_{ih}} f_{ih}
+    #   )
+    #   f_{jh}d d_{jh}
+    # = \sum_{n=0}^N
+    #   (
+    #   \gamma_{h}j_{h}
+    #   \frac{\partial l}{\partial a_{nh}}
+    #   )
+    #   d d_{nh}
+    #     -
+    #   \sum_{n=0}^N
+    #   (
+    #   \gamma_{h}j_{h}
+    #   \frac{1}{N}
+    #   \sum_{i=0}^N
+    #   \frac{\partial l}{\partial a_{ih}}
+    #   )
+    #   d d_{nh}
+    #     -
+    #   \sum_{n=0}^N
+    #   \gamma_{h}\frac{j_{h}^3 }{N-1}
+    #   f_{nh}
+    #   (
+    #   \sum_{i=0}^N
+    #   \frac{\partial l}{\partial a_{ih}} f_{ih}
+    #   )
+    #   d d_{nh}
+    # = \sum_{n=0}^N
+    #   [
+    #     \gamma_{h}j_{h}
+    #     \frac{\partial l}{\partial a_{nh}}
+    #       -
+    #     \gamma_{h}j_{h}
+    #     \frac{1}{N}
+    #     \sum_{i=0}^N
+    #     \frac{\partial l}{\partial a_{ih}}
+    #       -
+    #     \gamma_{h}\frac{j_{h}^3 }{N-1}
+    #     f_{nh}
+    #     \sum_{i=0}^N
+    #     f_{ih}
+    #     \frac{\partial l}{\partial a_{ih}}
+    #   ]
+    #   d d_{nh}
+    #
+    # Reading off the coefficient yields
+    #
+    # \frac{dl}{d d_{nh}}
+    # = \gamma_{h}j_{h}
+    #   [
+    #     \frac{\partial l}{\partial a_{nh}}
+    #       -
+    #     \frac{1}{N}
+    #     \sum_{i=0}^N
+    #     \frac{\partial l}{\partial a_{ih}}
+    #       -
+    #     \frac{j_{h}^2 }{N-1}
+    #     f_{nh}
+    #     \sum_{i=0}^N
+    #     f_{ih}
+    #     \frac{\partial l}{\partial a_{ih}}
+    #   ]
+    # = \frac{\gamma_{h}j_{h}}{N}
+    #   [
+    #     N\frac{\partial l}{\partial a_{nh}}
+    #       -
+    #     \sum_{i=0}^N
+    #     \frac{\partial l}{\partial a_{ih}}
+    #       -
+    #     \frac{N}{N-1}
+    #     j_{h}^2
+    #     f_{nh}
+    #     \sum_{i=0}^N
+    #     f_{ih}
+    #     \frac{\partial l}{\partial a_{ih}}
+    #   ]
+    #
+    # Using that k_{nh} = f_{nh}j_{h} gives
+    #
+    # \frac{dl}{d d_{nh}}
+    # = \frac{\gamma_{h}j_{h}}{N}
+    #   [
+    #     N\frac{\partial l}{\partial a_{nh}}
+    #       -
+    #     \sum_{i=0}^N
+    #     \frac{\partial l}{\partial a_{ih}}
+    #       -
+    #     \frac{N}{N-1}
+    #     k_{nh}
+    #     \sum_{i=0}^N
+    #     k_{ih}
+    #     \frac{\partial l}{\partial a_{ih}}
+    #   ]
