@@ -475,3 +475,10 @@ def succinct_manual_backprop(
             * (dl_d_h_pre_activation * batch_normalization_raw).sum(0)
         )
     )
+
+    # Reusing the derivation we did in verbose_manual_backprop
+    dl_d_batch_normalization_gain = (
+        dl_d_h_pre_activation * batch_normalization_raw
+    ).sum(0, keepdim=True)
+    dl_d_batch_normalization_bias = (dl_d_h_pre_activation).sum(0, keepdim=True)
+
