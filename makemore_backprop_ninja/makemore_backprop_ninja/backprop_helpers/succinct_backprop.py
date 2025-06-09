@@ -482,3 +482,15 @@ def succinct_manual_backprop(
     ).sum(0, keepdim=True)
     dl_d_batch_normalization_bias = (dl_d_h_pre_activation).sum(0, keepdim=True)
 
+    # And for the first layer, we have
+    dl_d_w1 = concatenated_embedding.T @ dl_d_h_pre_batch_norm
+    dl_d_b1 = dl_d_h_pre_batch_norm.sum(0)
+    dl_d_concatenated_embedding = dl_d_h_pre_batch_norm @ w1.T
+    dl_d_embedding = dl_d_concatenated_embedding.view(
+        batch_size, -1, embedding.shape[2]
+    )
+    dl_d_c = torch.zeros_like(c)
+    for i in range(input_data.shape[0]):
+        for j in range(input_data.shape[1]):
+            idx = input_data[i, j]
+            dl_d_c[idx] += dl_d_embedding[i, j]
