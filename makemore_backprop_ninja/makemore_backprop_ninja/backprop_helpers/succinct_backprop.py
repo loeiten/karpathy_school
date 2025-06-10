@@ -494,3 +494,19 @@ def succinct_manual_backprop(
         for j in range(input_data.shape[1]):
             idx = input_data[i, j]
             dl_d_c[idx] += dl_d_embedding[i, j]
+
+    gradients: Dict[str, torch.Tensor] = {}
+    gradients["dl_d_logits"] = dl_d_logits
+    gradients["dl_d_h"] = dl_d_h
+    gradients["dl_d_h_pre_activation"] = dl_d_h_pre_activation
+    gradients["dl_d_w2"] = dl_d_w2
+    gradients["dl_d_b2"] = dl_d_b2
+    gradients["dl_d_h_pre_batch_norm"] = dl_d_h_pre_batch_norm
+    gradients["dl_d_batch_normalization_gain"] = dl_d_batch_normalization_gain
+    gradients["dl_d_batch_normalization_bias"] = dl_d_batch_normalization_bias
+    gradients["dl_d_w1"] = dl_d_w1
+    gradients["dl_d_b1"] = dl_d_b1
+    gradients["dl_d_concatenated_embedding"] = dl_d_concatenated_embedding
+    gradients["dl_d_embedding"] = dl_d_embedding
+    gradients["dl_d_c"] = dl_d_c
+
