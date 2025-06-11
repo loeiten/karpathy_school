@@ -27,7 +27,7 @@ def succinct_manual_backprop(
     Returns:
         A map of the gradients
     """
-   # Alias for the model weights
+    # Alias for the model weights
     (
         c,
         w1,
@@ -510,3 +510,4 @@ def succinct_manual_backprop(
     gradients["dl_d_embedding"] = dl_d_embedding
     gradients["dl_d_c"] = dl_d_c
 
+    return gradients
