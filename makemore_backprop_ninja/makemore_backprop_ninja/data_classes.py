@@ -1,6 +1,7 @@
 """Module containing option classes."""
 
 from dataclasses import dataclass
+from enum import Enum
 from typing import Callable
 
 import torch
@@ -53,3 +54,17 @@ class BatchNormalizationParameters:
 
     running_mean: torch.Tensor
     running_std: torch.Tensor
+
+
+class BackpropMode(Enum):
+    """
+    Contains backprop modes.
+
+    AUTOMATIC - Uses pytorch autograd
+    VERBOSE - Calculate the gradients by hand in a verbose way
+    SUCCINCT - Calculate the gradients by hand in a succinct way
+    """
+
+    AUTOMATIC = "AUTOMATIC"
+    VERBOSE = "VERBOSE"
+    SUCCINCT = "SUCCINCT"

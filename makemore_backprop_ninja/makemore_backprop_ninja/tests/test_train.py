@@ -4,8 +4,8 @@ from itertools import chain
 
 import pytest
 import torch
-from makemore_backprop_ninja.backprop_helpers.dataclasses import BackpropMode
 from makemore_backprop_ninja.data_classes import (
+    BackpropMode,
     BatchNormalizationParameters,
     ModelParams,
     OptimizationParams,

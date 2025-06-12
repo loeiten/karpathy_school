@@ -6,7 +6,6 @@ from typing import List, Optional, Tuple
 
 import torch
 import torch.nn.functional as F
-from makemore_backprop_ninja.backprop_helpers.dataclasses import BackpropMode
 from makemore_backprop_ninja.backprop_helpers.gradients import (
     attach_gradients,
     compare_gradients,
@@ -18,6 +17,7 @@ from makemore_backprop_ninja.backprop_helpers.verbose_backprop import (
     verbose_manual_backprop,
 )
 from makemore_backprop_ninja.data_classes import (
+    BackpropMode,
     BatchNormalizationParameters,
     ModelParams,
     OptimizationParams,
