@@ -6,6 +6,7 @@ from typing import List, Tuple
 
 import torch
 from makemore_backprop_ninja.data_classes import (
+    BackpropMode,
     BatchNormalizationParameters,
     ModelParams,
     OptimizationParams,
@@ -90,12 +91,13 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
         help=("Number of names to predict"),
     )
     parser.add_argument(
-        "-u",
-        "--use-functional",
-        type=bool,
+        "-m",
+        "--backprop-mode",
+        type=BackpropMode,
         required=False,
-        default=True,
-        help="Whether or not to use the functional version of the cross entropy.",
+        default=BackpropMode.AUTOMATIC,
+        choices=list(BackpropMode),
+        help="What backprop mode to use",
     )
 
     args = parser.parse_args(sys_args)
@@ -136,7 +138,7 @@ def main(sys_args: List[str]):
         model_params=model_params,
         optimization_params=optimization_params,
         batch_normalization_parameters=batch_normalization_parameters,
-        use_functional=args.use_functional,
+        backprop_mode=args.backprop_mode,
     )
     predictions = run_inference(
         model=model,
