@@ -146,6 +146,7 @@ def train_neural_net_model(
             tensor.retain_grad()
 
         # Do the back propagation
+        gradients = {}
         if backprop_mode == BackpropMode.VERBOSE:
             gradients = verbose_manual_backprop(
                 model=model,
@@ -174,7 +175,6 @@ def train_neural_net_model(
 
         # Pylint is not able to see that in both non AUTOMATIC cases the
         # gradients are defined
-        gradients = {}
         if backprop_mode != BackpropMode.AUTOMATIC:
             if i % optimization_params.mini_batches_per_data_capture == 0:
                 compare_gradients(
