@@ -26,6 +26,7 @@ from makemore_backprop_ninja.evaluation import evaluate
 from makemore_backprop_ninja.models import get_explicit_model
 from makemore_backprop_ninja.predict import predict_neural_network
 from makemore_backprop_ninja.preprocessing import get_dataset
+from makemore_backprop_ninja.visualisation import plot_dl_d_logits
 from tqdm import tqdm
 
 from makemore_backprop_ninja import DATASET, DEVICE
@@ -39,6 +40,7 @@ def train_neural_net_model(
     dataset: DATASET,
     optimization_params: Optional[OptimizationParams],
     backprop_mode: BackpropMode = BackpropMode.AUTOMATIC,
+    plot_logits_grad: bool = False,
     seed: int = 2147483647,
 ) -> Tuple[torch.Tensor, ...]:
     """Train the neural net model.
@@ -52,6 +54,7 @@ def train_neural_net_model(
         optimization_params (Optional[OptimizationParams]): Optimization
             options
         backprop_mode (BackpropMode): The backprop mode to use
+        plot_logits (bool): Whether or not to plot the gradient of the logits
         seed (int): The seed for the random number generator
 
     Returns:
@@ -170,6 +173,13 @@ def train_neural_net_model(
             intermediate_variables.pop("inv_batch_normalization_std")
             intermediate_variables.pop("batch_normalization_raw")
 
+        if (
+            backprop_mode != BackpropMode.AUTOMATIC
+            and plot_logits_grad
+            and optimization_params.cur_step == 1
+        ):
+            plot_dl_d_logits(gradients["dl_d_logits"])
+
         # Always do the  backprop in order to compare
         loss.backward()
 
@@ -224,6 +234,7 @@ def train(
     optimization_params: OptimizationParams,
     batch_normalization_parameters: BatchNormalizationParameters,
     backprop_mode: BackpropMode = BackpropMode.AUTOMATIC,
+    plot_logits_grad: bool = False,
     seed: int = 2147483647,
 ) -> Tuple[torch.Tensor, ...]:
     """Train the model.
@@ -234,6 +245,7 @@ def train(
         batch_normalization_parameters (BatchNormalizationParameters):
             Contains the running mean and the running standard deviation
         backprop_mode (BackpropMode): The backprop mode to use
+        plot_logits (bool): Whether or not to plot the gradient of the logits
         seed (int): The seed for the random number generator
 
     Returns:
@@ -252,6 +264,7 @@ def train(
         batch_normalization_parameters=batch_normalization_parameters,
         optimization_params=optimization_params,
         backprop_mode=backprop_mode,
+        plot_logits_grad=plot_logits_grad,
         seed=seed,
     )
 
@@ -262,6 +275,7 @@ def train_model(
     model_params: ModelParams,
     optimization_params: OptimizationParams,
     backprop_mode: BackpropMode,
+    plot_logits_grad: bool = False,
 ) -> None:
     """Train the model.
 
@@ -269,6 +283,7 @@ def train_model(
         model_params (ModelParams): The model parameters
         optimization_params (OptimizationParams): The optimization parameters
         backprop_mode (BackpropMode): What backprop mode to use
+        plot_logits_grad (bool): Whether or not to plot the gradient of the logits
     """
     # These parameters will be used as batch norm parameters during inference
     # Initialized to zero as the mean and one as std as the initialization of w1
@@ -290,6 +305,7 @@ def train_model(
         optimization_params=optimization_params,
         batch_normalization_parameters=batch_normalization_parameters,
         backprop_mode=backprop_mode,
+        plot_logits_grad=plot_logits_grad,
     )
     print("Training done!")
 
@@ -307,7 +323,7 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
         description="Train a model and plot its contents.",
         epilog=(
             "Example using batch normalization\n"
-            "python3 -m makemore_backprop_ninja.train -m"
+            "python3 -m makemore_backprop_ninja.train"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -376,6 +392,13 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
         choices=list(BackpropMode),
         help="What backprop mode to use",
     )
+    parser.add_argument(
+        "-p",
+        "--plot-logits-grad",
+        required=False,
+        action="store_true",
+        help="Whether or not to plot the gradients of the logits",
+    )
 
     args = parser.parse_args(sys_args)
     return args
@@ -388,13 +411,18 @@ def main(sys_args: List[str]):
         sys_args (List[str]): The system arguments
     """
     args = parse_args(sys_args)
+
+    # Sanity checking
+    if args.backprop_mode == BackpropMode.AUTOMATIC and args.plot_logits_grad:
+        raise ValueError("Cannot plot the logits grad with autograd")
+
     model_params = ModelParams(
         block_size=args.block_size,
         embedding_size=args.embedding_size,
         hidden_layer_neurons=args.hidden_layer_neurons,
     )
     optimization_params = OptimizationParams(
-        n_mini_batches=args.n_mini_batches,
+        n_mini_batches=args.n_mini_batches if not args.plot_logits_grad else 1,
         mini_batches_per_data_capture=args.mini_batches_per_data_capture,
         batch_size=args.batch_size,
     )
@@ -402,6 +430,7 @@ def main(sys_args: List[str]):
         model_params=model_params,
         optimization_params=optimization_params,
         backprop_mode=args.backprop_mode,
+        plot_logits_grad=args.plot_logits_grad,
     )
 
 
