@@ -54,7 +54,7 @@ def train_neural_net_model(
         optimization_params (Optional[OptimizationParams]): Optimization
             options
         backprop_mode (BackpropMode): The backprop mode to use
-        plot_logits (bool): Whether or not to plot the gradient of the logits
+        plot_logits_grad (bool): Whether or not to plot the gradient of the logits
         seed (int): The seed for the random number generator
 
     Returns:
@@ -229,6 +229,7 @@ def train_neural_net_model(
     return model
 
 
+# pylint: disable-next=too-many-arguments,too-many-positional-arguments
 def train(
     model_params: ModelParams,
     optimization_params: OptimizationParams,
@@ -245,7 +246,7 @@ def train(
         batch_normalization_parameters (BatchNormalizationParameters):
             Contains the running mean and the running standard deviation
         backprop_mode (BackpropMode): The backprop mode to use
-        plot_logits (bool): Whether or not to plot the gradient of the logits
+        plot_logits_grad (bool): Whether or not to plot the gradient of the logits
         seed (int): The seed for the random number generator
 
     Returns:
@@ -406,6 +407,9 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
 
 def main(sys_args: List[str]):
     """Parse the arguments and run train_and_plot.
+
+    Raises:
+        ValueError: In case arguments are not properly set
 
     Args:
         sys_args (List[str]): The system arguments
