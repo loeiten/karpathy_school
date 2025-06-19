@@ -1,27 +1,13 @@
 """Contains tests for the inference module."""
 
-from typing import Literal
-
-import pytest
-import torch
-from makemore_wavenet.data_classes import BatchNormalizationParameters, ModelParams
+from makemore_wavenet.data_classes import ModelParams
 from makemore_wavenet.inference import parse_args, run_inference
-from makemore_wavenet.models import get_model_function
-
-from makemore_wavenet import DEVICE
+from makemore_wavenet.models import get_model
 
 
-@pytest.mark.parametrize("batch_normalize", [True, False])
-@pytest.mark.parametrize("model_type", ["explicit", "pytorch"])
-def test_run_inference(
-    batch_normalize: bool, model_type: Literal["explicit", "pytorch"]
-) -> None:
+def test_run_inference() -> None:
     """
     Test the run_inference function.
-
-    Args:
-        batch_normalize (bool): Whether or not to use batch normalization
-        model_type (Literal["explicit", "pytorch"]): What model type to use
     """
     # Obtain the model with default parameters
     hidden_layer_neurons = 100
@@ -29,31 +15,13 @@ def test_run_inference(
     model_params = ModelParams(
         block_size=3,
         hidden_layer_neurons=hidden_layer_neurons,
-        batch_normalize=batch_normalize,
     )
-    model_function = get_model_function(model_type=model_type)
-    model = model_function(model_params)
-    if batch_normalize and model_type == "explicit":
-        batch_normalization_parameters = BatchNormalizationParameters(
-            running_mean=torch.zeros(
-                (1, hidden_layer_neurons),
-                requires_grad=False,
-                device=DEVICE,
-            ),
-            running_std=torch.ones(
-                (1, hidden_layer_neurons),
-                requires_grad=False,
-                device=DEVICE,
-            ),
-        )
-    else:
-        batch_normalization_parameters = None
+    model = get_model(model_params)
+
     # Run inference on the untrained model
     predictions = run_inference(
-        model_type=model_type,
         model=model,
         n_samples=2,
-        batch_normalization_parameters=batch_normalization_parameters,
     )
     assert len(predictions) == 2
 

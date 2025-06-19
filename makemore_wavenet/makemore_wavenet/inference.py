@@ -2,17 +2,13 @@
 
 import argparse
 import sys
-from typing import List, Literal, Optional, Tuple, Union
+from typing import List, Tuple
 
 import torch
-from makemore_wavenet.data_classes import (
-    BatchNormalizationParameters,
-    ModelParams,
-    OptimizationParams,
-)
-from makemore_wavenet.embedding import Embedding
-from makemore_wavenet.linear import Linear
+from makemore_wavenet.data_classes import ModelParams, OptimizationParams
 from makemore_wavenet.module import Module
+from makemore_wavenet.ops.embedding import Embedding
+from makemore_wavenet.ops.linear import Linear
 from makemore_wavenet.predict import predict_neural_network
 from makemore_wavenet.train import train
 
@@ -20,56 +16,42 @@ from makemore_wavenet import DEVICE, INDEX_TO_TOKEN, TOKEN_TO_INDEX
 
 
 def run_inference(
-    model_type: Literal["explicit", "pytorch"],
-    model: Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]],
+    model: Tuple[Module, ...],
     n_samples: int = 20,
-    batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
     seed: int = 2147483647,
 ) -> Tuple[str, ...]:
     """Run inference on the model.
 
     Args:
-        model_type (Literal["explicit", "pytorch"]): What model type to use
-        model (Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]): The model to
-            run inference on.
+        model (Tuple[Module, ...]): The model to run inference on.
         n_samples (int, optional): The number of inferences to run.
             Defaults to 20.
-        batch_normalization_parameters (Optional[BatchNormalizationParameters]):
-            If set: Contains the running mean and the running standard deviation
         seed (int, optional): The seed to use. Defaults to 2147483647.
 
     Raises:
         TypeError: If invalid model is given
+        ValueError: If the first layer is not an Embedding
+        ValueError: If the second layer is not a Linear layer
 
     Returns:
         Tuple[str, ...]: The predictions
     """
-    if (
-        model_type == "explicit"
-        and isinstance(model[0], torch.Tensor)
-        and isinstance(model[1], torch.Tensor)
-    ):
-        # Obtain the embedding size from c
-        embedding_size = int(model[0].shape[-1])
-        # Obtain the block size from w1
-        block_size = int(model[1].shape[-2] / embedding_size)
-    elif (
-        model_type == "pytorch"
-        and isinstance(model[0], Embedding)
-        and isinstance(model[1], Linear)
-    ):
-        # Obtain the embedding size from c
-        embedding_size = int(model[0].weight.shape[-1])
-        # Obtain the block size from w1
-        block_size = int(model[1].weight.shape[-2] / embedding_size)
-        # Disable training
-        for layer in model:
-            if hasattr(layer, "training"):
-                layer.training = False
-    else:
-        raise TypeError(
-            f"{model_type=} with {type(model[0])=} and {type(model[1])=} not recognized"
+    if not isinstance(model[0], Embedding):
+        raise ValueError(
+            f"Expected the first layer to be an embedding, got {type(model[0])}"
         )
+    # Obtain the embedding size from c
+    embedding_size = int(model[0].weight.shape[-1])
+    if not isinstance(model[1], Linear):
+        raise ValueError(
+            f"Expected the second layer to be an linear layer, got {type(model[1])}"
+        )
+    # Obtain the block size from w1
+    block_size = int(model[1].weight.shape[-2] / embedding_size)
+    # Disable training
+    for layer in model:
+        if hasattr(layer, "training"):
+            layer.training = False
 
     g = torch.Generator(device=DEVICE).manual_seed(seed)
     predictions: List[str] = []
@@ -82,11 +64,8 @@ def run_inference(
             # Note the [] to get the batch shape correct
             # Note the [0] as predict always returns a tuple
             logits = predict_neural_network(
-                model_type=model_type,
                 model=model,
                 input_data=torch.tensor([context]),
-                batch_normalization_parameters=batch_normalization_parameters,
-                training=False,
             )[0]
             probs = torch.softmax(logits, dim=1)
             index = torch.multinomial(probs, num_samples=1, generator=g)
@@ -156,35 +135,14 @@ def main(sys_args: List[str]):
         n_mini_batches=200_000,
         mini_batches_per_data_capture=1_000,
     )
-    if args.batch_normalize:
-        # These parameters will be used as batch norm parameters during inference
-        # Initialized to zero as the mean and one as std as the initialization of w1
-        # and b1 is so that h_pre_activation is roughly gaussian
-        batch_normalization_parameters = BatchNormalizationParameters(
-            running_mean=torch.zeros(
-                (1, model_params.hidden_layer_neurons),
-                requires_grad=False,
-                device=DEVICE,
-            ),
-            running_std=torch.ones(
-                (1, model_params.hidden_layer_neurons),
-                requires_grad=False,
-                device=DEVICE,
-            ),
-        )
-    else:
-        batch_normalization_parameters = None
+
     model, _ = train(
-        model_type=args.model_type,
         model_params=model_params,
         optimization_params=optimization_params,
-        batch_normalization_parameters=batch_normalization_parameters,
     )
     predictions = run_inference(
-        model_type=args.model_type,
         model=model,
         n_samples=args.n_predictions,
-        batch_normalization_parameters=batch_normalization_parameters,
     )
     for prediction in predictions:
         print(f"{prediction}")

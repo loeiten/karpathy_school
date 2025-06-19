@@ -2,18 +2,17 @@
 
 import argparse
 import sys
-from typing import List, Literal, Optional, Tuple, Union
+from typing import List, Optional, Tuple
 
 import torch
 import torch.nn.functional as F
 from makemore_wavenet.data_classes import (
-    BatchNormalizationParameters,
     ModelParams,
     OptimizationParams,
     TrainStatistics,
 )
 from makemore_wavenet.evaluation import evaluate
-from makemore_wavenet.models import get_model_function
+from makemore_wavenet.models import get_model
 from makemore_wavenet.module import Module
 from makemore_wavenet.predict import predict_neural_network
 from makemore_wavenet.preprocessing import get_dataset
@@ -26,20 +25,16 @@ from makemore_wavenet import DATASET, DEVICE
 # Reducing the number of locals here will penalize the didactical purpose
 # pylint: disable-next=too-many-arguments,too-many-locals,too-complex,too-many-branches
 def train_neural_net_model(
-    model_type: Literal["explicit", "pytorch"],
-    model: Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]],
+    model: Tuple[Module, ...],
     dataset: DATASET,
     optimization_params: Optional[OptimizationParams],
     seed: int = 2147483647,
     train_statistics: Optional[TrainStatistics] = None,
-    batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
 ) -> Tuple[torch.Tensor, ...]:
     """Train the neural net model.
 
     Args:
-        model_type (Literal["explicit", "pytorch"]): What model type to use
-        model (Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]): The model
-            (weights or Modules) to use
+        model (Tuple[Module, ...]): The model to use
         dataset: DATASET
             Data containing the training and validation set
         optimization_params (Optional[OptimizationParams]): Optimization
@@ -47,8 +42,6 @@ def train_neural_net_model(
         seed (int): The seed for the random number generator
         train_statistics (Optional[TrainStatistics]): Class to capture the
             statistics of the training job
-        batch_normalization_parameters (Optional[BatchNormalizationParameters]):
-            If set: Contains the running mean and the running standard deviation
 
     Raises:
         TypeError: If wrong model type is given
@@ -87,11 +80,8 @@ def train_neural_net_model(
         #       (batch_size, block_size)
         # Note the [0] as predict always returns a tuple
         logits = predict_neural_network(
-            model_type=model_type,
             model=model,
             input_data=dataset["training_input_data"][idxs],
-            batch_normalization_parameters=batch_normalization_parameters,
-            training=(model_type == "explicit"),
         )[0]
         loss = F.cross_entropy(logits, dataset["training_ground_truth"][idxs])
 
@@ -115,11 +105,10 @@ def train_neural_net_model(
                 "Modules not recognized"
             )
 
-        if model_type == "pytorch":
-            for layer in model:
-                # Create a leaf tensor of a the non-leaf tensors, so that it's
-                # possible to inspect the gradients
-                layer.out.retain_grad()
+        for layer in model:
+            # Create a leaf tensor of a the non-leaf tensors, so that it's
+            # possible to inspect the gradients
+            layer.out.retain_grad()
         # Reset the gradients
         for parameters in layered_parameters:
             parameters.grad = None
@@ -136,21 +125,17 @@ def train_neural_net_model(
             if train_statistics is not None:
                 # Predict on the whole training set
                 cur_training_loss = evaluate(
-                    model_type=model_type,
                     model=model,
                     input_data=dataset["training_input_data"],
                     ground_truth=dataset["training_ground_truth"],
-                    batch_normalization_parameters=batch_normalization_parameters,
                 )
                 train_statistics.eval_training_loss.append(cur_training_loss)
                 train_statistics.eval_training_step.append(optimization_params.cur_step)
                 # Predict on evaluation set
                 cur_validation_loss = evaluate(
-                    model_type=model_type,
                     model=model,
                     input_data=dataset["validation_input_data"],
                     ground_truth=dataset["validation_ground_truth"],
-                    batch_normalization_parameters=batch_normalization_parameters,
                 )
                 train_statistics.eval_validation_loss.append(cur_validation_loss)
                 train_statistics.eval_validation_step.append(
@@ -189,21 +174,16 @@ def train_neural_net_model(
 
 
 def train(
-    model_type: Literal["explicit", "pytorch"],
     model_params: ModelParams,
     optimization_params: OptimizationParams,
     seed: int = 2147483647,
-    batch_normalization_parameters: Optional[BatchNormalizationParameters] = None,
 ) -> Tuple[Tuple[torch.Tensor, ...], TrainStatistics]:
     """Train the model.
 
     Args:
-        model_type (Literal["explicit", "pytorch"]): What model type to use
         model_params (ModelParams): The model parameters
         optimization_params (OptimizationParams): The optimization parameters
         seed (int): The seed for the random number generator
-        batch_normalization_parameters (Optional[BatchNormalizationParameters]):
-            If set: Contains the running mean and the running standard deviation
 
     Returns:
         Tuple[torch.Tensor, ...]: The model
@@ -213,20 +193,17 @@ def train(
     dataset = get_dataset(block_size=model_params.block_size)
 
     # Obtain the model
-    model_function = get_model_function(model_type=model_type)
-    model = model_function(model_params)
+    model = get_model(model_params)
 
     train_statistics = TrainStatistics()
 
     # Train for one step
     model = train_neural_net_model(
-        model_type=model_type,
         model=model,
         dataset=dataset,
         optimization_params=optimization_params,
         seed=seed,
         train_statistics=train_statistics,
-        batch_normalization_parameters=batch_normalization_parameters,
     )
 
     print(f"Final train loss: {train_statistics.eval_training_loss[-1]:.3f}")
@@ -236,44 +213,19 @@ def train(
 
 
 def train_and_plot(
-    model_type: Literal["explicit", "pytorch"],
     model_params: ModelParams,
     optimization_params: OptimizationParams,
-    batch_normalize: bool = False,
 ) -> None:
     """Train the model and plot the statistics.
 
     Args:
-        model_type (Literal["explicit", "pytorch"]): What model type to use
         model_params (ModelParams): The model parameters
         optimization_params (OptimizationParams): The optimization parameters
-        batch_normalize (bool): Whether or not to use batch normalization
     """
-    if batch_normalize:
-        # These parameters will be used as batch norm parameters during inference
-        # Initialized to zero as the mean and one as std as the initialization of w1
-        # and b1 is so that h_pre_activation is roughly gaussian
-        batch_normalization_parameters = BatchNormalizationParameters(
-            running_mean=torch.zeros(
-                (1, model_params.hidden_layer_neurons),
-                requires_grad=False,
-                device=DEVICE,
-            ),
-            running_std=torch.ones(
-                (1, model_params.hidden_layer_neurons),
-                requires_grad=False,
-                device=DEVICE,
-            ),
-        )
-    else:
-        batch_normalization_parameters = None
     _, train_statistics = train(
-        model_type=model_type,
         model_params=model_params,
         optimization_params=optimization_params,
-        batch_normalization_parameters=batch_normalization_parameters,
     )
-
     plot_training(train_statistics=train_statistics)
 
 
@@ -288,7 +240,9 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
     """
     parser = argparse.ArgumentParser(
         description="Train a model and plot its contents.",
-        epilog=("Example using batch normalization\npython3 -m makemore_wavenet.train -m"),
+        epilog=(
+            "Example using batch normalization\npython3 -m makemore_wavenet.train -m"
+        ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
@@ -383,10 +337,8 @@ def main(sys_args: List[str]):
         batch_size=args.batch_size,
     )
     train_and_plot(
-        model_type=args.model_type,
         model_params=model_params,
         optimization_params=optimization_params,
-        batch_normalize=args.batch_normalize,
     )
 
 
