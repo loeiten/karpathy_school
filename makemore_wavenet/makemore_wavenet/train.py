@@ -78,11 +78,10 @@ def train_neural_net_model(
         #       training data
         #       The size of training_input_data[idxs] is therefore
         #       (batch_size, block_size)
-        # Note the [0] as predict always returns a tuple
         logits = predict_neural_network(
             model=model,
             input_data=dataset["training_input_data"][idxs],
-        )[0]
+        )
         loss = F.cross_entropy(logits, dataset["training_ground_truth"][idxs])
 
         # Append loss and iteration
@@ -91,25 +90,10 @@ def train_neural_net_model(
             train_statistics.training_step.append(optimization_params.cur_step)
 
         # Backward pass
-        layered_parameters: List[torch.Tensor] = []
-        if all(isinstance(layer, torch.Tensor) for layer in model):
-            # Mypy doesn't recognize that these are all Tensors
-            layered_parameters = model  # type: ignore
-        elif all(isinstance(layer, Module) for layer in model):
-            # Mypy doesn't recognize that these are all Modules
-            # type: ignore
-            layered_parameters = [p for layer in model for p in layer.parameters()]
-        else:
-            raise TypeError(
-                "Model where all the layers are neither Tensors nor "
-                "Modules not recognized"
-            )
-
-        for layer in model:
-            # Create a leaf tensor of a the non-leaf tensors, so that it's
-            # possible to inspect the gradients
-            layer.out.retain_grad()
         # Reset the gradients
+        layered_parameters = [
+            params for layer in model for params in layer.parameters()  # type: ignore
+        ]
         for parameters in layered_parameters:
             parameters.grad = None
         loss.backward()
@@ -147,28 +131,6 @@ def train_neural_net_model(
                 f"{optimization_params.n_mini_batches:7d}: "
                 f"{loss.item():.4f}"
             )
-
-        # Update update-to-data-ratio
-        if train_statistics is not None:
-            with torch.no_grad():
-                train_statistics.update_to_data_ratio.append(
-                    (
-                        [
-                            (
-                                (
-                                    optimization_params.learning_rate(
-                                        optimization_params.cur_step
-                                    )
-                                    * parameters.grad
-                                ).std()
-                                / parameters.data.std()
-                            )
-                            .log10()
-                            .item()
-                            for parameters in layered_parameters
-                        ]
-                    )
-                )
 
     return model
 

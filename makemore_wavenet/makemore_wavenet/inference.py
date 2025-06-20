@@ -36,18 +36,20 @@ def run_inference(
     Returns:
         Tuple[str, ...]: The predictions
     """
+    # Obtain the embedding size from c
     if not isinstance(model[0], Embedding):
         raise ValueError(
             f"Expected the first layer to be an embedding, got {type(model[0])}"
         )
-    # Obtain the embedding size from c
     embedding_size = int(model[0].weight.shape[-1])
-    if not isinstance(model[1], Linear):
+
+    # Obtain the block size from w1
+    if not isinstance(model[2], Linear):
         raise ValueError(
             f"Expected the second layer to be an linear layer, got {type(model[1])}"
         )
-    # Obtain the block size from w1
-    block_size = int(model[1].weight.shape[-2] / embedding_size)
+    block_size = int(model[2].weight.shape[-2] / embedding_size)
+
     # Disable training
     for layer in model:
         if hasattr(layer, "training"):
@@ -62,11 +64,10 @@ def run_inference(
 
         while True:
             # Note the [] to get the batch shape correct
-            # Note the [0] as predict always returns a tuple
             logits = predict_neural_network(
                 model=model,
                 input_data=torch.tensor([context]),
-            )[0]
+            )
             probs = torch.softmax(logits, dim=1)
             index = torch.multinomial(probs, num_samples=1, generator=g)
             # The context size is constant, so we drop the first token, and add

@@ -11,7 +11,6 @@ from makemore_wavenet.ops.tanh import Tanh
 from makemore_wavenet import VOCAB_SIZE
 
 
-# FIXME: Enable this test
 # We disable mypy check as layers have different attributes
 @typing.no_type_check
 @pytest.mark.parametrize(

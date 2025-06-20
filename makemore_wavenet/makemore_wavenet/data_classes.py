@@ -1,17 +1,7 @@
 """Module containing option classes."""
 
 from dataclasses import dataclass, field
-from enum import Enum
 from typing import Callable, List
-
-import torch
-
-
-class LayerType(Enum):
-    """Enumeration of layer types."""
-
-    TANH = "Tanh"
-    LINEAR = "Linear"
 
 
 @dataclass
@@ -24,7 +14,6 @@ class TrainStatistics:
     eval_training_step: List[int] = field(default_factory=list)
     eval_validation_loss: List[float] = field(default_factory=list)
     eval_validation_step: List[int] = field(default_factory=list)
-    update_to_data_ratio: List[List[float]] = field(default_factory=list)
 
 
 @dataclass
@@ -66,11 +55,3 @@ class ModelParams:
     embedding_size: int = 2
     hidden_layer_neurons: int = 100
     seed: int = 2147483647
-
-
-@dataclass
-class BatchNormalizationParameters:
-    """Class that holds the batch normalization parameters."""
-
-    running_mean: torch.Tensor
-    running_std: torch.Tensor

@@ -8,7 +8,7 @@ from makemore_agb.module import Module
 
 
 # Reducing the number of locals here will penalize the didactical purpose
-# pylint: disable-next=too-many-arguments
+# pylint: disable-next=too-many-arguments,too-many-positional-arguments
 def predict_neural_network(
     model_type: Literal["explicit", "pytorch"],
     model: Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]],
@@ -38,7 +38,7 @@ def predict_neural_network(
         ValueError: If training is passed to the pytorch model
 
     Returns:
-        torch.Tensor: The achieved logits with shape (batch_size)
+        Tuple[torch.Tensor,...]: The achieved logits with shape (batch_size)
     """
     if model_type == "explicit":
         return predict_using_explicit_network(
