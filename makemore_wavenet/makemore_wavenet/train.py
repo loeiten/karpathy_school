@@ -194,9 +194,7 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
     """
     parser = argparse.ArgumentParser(
         description="Train a model and plot its contents.",
-        epilog=(
-            "Example using batch normalization\npython3 -m makemore_wavenet.train -m"
-        ),
+        epilog=("Example using batch normalization\npython3 -m makemore_wavenet.train"),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
@@ -254,19 +252,6 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
         required=False,
         default=default_optimization_params.batch_size,
         help="Number of examples per batch",
-    )
-    parser.add_argument(
-        "-m",
-        "--batch-normalize",
-        action="store_true",
-        help="Whether or not to use batch normalization",
-    )
-    parser.add_argument(
-        "-t",
-        "--model-type",
-        type=str,
-        choices=("explicit", "pytorch"),
-        help="What model type to use",
     )
 
     args = parser.parse_args(sys_args)
