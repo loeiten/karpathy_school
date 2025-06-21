@@ -1,6 +1,6 @@
 """Module for the embedding layer."""
 
-from typing import List, Optional
+from typing import Optional, Tuple
 
 import torch
 from makemore_wavenet.module import Module
@@ -55,11 +55,11 @@ class Embedding(Module):
         self.out = self.weight[x]
         return self.out
 
-    def parameters(self) -> List[torch.Tensor]:
+    def parameters(self) -> Tuple[torch.Tensor, ...]:
         """Return the parameters.
 
         Returns:
-            List[torch.Tensor]: The parameters of the layer
+            Tuple[torch.Tensor,...]: The parameters of the layer
         """
         params = [self.weight]
-        return params
+        return tuple(params)

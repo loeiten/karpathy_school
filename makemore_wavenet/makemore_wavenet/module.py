@@ -1,7 +1,7 @@
 """Module for the abstract module class."""
 
 import abc
-from typing import List
+from typing import List, Tuple
 
 import torch
 
@@ -36,9 +36,47 @@ class Module(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def parameters(self) -> List[torch.Tensor]:
+    def parameters(self) -> Tuple[torch.Tensor, ...]:
         """Return the parameters.
 
         Returns:
-            List[torch.Tensor]: The parameters of the layer
+            Tuple[torch.Tensor,...]: Tuple of the parameters
         """
+
+
+class Sequential(Module):
+    """Class mimicking torch.nn.Sequential."""
+
+    def __init__(self, layers: List[Module]) -> None:
+        """Set the layers.
+
+        Args:
+            layers (List[Module]): Layers to be added to the sequence
+        """
+        self.layers = layers
+        # NOTE: Just for us in order to inspect the output
+        self.out = None
+
+    def __call__(self, x: torch.Tensor) -> torch.Tensor:
+        """Run the sequence on input data.
+
+        Args:
+            x (torch.Tensor): The input data
+
+        Returns:
+            torch.Tensor: The result of passing the data through the layers
+        """
+        for layer in self.layers:
+            x = layer(x)
+        self.out = x
+        return self.out
+
+    def parameters(self) -> Tuple[torch.Tensor, ...]:
+        """Return the parameters of the Sequence.
+
+        Returns:
+            Tuple[torch.Tensor,...]: Tuple of the parameters
+        """
+        return tuple(
+            parameter for layer in self.layers for parameter in layer.parameters()
+        )

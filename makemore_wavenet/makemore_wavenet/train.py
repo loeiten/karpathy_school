@@ -13,8 +13,7 @@ from makemore_wavenet.data_classes import (
 )
 from makemore_wavenet.evaluation import evaluate
 from makemore_wavenet.models import get_model
-from makemore_wavenet.module import Module
-from makemore_wavenet.predict import predict_neural_network
+from makemore_wavenet.module import Sequential
 from makemore_wavenet.preprocessing import get_dataset
 from makemore_wavenet.visualisation import plot_training
 from tqdm import tqdm
@@ -25,12 +24,12 @@ from makemore_wavenet import DATASET, DEVICE
 # Reducing the number of locals here will penalize the didactical purpose
 # pylint: disable-next=too-many-arguments,too-many-locals,too-complex,too-many-branches
 def train_neural_net_model(
-    model: Tuple[Module, ...],
+    model: Sequential,
     dataset: DATASET,
     optimization_params: Optional[OptimizationParams],
     seed: int = 2147483647,
     train_statistics: Optional[TrainStatistics] = None,
-) -> Tuple[torch.Tensor, ...]:
+) -> Sequential:
     """Train the neural net model.
 
     Args:
@@ -47,7 +46,7 @@ def train_neural_net_model(
         TypeError: If wrong model type is given
 
     Returns:
-        Tuple[torch.Tensor, ...]: The trained model
+        Sequential: The trained model
     """
     if optimization_params is None:
         optimization_params = OptimizationParams()
@@ -78,10 +77,7 @@ def train_neural_net_model(
         #       training data
         #       The size of training_input_data[idxs] is therefore
         #       (batch_size, block_size)
-        logits = predict_neural_network(
-            model=model,
-            input_data=dataset["training_input_data"][idxs],
-        )
+        logits = model(dataset["training_input_data"][idxs])
         loss = F.cross_entropy(logits, dataset["training_ground_truth"][idxs])
 
         # Append loss and iteration
@@ -91,15 +87,12 @@ def train_neural_net_model(
 
         # Backward pass
         # Reset the gradients
-        layered_parameters = [
-            params for layer in model for params in layer.parameters()  # type: ignore
-        ]
-        for parameters in layered_parameters:
+        for parameters in model.parameters():
             parameters.grad = None
         loss.backward()
 
         # Update the weights
-        for parameters in layered_parameters:
+        for parameters in model.parameters():
             parameters.data += (
                 -optimization_params.learning_rate(optimization_params.cur_step)
                 * parameters.grad
@@ -139,7 +132,7 @@ def train(
     model_params: ModelParams,
     optimization_params: OptimizationParams,
     seed: int = 2147483647,
-) -> Tuple[Tuple[torch.Tensor, ...], TrainStatistics]:
+) -> Tuple[Sequential, TrainStatistics]:
     """Train the model.
 
     Args:
@@ -148,7 +141,7 @@ def train(
         seed (int): The seed for the random number generator
 
     Returns:
-        Tuple[torch.Tensor, ...]: The model
+        Sequential: The model
         TrainStatistics: Statistics from the training
     """
     # Obtain the data

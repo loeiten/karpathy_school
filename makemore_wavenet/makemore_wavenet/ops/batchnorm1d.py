@@ -1,6 +1,6 @@
 """Module for the tanh layer."""
 
-from typing import List, Optional
+from typing import Optional, Tuple
 
 import torch
 from makemore_wavenet.module import Module
@@ -80,10 +80,10 @@ class BatchNorm1d(Module):
 
         return self.out
 
-    def parameters(self) -> List[torch.Tensor]:
+    def parameters(self) -> Tuple[torch.Tensor, ...]:
         """Return the parameters.
 
         Returns:
-            List[torch.Tensor]: The parameters of the layer
+            Tuple[torch.Tensor,...]: The parameters of the layer
         """
-        return [self.gamma, self.beta]
+        return tuple([self.gamma, self.beta])

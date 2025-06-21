@@ -6,52 +6,52 @@ from typing import List, Tuple
 
 import torch
 from makemore_wavenet.data_classes import ModelParams, OptimizationParams
-from makemore_wavenet.module import Module
+from makemore_wavenet.module import Sequential
 from makemore_wavenet.ops.embedding import Embedding
 from makemore_wavenet.ops.linear import Linear
-from makemore_wavenet.predict import predict_neural_network
 from makemore_wavenet.train import train
 
 from makemore_wavenet import DEVICE, INDEX_TO_TOKEN, TOKEN_TO_INDEX
 
 
 def run_inference(
-    model: Tuple[Module, ...],
+    model: Sequential,
     n_samples: int = 20,
     seed: int = 2147483647,
 ) -> Tuple[str, ...]:
     """Run inference on the model.
 
     Args:
-        model (Tuple[Module, ...]): The model to run inference on.
+        model (Sequential): The model to run inference on.
         n_samples (int, optional): The number of inferences to run.
             Defaults to 20.
         seed (int, optional): The seed to use. Defaults to 2147483647.
 
     Raises:
-        TypeError: If invalid model is given
-        ValueError: If the first layer is not an Embedding
-        ValueError: If the second layer is not a Linear layer
+        TypeError: If the first layer is not an Embedding
+        TypeError: If the second layer is not a Linear layer
 
     Returns:
         Tuple[str, ...]: The predictions
     """
     # Obtain the embedding size from c
-    if not isinstance(model[0], Embedding):
-        raise ValueError(
-            f"Expected the first layer to be an embedding, got {type(model[0])}"
+    if not isinstance(model.layers[0], Embedding):
+        raise TypeError(
+            "Expected the first layer to be an embedding, "
+            f"got {type(model.layers[0])}"
         )
-    embedding_size = int(model[0].weight.shape[-1])
+    embedding_size = int(model.layers[0].weight.shape[-1])
 
     # Obtain the block size from w1
-    if not isinstance(model[2], Linear):
-        raise ValueError(
-            f"Expected the second layer to be an linear layer, got {type(model[1])}"
+    if not isinstance(model.layers[2], Linear):
+        raise TypeError(
+            "Expected the second layer to be an linear layer, "
+            f"got {type(model.layers[1])}"
         )
-    block_size = int(model[2].weight.shape[-2] / embedding_size)
+    block_size = int(model.layers[2].weight.shape[-2] / embedding_size)
 
     # Disable training
-    for layer in model:
+    for layer in model.layers:
         if hasattr(layer, "training"):
             layer.training = False
 
@@ -64,10 +64,7 @@ def run_inference(
 
         while True:
             # Note the [] to get the batch shape correct
-            logits = predict_neural_network(
-                model=model,
-                input_data=torch.tensor([context]),
-            )
+            logits = model(torch.tensor([context]))
             probs = torch.softmax(logits, dim=1)
             index = torch.multinomial(probs, num_samples=1, generator=g)
             # The context size is constant, so we drop the first token, and add

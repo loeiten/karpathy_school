@@ -1,15 +1,12 @@
 """Module for evaluation."""
 
-from typing import Tuple
-
 import torch
 import torch.nn.functional as F
-from makemore_wavenet.module import Module
-from makemore_wavenet.predict import predict_neural_network
+from makemore_wavenet.module import Sequential
 
 
 def evaluate(
-    model: Tuple[Module, ...],
+    model: Sequential,
     input_data: torch.Tensor,
     ground_truth: torch.Tensor,
 ) -> float:
@@ -23,9 +20,6 @@ def evaluate(
     Returns:
         float: The loss
     """
-    logits = predict_neural_network(
-        model=model,
-        input_data=input_data,
-    )
+    logits = model(input_data)
     loss = F.cross_entropy(logits, ground_truth)
     return loss.item()

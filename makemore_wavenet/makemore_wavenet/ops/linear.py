@@ -1,6 +1,6 @@
 """Module for the linear layer."""
 
-from typing import List, Optional
+from typing import Optional, Tuple
 
 import torch
 from makemore_wavenet.module import Module
@@ -51,13 +51,13 @@ class Linear(Module):
             self.out += self.bias
         return self.out
 
-    def parameters(self) -> List[torch.Tensor]:
+    def parameters(self) -> Tuple[torch.Tensor, ...]:
         """Return the parameters.
 
         Returns:
-            List[torch.Tensor]: The parameters of the layer
+            Tuple[torch.Tensor,...]: The parameters of the layer
         """
         params = [self.weight]
         if self.bias is not None:
             params.append(self.bias)
-        return params
+        return tuple(params)
