@@ -10,7 +10,6 @@ class Tanh(Module):
     """Class mimicking the torch.nn.Tanh Module in PyTorch."""
 
     # Reducing the number of arguments here would be counter productive
-    # pylint: disable-next=too-many-arguments
     def __init__(
         self,
         device: Optional[torch.device] = None,

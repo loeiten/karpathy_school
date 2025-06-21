@@ -136,7 +136,6 @@ def get_explicit_model(model_params: ModelParams) -> Tuple[torch.Tensor, ...]:
 
 
 # Reducing the number of locals here will penalize the didactical purpose
-# pylint: disable-next=too-many-arguments
 def get_pytorch_model(
     model_params: ModelParams,
 ) -> Tuple[Module, ...]:
@@ -259,7 +258,9 @@ def get_pytorch_model(
                     layer.bias += 0.01
 
     parameters = [
-        params for layer in layers for params in layer.parameters()  # type: ignore
+        params
+        for layer in layers
+        for params in layer.parameters()  # type: ignore
     ]
 
     # Make it possible to train
@@ -274,7 +275,7 @@ def get_pytorch_model(
 
 
 def get_model_function(
-    model_type: Literal["explicit", "pytorch"]
+    model_type: Literal["explicit", "pytorch"],
 ) -> Callable[[ModelParams], Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]]]:
     """Return the model function.
 

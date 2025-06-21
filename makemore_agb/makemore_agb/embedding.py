@@ -10,7 +10,6 @@ class Embedding(Module):
     """Class mimicking the torch.nn.Embedding Module in PyTorch."""
 
     # Reducing the number of arguments here would be counter productive
-    # pylint: disable-next=too-many-arguments
     def __init__(
         self,
         num_embeddings: int,

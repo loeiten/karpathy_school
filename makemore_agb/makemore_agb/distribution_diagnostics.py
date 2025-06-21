@@ -27,7 +27,6 @@ from makemore_agb import DEVICE
 
 
 # Reducing the number of locals here will penalize the didactical purpose
-# pylint: disable-next=too-many-locals
 def plot_initial_distributions(
     model_type: Literal["explicit", "pytorch"],
     good_initialization: bool = False,
@@ -131,8 +130,7 @@ def plot_distributions_from_explicit_model(
     if len(output) != 3:
         raise RuntimeError("Got unexpected output from the predictor")
 
-    # We're checking for the length above, so we can safely ignore the pylint
-    # pylint: disable-next=unbalanced-tuple-unpacking
+    # We're checking for the length above
     _, h_pre_activation, h = output
 
     # Create the figures

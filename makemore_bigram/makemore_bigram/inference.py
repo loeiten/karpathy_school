@@ -49,7 +49,6 @@ def run_inference(
             elif model_type == "neural_net":
                 # Here we first select a one hot encoded token
                 # The following will create a 1xN_TOKENS tensor
-                # pylint: disable-next=not-callable
                 input_data = F.one_hot(
                     torch.tensor([idx]), num_classes=N_TOKENS
                 ).float()

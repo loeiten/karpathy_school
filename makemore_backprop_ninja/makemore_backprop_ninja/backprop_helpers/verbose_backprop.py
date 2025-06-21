@@ -7,7 +7,6 @@ import torch.nn.functional as F
 
 
 # Reducing the number of locals here will penalize the didactical purpose
-# pylint: disable=too-many-locals,too-many-statements,too-many-lines
 def verbose_manual_backprop(
     model: Tuple[torch.Tensor, ...],
     intermediate_variables: Dict[str, torch.Tensor],
@@ -894,7 +893,6 @@ def verbose_manual_backprop(
     # = \frac{\partial l}{\partial o_{nc}}
     #   -
     #   \frac{d o_{nc}}{d m_{n}} \{c=\arg \max_{C}x_{nc} \}
-    # pylint: disable=not-callable
     dl_d_logits = dl_d_normalized_logits_clone + dl_d_logits_maxes * (
         F.one_hot(logits.max(1).indices, num_classes=logits.shape[1])
     )

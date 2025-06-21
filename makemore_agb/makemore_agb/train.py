@@ -24,7 +24,6 @@ from makemore_agb import DATASET, DEVICE
 
 
 # Reducing the number of locals here will penalize the didactical purpose
-# pylint: disable-next=too-many-arguments,too-many-locals,too-complex,too-many-branches
 def train_neural_net_model(
     model_type: Literal["explicit", "pytorch"],
     model: Union[Tuple[torch.Tensor, ...], Tuple[Module, ...]],

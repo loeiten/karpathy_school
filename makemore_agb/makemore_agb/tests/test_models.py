@@ -49,7 +49,6 @@ def test_get_explicit_model(
     )
 
     # We know the exact output from the batch_normalize flag
-    # pylint: disable-next=unbalanced-tuple-unpacking
     c, w1, b1, w2, b2 = model
 
     assert c.shape == torch.Size([VOCAB_SIZE, embedding_size])
@@ -74,7 +73,6 @@ def test_get_explicit_model(
     )
 
     # We know the exact output from the batch_normalize flag
-    # pylint: disable-next=unbalanced-tuple-unpacking
     c, w1, b1, w2, b2, batch_normalization_gain, batch_normalization_bias = model
 
     assert c.shape == torch.Size([VOCAB_SIZE, embedding_size])
@@ -92,8 +90,6 @@ def test_get_explicit_model(
     "block_size, embedding_size, hidden_layer_neurons",
     ((3, 2, 100), (8, 15, 200), (20, 3, 5)),
 )
-# Need the locals
-# pylint: disable-next=too-many-locals
 def test_get_pytorch_model(
     block_size: int, embedding_size: int, hidden_layer_neurons: int
 ) -> None:
@@ -131,7 +127,6 @@ def test_get_pytorch_model(
     )
 
     # We know how much we're unpacking
-    # pylint: disable-next=unbalanced-tuple-unpacking
     c, l1, t1, l2, t2, l3, t3, l4, t4, l5, t5, l6 = model
 
     assert c.weight.shape == torch.Size([VOCAB_SIZE, embedding_size])
@@ -149,9 +144,7 @@ def test_get_pytorch_model(
         assert layer.bias.shape == torch.Size([hidden_layer_neurons])
         assert isinstance(activation, Tanh)
     # This should be a linear layer
-    # pylint: disable-next=no-member
     assert l6.weight.shape == torch.Size([hidden_layer_neurons, VOCAB_SIZE])
-    # pylint: disable-next=no-member
     assert l6.bias.shape == torch.Size([VOCAB_SIZE])
 
     model_params.batch_normalize = True

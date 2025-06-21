@@ -19,7 +19,6 @@ from makemore_wavenet import VOCAB_SIZE
 )
 @pytest.mark.skip(reason="Need to enable this once fixed")
 # Need the locals
-# pylint: disable-next=too-many-locals
 def test_get_model(
     block_size: int, embedding_size: int, hidden_layer_neurons: int
 ) -> None:

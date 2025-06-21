@@ -37,8 +37,7 @@ def run_inference(
     # Obtain the embedding size from c
     if not isinstance(model.layers[0], Embedding):
         raise TypeError(
-            "Expected the first layer to be an embedding, "
-            f"got {type(model.layers[0])}"
+            f"Expected the first layer to be an embedding, got {type(model.layers[0])}"
         )
     embedding_size = int(model.layers[0].weight.shape[-1])
 

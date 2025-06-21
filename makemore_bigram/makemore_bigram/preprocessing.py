@@ -44,7 +44,7 @@ def pad_data(data_tuple: Tuple[str, ...]) -> Tuple[str, ...]:
 
 
 def create_training_data(
-    input_data: Tuple[str, ...]
+    input_data: Tuple[str, ...],
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """Return the training data.
 
@@ -72,7 +72,6 @@ def create_training_data(
     output_tensor = torch.tensor(output_token)
 
     # One hot encoding of the data
-    # pylint: disable-next=not-callable
     encoded_input = F.one_hot(input_tensor, num_classes=N_TOKENS).float()
 
     return encoded_input, output_tensor

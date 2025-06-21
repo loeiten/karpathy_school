@@ -10,7 +10,6 @@ class Linear(Module):
     """Class mimicking the torch.nn.Linear Module in PyTorch."""
 
     # Reducing the number of arguments here would be counter productive
-    # pylint: disable-next=too-many-arguments,too-many-positional-arguments
     def __init__(
         self,
         fan_in: int,

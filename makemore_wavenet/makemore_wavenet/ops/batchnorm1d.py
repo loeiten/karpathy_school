@@ -7,7 +7,6 @@ from makemore_wavenet.module import Module
 
 
 # Reducing the number of attributes here will penalize the didactical purpose
-# pylint: disable-next=too-many-instance-attributes
 class BatchNorm1d(Module):
     """Class mimicking the torch.nn.BatchNorm1d Module in PyTorch."""
 

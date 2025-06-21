@@ -33,7 +33,6 @@ from makemore_backprop_ninja import DATASET, DEVICE
 
 
 # Reducing the number of locals here will penalize the didactical purpose
-# pylint: disable-next=too-many-arguments,too-many-locals,too-complex,too-many-branches,too-many-positional-arguments,too-many-statements
 def train_neural_net_model(
     model: Tuple[torch.Tensor, ...],
     batch_normalization_parameters: BatchNormalizationParameters,
@@ -183,8 +182,6 @@ def train_neural_net_model(
         # Always do the  backprop in order to compare
         loss.backward()
 
-        # Pylint is not able to see that in both non AUTOMATIC cases the
-        # gradients are defined
         if backprop_mode != BackpropMode.AUTOMATIC:
             if i % optimization_params.mini_batches_per_data_capture == 0:
                 compare_gradients(
@@ -229,7 +226,6 @@ def train_neural_net_model(
     return model
 
 
-# pylint: disable-next=too-many-arguments,too-many-positional-arguments
 def train(
     model_params: ModelParams,
     optimization_params: OptimizationParams,

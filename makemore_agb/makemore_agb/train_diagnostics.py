@@ -2,7 +2,7 @@
 
 import argparse
 import sys
-from typing import List, Tuple
+from typing import List, Tuple, cast
 
 import matplotlib.pyplot as plt
 from makemore_agb.data_classes import (
@@ -62,8 +62,11 @@ def plot_pytorch_train_distributions(
         batch_normalization_parameters=None,
     )
     # We know that model must be of type Tuple[Module]
+    model_tuple = cast(Tuple[Module], model)
     plot_distributions_from_pytorch_model(
-        model=model, training_stats=training_stats, show=show  # type: ignore
+        model=model_tuple,
+        training_stats=training_stats,
+        show=show,  # type: ignore
     )
 
 

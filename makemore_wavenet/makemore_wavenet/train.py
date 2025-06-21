@@ -22,7 +22,6 @@ from makemore_wavenet import DATASET, DEVICE
 
 
 # Reducing the number of locals here will penalize the didactical purpose
-# pylint: disable-next=too-many-arguments,too-many-locals,too-complex,too-many-branches
 def train_neural_net_model(
     model: Sequential,
     dataset: DATASET,

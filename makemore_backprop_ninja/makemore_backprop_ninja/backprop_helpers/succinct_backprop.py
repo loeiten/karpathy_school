@@ -7,7 +7,6 @@ import torch.nn.functional as F
 
 
 # Reducing the number of locals here will penalize the didactical purpose
-# pylint: disable=too-many-locals,too-many-statements,too-many-lines
 def succinct_manual_backprop(
     model: Tuple[torch.Tensor, ...],
     intermediate_variables: Dict[str, torch.Tensor],

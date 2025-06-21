@@ -38,12 +38,12 @@ def pad_data(data_tuple: Tuple[str, ...], block_size: int) -> Tuple[str, ...]:
     Returns:
         Tuple: The padded data
     """
-    padded_data = [f"{'.'*block_size}{name}." for name in data_tuple]
+    padded_data = [f"{'.' * block_size}{name}." for name in data_tuple]
     return tuple(padded_data)
 
 
 def create_feature_and_labels(
-    input_data: Tuple[str, ...]
+    input_data: Tuple[str, ...],
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """Return the training data.
 
