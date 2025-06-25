@@ -5,7 +5,7 @@ from makemore_wavenet.data_classes import ModelParams
 from makemore_wavenet.module import Sequential
 from makemore_wavenet.ops.batchnorm1d import BatchNorm1d
 from makemore_wavenet.ops.embedding import Embedding
-from makemore_wavenet.ops.flatten import Flatten
+from makemore_wavenet.ops.FlattenConsecutive import FlattenConsecutive
 from makemore_wavenet.ops.linear import Linear
 from makemore_wavenet.ops.tanh import Tanh
 
@@ -36,7 +36,7 @@ def get_model(
             Embedding(
                 num_embeddings=VOCAB_SIZE, embedding_dim=model_params.embedding_size
             ),
-            Flatten(),
+            FlattenConsecutive(n=model_params.block_size),
             Linear(
                 fan_in=model_params.embedding_size * model_params.block_size,
                 fan_out=model_params.hidden_layer_neurons,
