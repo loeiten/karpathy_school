@@ -5,7 +5,7 @@ import typing
 import pytest
 import torch
 from makemore_wavenet.data_classes import ModelParams
-from makemore_wavenet.models import get_model
+from makemore_wavenet.models import get_vanilla_model
 from makemore_wavenet.ops.tanh import Tanh
 
 from makemore_wavenet import VOCAB_SIZE
@@ -18,10 +18,10 @@ from makemore_wavenet import VOCAB_SIZE
     ((3, 2, 100), (8, 15, 200), (20, 3, 5)),
 )
 # Need the locals
-def test_get_model(
+def test_get_vanilla_model(
     block_size: int, embedding_size: int, hidden_layer_neurons: int
 ) -> None:
-    """Test the get_model function.
+    """Test the get_vanilla_model function.
 
     Args:
         block_size (int): The context length
@@ -34,7 +34,7 @@ def test_get_model(
         hidden_layer_neurons=hidden_layer_neurons,
     )
 
-    model = get_model(model_params=model_params)
+    model = get_vanilla_model(model_params=model_params)
 
     # Check the number of parameters
     assert (

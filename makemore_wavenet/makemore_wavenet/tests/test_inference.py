@@ -2,7 +2,7 @@
 
 from makemore_wavenet.data_classes import ModelParams
 from makemore_wavenet.inference import parse_args, run_inference
-from makemore_wavenet.models import get_model
+from makemore_wavenet.models import get_vanilla_model
 
 
 def test_run_inference() -> None:
@@ -16,7 +16,7 @@ def test_run_inference() -> None:
         block_size=3,
         hidden_layer_neurons=hidden_layer_neurons,
     )
-    model = get_model(model_params)
+    model = get_vanilla_model(model_params)
 
     # Run inference on the untrained model
     predictions = run_inference(
