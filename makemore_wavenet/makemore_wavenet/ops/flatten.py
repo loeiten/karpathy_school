@@ -13,10 +13,10 @@ class FlattenConsecutive(Module):
     NOTE: This will help us to create the dilated causal convolutional
         layer as consecutive flattening through the network will ensure
         that groups are gradually squeezed.
-        This hinders us from squeezing all the information to the 
+        This hinders us from squeezing all the information to the
         embedding at once, but will instead do so gradually
 
-        This becomes the same as torch.nn.Flatten if 
+        This becomes the same as torch.nn.Flatten if
         n_consecutive_elements == block_size
 
     Example: We have
@@ -26,35 +26,32 @@ class FlattenConsecutive(Module):
     >>> input_data = torch.Tensor([[[1,4,7],
     ...                             [2,5,8],
     ...                             [3,6,9],
-    ...                             [4,7,10]], 
+    ...                             [4,7,10]],
     ...                           [[11,15,19],
     ...                            [12,16,20],
     ...                            [13,17,21],
     ...                            [14,18,22]]])
-    >>> # The first two characters from the first batch along the first 
+    >>> # The first two characters from the first batch along the first
     >>> # dimension of the embedding
-    >>> input_data[0,:,0]  
+    >>> input_data[0,:,0]
     >>> # The first two characters from the first batch along the second
     >>> # dimension of the embedding
-    >>> input_data[0,:,1]     
+    >>> input_data[0,:,1]
     >>> n_consecutive_elements = 2  # Numbers we need to sum together
-    >>> flattened = input_data.view(batch_size, 
+    >>> flattened = input_data.view(batch_size,
     ...                             block_size//n_consecutive_elements,
     ...                             embedding_size*n_consecutive_elements)
     >>> flattened[0,:,0]  # These numbers will be used first in the hierarchy
-    >>> flattened[0,:,1]  # These  will be used next in the same level of the 
+    >>> flattened[0,:,1]  # These  will be used next in the same level of the
     >>> # hierarchy
     """
 
-    def __init__(
-        self,
-        n_consecutive_elements: int
-    ):
+    def __init__(self, n_consecutive_elements: int):
         """
         Set the number of consecutive elements.
 
         Args:
-            n_consecutive_elements (int): Number of consecutive elements to 
+            n_consecutive_elements (int): Number of consecutive elements to
                 group.
         """
         # The size of out is determined during runtime
@@ -72,7 +69,11 @@ class FlattenConsecutive(Module):
         """
         batch_size, block_size, embedding_size = x.shape
         # Create the view which groups characters together
-        x = x.view(batch_size, block_size//self.n_consecutive_elements, embedding_size*self.n_consecutive_elements)
+        x = x.view(
+            batch_size,
+            block_size // self.n_consecutive_elements,
+            embedding_size * self.n_consecutive_elements,
+        )
         if x.shape[1] == 1:
             # In the case where the middle dimension is 1, we remove it
             x = x.squeeze(1)
