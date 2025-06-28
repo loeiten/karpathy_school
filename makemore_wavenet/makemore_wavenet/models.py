@@ -67,3 +67,24 @@ def get_vanilla_model(
     )
 
     return model
+
+def get_original_12k(
+    model_params: ModelParams,
+) -> Sequential:
+    """Returns the original 12k model.
+
+    Approximate train loss: 2.058
+    Approximate val loss: 2.105
+
+    Args:
+        model_params (ModelParams): The parameters of the model
+            Note that these will be overwritten
+
+    Returns:
+        Sequential: The sequence which makes up the model.
+    """
+    model_params.embedding_size = 10
+    model_params.hidden_layer_neurons = 200
+    model_params.block_size = 3
+
+    return get_vanilla_model(model_params=model_params)

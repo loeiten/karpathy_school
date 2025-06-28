@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass, field
 from typing import Callable, List
+from enum import Enum
 
 
 @dataclass
@@ -55,3 +56,16 @@ class ModelParams:
     embedding_size: int = 2
     hidden_layer_neurons: int = 100
     seed: int = 2147483647
+
+
+class ModelType(Enum):
+    """
+    Contains the model types.
+
+    NONE - Do not use pre-canned ModelType
+    ORIGINAL_12K - The original 12k parameter model
+    """
+
+    NONE = "NONE"
+    ORIGINAL_12K = "ORIGINAL_12K"
+    CONTEXT_8_22K = "CONTEXT_8_22K"
