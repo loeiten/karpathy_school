@@ -68,6 +68,7 @@ def get_vanilla_model(
 
     return model
 
+
 def get_original_12k(
     model_params: ModelParams,
 ) -> Sequential:
@@ -86,5 +87,27 @@ def get_original_12k(
     model_params.embedding_size = 10
     model_params.hidden_layer_neurons = 200
     model_params.block_size = 3
+
+    return get_vanilla_model(model_params=model_params)
+
+
+def get_context_8_22k(
+    model_params: ModelParams,
+) -> Sequential:
+    """Returns the 22k model with context length of 8.
+
+    Approximate train loss: 1.918
+    Approximate val loss: 2.033
+
+    Args:
+        model_params (ModelParams): The parameters of the model
+            Note that these will be overwritten
+
+    Returns:
+        Sequential: The sequence which makes up the model.
+    """
+    model_params.embedding_size = 10
+    model_params.hidden_layer_neurons = 200
+    model_params.block_size = 8
 
     return get_vanilla_model(model_params=model_params)

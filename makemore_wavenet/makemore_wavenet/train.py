@@ -10,9 +10,14 @@ from makemore_wavenet.data_classes import (
     ModelParams,
     OptimizationParams,
     TrainStatistics,
+    ModelType,
 )
 from makemore_wavenet.evaluation import evaluate
-from makemore_wavenet.models import get_model
+from makemore_wavenet.models import (
+    get_vanilla_model,
+    get_original_12k,
+    get_context_8_22k,
+)
 from makemore_wavenet.module import Sequential
 from makemore_wavenet.preprocessing import get_dataset
 from makemore_wavenet.visualisation import plot_training
@@ -131,23 +136,37 @@ def train(
     model_params: ModelParams,
     optimization_params: OptimizationParams,
     seed: int = 2147483647,
+    model_type: ModelType = ModelType.NONE,
 ) -> Tuple[Sequential, TrainStatistics]:
     """Train the model.
+
+    Raises:
+        ValueError: If the model_type is non-existent
 
     Args:
         model_params (ModelParams): The model parameters
         optimization_params (OptimizationParams): The optimization parameters
         seed (int): The seed for the random number generator
+        model_type (ModelType): What pre-canned model to use (if any).
+            If set to something else than ModelType.NONE the model_params will
+            be overwritten
 
     Returns:
         Sequential: The model
         TrainStatistics: Statistics from the training
     """
+    # Obtain the model (need to be first at it may alter model params)
+    if model_type == ModelType.NONE:
+        model = get_vanilla_model(model_params=model_params)
+    elif model_type == ModelType.ORIGINAL_12K:
+        model = get_original_12k(model_params=model_params)
+    elif model_type == ModelType.CONTEXT_8_22K:
+        model = get_context_8_22k(model_params=model_params)
+    else:
+        ValueError(f"No model with type {model_type}")
+
     # Obtain the data
     dataset = get_dataset(block_size=model_params.block_size)
-
-    # Obtain the model
-    model = get_model(model_params)
 
     train_statistics = TrainStatistics()
 
@@ -169,16 +188,21 @@ def train(
 def train_and_plot(
     model_params: ModelParams,
     optimization_params: OptimizationParams,
+    model_type: ModelType = ModelType.NONE,
 ) -> None:
     """Train the model and plot the statistics.
 
     Args:
         model_params (ModelParams): The model parameters
         optimization_params (OptimizationParams): The optimization parameters
+        model_type (ModelType): What pre-canned model to use (if any).
+            If set to something else than ModelType.NONE the model_params will
+            be overwritten
     """
     _, train_statistics = train(
         model_params=model_params,
         optimization_params=optimization_params,
+        model_type=model_type,
     )
     plot_training(train_statistics=train_statistics)
 
@@ -199,6 +223,18 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
     )
 
     default_model_params = ModelParams()
+    parser.add_argument(
+        "-t",
+        "--model-type",
+        type=ModelType,
+        required=False,
+        default=ModelType.NONE,
+        choices=list(ModelType),
+        help=(
+            "The pre-defined models. "
+            "If selected, they will overwrite other parameters set in the input."
+        ),
+    )
     parser.add_argument(
         "-s",
         "--block-size",
@@ -278,6 +314,7 @@ def main(sys_args: List[str]):
     train_and_plot(
         model_params=model_params,
         optimization_params=optimization_params,
+        model_type=args.model_type,
     )
 
 
