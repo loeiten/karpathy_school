@@ -67,7 +67,8 @@ class ModelType(Enum):
     CONTEXT_8_22K - Using context length of 8 instead of 3
     HIERARCHICAL_22K - Gradually squish the network using a diluted causal
         convolution layer
-    SCALED_UP_76K - The model scaled up to 76k
+    SCALED_UP_76K - The model scaled up to 76k model
+    SCALED_UP_77K - The model scaled up to 77k
     """
 
     NONE = "NONE"
@@ -75,3 +76,4 @@ class ModelType(Enum):
     CONTEXT_8_22K = "CONTEXT_8_22K"
     HIERARCHICAL_22K = "HIERARCHICAL_22K"
     SCALED_UP_76K = "SCALED_UP_76K"
+    SCALED_UP_77K = "SCALED_UP_77K"

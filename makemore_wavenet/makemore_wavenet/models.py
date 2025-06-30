@@ -234,3 +234,22 @@ def get_scaled_up_76k(model_params: ModelParams) -> Sequential:
     model_params.hidden_layer_neurons = 128
 
     return get_hierarchical_model(model_params=model_params)
+
+
+def get_scaled_up_77k(model_params: ModelParams) -> Sequential:
+    """Return the 77k model with hierarchical embedding of the layers.
+
+    Approximate train loss: 1.766
+    Approximate val loss: 1.984
+
+    Args:
+        model_params (ModelParams): The parameters of the model
+            Note that these will be overwritten
+
+    Returns:
+        Sequential: The sequence which makes up the model.
+    """
+    model_params.embedding_size = 26
+    model_params.hidden_layer_neurons = 128
+
+    return get_hierarchical_model(model_params=model_params)
