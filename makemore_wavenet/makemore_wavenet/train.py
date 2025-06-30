@@ -17,13 +17,14 @@ from makemore_wavenet.models import (
     get_vanilla_model,
     get_original_12k,
     get_context_8_22k,
+    get_hierarchical_22k,
 )
 from makemore_wavenet.module import Sequential
 from makemore_wavenet.preprocessing import get_dataset
 from makemore_wavenet.visualisation import plot_training
 from tqdm import tqdm
 
-from makemore_wavenet import DATASET, DEVICE
+from makemore_wavenet import DATASET, DEVICE, VOCAB_SIZE
 
 
 # Reducing the number of locals here will penalize the didactical purpose
@@ -162,8 +163,16 @@ def train(
         model = get_original_12k(model_params=model_params)
     elif model_type == ModelType.CONTEXT_8_22K:
         model = get_context_8_22k(model_params=model_params)
+    elif model_type == ModelType.HIERARCHICAL_22K:
+        model = get_hierarchical_22k(model_params=model_params)
+        # We can only print after we know the batch size
+        print("Printing the model on a random batch of 4 examples")
+        random_input = torch.randint(0, VOCAB_SIZE, (4, model_params.block_size))
+        _ = model(random_input)
+        for layer in model.layers:
+            print(f"{layer.__class__.__name__}: {tuple(layer.out.shape)}")
     else:
-        ValueError(f"No model with type {model_type}")
+        raise ValueError(f"No model with type {model_type}")
 
     # Obtain the data
     dataset = get_dataset(block_size=model_params.block_size)
