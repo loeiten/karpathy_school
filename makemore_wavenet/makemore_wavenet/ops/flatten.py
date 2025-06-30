@@ -78,10 +78,6 @@ class FlattenConsecutive(Module):
             # In the case where the middle dimension is 1, we remove it
             x = x.squeeze(1)
         self.out = x
-        # Concatenate the vectors
-        # x.shape[0] is the batch size
-        # -1 means "infer the rest" (in this case block_size * n_embedding)
-        self.out = x.view(x.shape[0], -1)
         return self.out
 
     def parameters(self) -> Tuple[torch.Tensor, ...]:
