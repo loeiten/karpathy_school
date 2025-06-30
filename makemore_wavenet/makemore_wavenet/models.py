@@ -69,69 +69,26 @@ def get_vanilla_model(
     return model
 
 
-def get_original_12k(
+def get_hierarchical_model(
     model_params: ModelParams,
 ) -> Sequential:
-    """Return the original 12k model.
-
-    Approximate train loss: 2.058
-    Approximate val loss: 2.105
-
-    Args:
-        model_params (ModelParams): The parameters of the model
-            Note that these will be overwritten
-
-    Returns:
-        Sequential: The sequence which makes up the model.
     """
-    model_params.embedding_size = 10
-    model_params.hidden_layer_neurons = 200
-    model_params.block_size = 3
-
-    return get_vanilla_model(model_params=model_params)
-
-
-def get_context_8_22k(
-    model_params: ModelParams,
-) -> Sequential:
-    """Return the 22k model with context length of 8.
-
-    Approximate train loss: 1.918
-    Approximate val loss: 2.033
-
-    Args:
-        model_params (ModelParams): The parameters of the model
-            Note that these will be overwritten
-
-    Returns:
-        Sequential: The sequence which makes up the model.
-    """
-    model_params.embedding_size = 10
-    model_params.hidden_layer_neurons = 200
-    model_params.block_size = 8
-
-    return get_vanilla_model(model_params=model_params)
-
-
-def get_hierarchical_22k(model_params: ModelParams) -> Sequential:
-    """Return the 22k model with hierarchical embedding of the layers.
+    Return the hierarchical pytorch model.
 
     This is the same as a dilated causal convolution layer.
     The idea is that instead of squishing the vocabulary into a embedding, we
     will instead do so gradually in a tree based reduction matter.
 
-    Approximate train loss: 1.942
-    Approximate val loss: 2.092
-
     Args:
         model_params (ModelParams): The parameters of the model
-            Note that these will be overwritten
+
+    Raises:
+        TypeError: If last layer is not Linear
 
     Returns:
         Sequential: The sequence which makes up the model.
     """
-    model_params.embedding_size = 10
-    model_params.hidden_layer_neurons = 68
+    # These are hard-coded due to the architecture of the dilation
     model_params.block_size = 8
     dilation_degree = 2
 
@@ -189,4 +146,91 @@ def get_hierarchical_22k(model_params: ModelParams) -> Sequential:
     for parameter in model.parameters():
         parameter.requires_grad = True
 
+    print(
+        "Number of elements in model: "
+        f"{sum(layer.nelement() for layer in model.parameters())}"
+    )
+
     return model
+
+
+def get_original_12k(
+    model_params: ModelParams,
+) -> Sequential:
+    """Return the original 12k model.
+
+    Approximate train loss: 2.058
+    Approximate val loss: 2.105
+
+    Args:
+        model_params (ModelParams): The parameters of the model
+            Note that these will be overwritten
+
+    Returns:
+        Sequential: The sequence which makes up the model.
+    """
+    model_params.embedding_size = 10
+    model_params.hidden_layer_neurons = 200
+    model_params.block_size = 3
+
+    return get_vanilla_model(model_params=model_params)
+
+
+def get_context_8_22k(
+    model_params: ModelParams,
+) -> Sequential:
+    """Return the 22k model with context length of 8.
+
+    Approximate train loss: 1.918
+    Approximate val loss: 2.033
+
+    Args:
+        model_params (ModelParams): The parameters of the model
+            Note that these will be overwritten
+
+    Returns:
+        Sequential: The sequence which makes up the model.
+    """
+    model_params.embedding_size = 10
+    model_params.hidden_layer_neurons = 200
+    model_params.block_size = 8
+
+    return get_vanilla_model(model_params=model_params)
+
+
+def get_hierarchical_22k(model_params: ModelParams) -> Sequential:
+    """Return the 22k model with hierarchical embedding of the layers.
+
+    Approximate train loss: 1.911
+    Approximate val loss: 2.019
+
+    Args:
+        model_params (ModelParams): The parameters of the model
+            Note that these will be overwritten
+
+    Returns:
+        Sequential: The sequence which makes up the model.
+    """
+    model_params.embedding_size = 10
+    model_params.hidden_layer_neurons = 68
+
+    return get_hierarchical_model(model_params=model_params)
+
+
+def get_scaled_up_76k(model_params: ModelParams) -> Sequential:
+    """Return the 76k model with hierarchical embedding of the layers.
+
+    Approximate train loss: 1.769
+    Approximate val loss: 1.993
+
+    Args:
+        model_params (ModelParams): The parameters of the model
+            Note that these will be overwritten
+
+    Returns:
+        Sequential: The sequence which makes up the model.
+    """
+    model_params.embedding_size = 24
+    model_params.hidden_layer_neurons = 128
+
+    return get_hierarchical_model(model_params=model_params)

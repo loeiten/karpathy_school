@@ -18,6 +18,7 @@ from makemore_wavenet.models import (
     get_original_12k,
     get_context_8_22k,
     get_hierarchical_22k,
+    get_scaled_up_76k,
 )
 from makemore_wavenet.module import Sequential
 from makemore_wavenet.preprocessing import get_dataset
@@ -171,6 +172,8 @@ def train(
         _ = model(random_input)
         for layer in model.layers:
             print(f"{layer.__class__.__name__}: {tuple(layer.out.shape)}")
+    elif model_type == ModelType.SCALED_UP_76K:
+        model = get_scaled_up_76k(model_params=model_params)
     else:
         raise ValueError(f"No model with type {model_type}")
 
