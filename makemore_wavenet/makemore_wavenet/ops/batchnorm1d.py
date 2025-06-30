@@ -7,8 +7,12 @@ from makemore_wavenet.module import Module
 
 
 # Reducing the number of attributes here will penalize the didactical purpose
-class BatchNorm1d(Module):
-    """Class mimicking the torch.nn.BatchNorm1d Module in PyTorch."""
+class BatchNorm1dCustom(Module):
+    """
+    Class mimicking the torch.nn.BatchNorm1dCustom Module in PyTorch.
+
+    It differs from PyTorch in the way it treats tensors of dim 3
+    """
 
     def __init__(
         self,
@@ -46,6 +50,9 @@ class BatchNorm1d(Module):
     def __call__(self, x: torch.Tensor) -> torch.Tensor:
         """Return the output of the layer given on the input.
 
+        Raises:
+            NotImplementedError: If x.dim is not either 2 or 3
+
         Args:
             x (torch.Tensor): The input tensor
 
@@ -54,10 +61,16 @@ class BatchNorm1d(Module):
         """
         # Forward pass
         if self.training:
+            if x.ndim == 2:
+                reduce_dimension: Tuple[int, ...] = (0,)
+            elif x.ndim == 3:
+                reduce_dimension = (0, 1)
+            else:
+                raise NotImplementedError(f"{x.ndim=} not implemented")
             # Mean of the batch
-            x_mean = x.mean(0, keepdim=True)
+            x_mean = x.mean(reduce_dimension, keepdim=True)
             # Variance of the batch
-            x_var = x.var(0, keepdim=True)
+            x_var = x.var(reduce_dimension, keepdim=True)
         else:
             # Use the buffers
             x_mean = self.running_mean

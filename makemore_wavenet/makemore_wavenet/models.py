@@ -3,7 +3,7 @@
 import torch
 from makemore_wavenet.data_classes import ModelParams
 from makemore_wavenet.module import Sequential
-from makemore_wavenet.ops.batchnorm1d import BatchNorm1d
+from makemore_wavenet.ops.batchnorm1d import BatchNorm1dCustom
 from makemore_wavenet.ops.embedding import Embedding
 from makemore_wavenet.ops.flatten import FlattenConsecutive
 from makemore_wavenet.ops.linear import Linear
@@ -42,7 +42,7 @@ def get_vanilla_model(
                 fan_out=model_params.hidden_layer_neurons,
                 bias=False,
             ),
-            BatchNorm1d(dim=model_params.hidden_layer_neurons),
+            BatchNorm1dCustom(dim=model_params.hidden_layer_neurons),
             Tanh(),
             Linear(
                 fan_in=model_params.hidden_layer_neurons,
@@ -152,7 +152,7 @@ def get_hierarchical_22k(model_params: ModelParams) -> Sequential:
                 fan_out=model_params.hidden_layer_neurons,
                 bias=False,
             ),
-            BatchNorm1d(dim=model_params.hidden_layer_neurons),
+            BatchNorm1dCustom(dim=model_params.hidden_layer_neurons),
             Tanh(),
             # Second part
             FlattenConsecutive(n_consecutive_elements=dilation_degree),
@@ -161,7 +161,7 @@ def get_hierarchical_22k(model_params: ModelParams) -> Sequential:
                 fan_out=model_params.hidden_layer_neurons,
                 bias=False,
             ),
-            BatchNorm1d(dim=model_params.hidden_layer_neurons),
+            BatchNorm1dCustom(dim=model_params.hidden_layer_neurons),
             Tanh(),
             # Third part
             FlattenConsecutive(n_consecutive_elements=dilation_degree),
@@ -170,7 +170,7 @@ def get_hierarchical_22k(model_params: ModelParams) -> Sequential:
                 fan_out=model_params.hidden_layer_neurons,
                 bias=False,
             ),
-            BatchNorm1d(dim=model_params.hidden_layer_neurons),
+            BatchNorm1dCustom(dim=model_params.hidden_layer_neurons),
             Tanh(),
             Linear(
                 fan_in=model_params.hidden_layer_neurons,
