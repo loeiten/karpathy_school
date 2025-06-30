@@ -29,15 +29,15 @@ DATASET = Dict[
 #       1. The model is small, which might require a lot of memory movement
 #       2. No I/O overlap is implemented
 #       3. I've (most likely) done something really silly
-#
-#       Alternatively one could've made the device like this
-#       DEVICE = (
-#           torch.device("cuda")
-#           if torch.cuda.is_available()
-#           else (
-#               torch.device("mps")
-#               if torch.backends.mps.is_available()
-#               else torch.device("cpu")
-#           )
-#       )
-DEVICE = torch.device("cpu")
+
+DEVICE = (
+    torch.device("cuda")
+    if torch.cuda.is_available()
+    else (
+        torch.device("mps")
+        if torch.backends.mps.is_available()
+        else torch.device("cpu")
+    )
+)
+
+print(f"Running on {DEVICE}")

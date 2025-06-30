@@ -160,23 +160,25 @@ def train(
     """
     # Obtain the model (need to be first at it may alter model params)
     if model_type == ModelType.NONE:
-        model = get_vanilla_model(model_params=model_params)
+        model = get_vanilla_model(model_params=model_params, device=DEVICE)
     elif model_type == ModelType.ORIGINAL_12K:
-        model = get_original_12k(model_params=model_params)
+        model = get_original_12k(model_params=model_params, device=DEVICE)
     elif model_type == ModelType.CONTEXT_8_22K:
-        model = get_context_8_22k(model_params=model_params)
+        model = get_context_8_22k(model_params=model_params, device=DEVICE)
     elif model_type == ModelType.HIERARCHICAL_22K:
-        model = get_hierarchical_22k(model_params=model_params)
+        model = get_hierarchical_22k(model_params=model_params, device=DEVICE)
         # We can only print after we know the batch size
         print("Printing the model on a random batch of 4 examples")
-        random_input = torch.randint(0, VOCAB_SIZE, (4, model_params.block_size))
+        random_input = torch.randint(
+            0, VOCAB_SIZE, (4, model_params.block_size), device=DEVICE
+        )
         _ = model(random_input)
         for layer in model.layers:
             print(f"{layer.__class__.__name__}: {tuple(layer.out.shape)}")
     elif model_type == ModelType.SCALED_UP_76K:
-        model = get_scaled_up_76k(model_params=model_params)
+        model = get_scaled_up_76k(model_params=model_params, device=DEVICE)
     elif model_type == ModelType.SCALED_UP_77K:
-        model = get_scaled_up_77k(model_params=model_params)
+        model = get_scaled_up_77k(model_params=model_params, device=DEVICE)
     else:
         raise ValueError(f"No model with type {model_type}")
 

@@ -11,14 +11,19 @@ from makemore_wavenet.ops.tanh import Tanh
 
 from makemore_wavenet import VOCAB_SIZE
 
+from typing import Optional
+
 
 def get_vanilla_model(
     model_params: ModelParams,
+    device: Optional[torch.device] = None,
 ) -> Sequential:
     """Return the vanilla pytorch model.
 
     Args:
         model_params (ModelParams): The parameters of the model
+        device (Optional[torch.device], optional): Device to use for the tensors.
+            Defaults to None.
 
     Raises:
         TypeError: If last layer is not Linear
@@ -34,19 +39,23 @@ def get_vanilla_model(
     model = Sequential(
         [
             Embedding(
-                num_embeddings=VOCAB_SIZE, embedding_dim=model_params.embedding_size
+                num_embeddings=VOCAB_SIZE,
+                embedding_dim=model_params.embedding_size,
+                device=device,
             ),
             FlattenConsecutive(n_consecutive_elements=model_params.block_size),
             Linear(
                 fan_in=model_params.embedding_size * model_params.block_size,
                 fan_out=model_params.hidden_layer_neurons,
                 bias=False,
+                device=device,
             ),
-            BatchNorm1dCustom(dim=model_params.hidden_layer_neurons),
+            BatchNorm1dCustom(dim=model_params.hidden_layer_neurons, device=device),
             Tanh(),
             Linear(
                 fan_in=model_params.hidden_layer_neurons,
                 fan_out=VOCAB_SIZE,
+                device=device,
             ),
         ]
     )
@@ -71,6 +80,7 @@ def get_vanilla_model(
 
 def get_hierarchical_model(
     model_params: ModelParams,
+    device: Optional[torch.device] = None,
 ) -> Sequential:
     """
     Return the hierarchical pytorch model.
@@ -81,6 +91,8 @@ def get_hierarchical_model(
 
     Args:
         model_params (ModelParams): The parameters of the model
+        device (Optional[torch.device], optional): Device to use for the tensors.
+            Defaults to None.
 
     Raises:
         TypeError: If last layer is not Linear
@@ -100,7 +112,9 @@ def get_hierarchical_model(
     model = Sequential(
         [
             Embedding(
-                num_embeddings=VOCAB_SIZE, embedding_dim=model_params.embedding_size
+                num_embeddings=VOCAB_SIZE,
+                embedding_dim=model_params.embedding_size,
+                device=device,
             ),
             # First part
             FlattenConsecutive(n_consecutive_elements=dilation_degree),
@@ -108,8 +122,9 @@ def get_hierarchical_model(
                 fan_in=model_params.embedding_size * dilation_degree,
                 fan_out=model_params.hidden_layer_neurons,
                 bias=False,
+                device=device,
             ),
-            BatchNorm1dCustom(dim=model_params.hidden_layer_neurons),
+            BatchNorm1dCustom(dim=model_params.hidden_layer_neurons, device=device),
             Tanh(),
             # Second part
             FlattenConsecutive(n_consecutive_elements=dilation_degree),
@@ -117,8 +132,9 @@ def get_hierarchical_model(
                 fan_in=model_params.hidden_layer_neurons * dilation_degree,
                 fan_out=model_params.hidden_layer_neurons,
                 bias=False,
+                device=device,
             ),
-            BatchNorm1dCustom(dim=model_params.hidden_layer_neurons),
+            BatchNorm1dCustom(dim=model_params.hidden_layer_neurons, device=device),
             Tanh(),
             # Third part
             FlattenConsecutive(n_consecutive_elements=dilation_degree),
@@ -126,12 +142,14 @@ def get_hierarchical_model(
                 fan_in=model_params.hidden_layer_neurons * dilation_degree,
                 fan_out=model_params.hidden_layer_neurons,
                 bias=False,
+                device=device,
             ),
-            BatchNorm1dCustom(dim=model_params.hidden_layer_neurons),
+            BatchNorm1dCustom(dim=model_params.hidden_layer_neurons, device=device),
             Tanh(),
             Linear(
                 fan_in=model_params.hidden_layer_neurons,
                 fan_out=VOCAB_SIZE,
+                device=device,
             ),
         ]
     )
@@ -156,6 +174,7 @@ def get_hierarchical_model(
 
 def get_original_12k(
     model_params: ModelParams,
+    device: Optional[torch.device] = None,
 ) -> Sequential:
     """Return the original 12k model.
 
@@ -165,6 +184,8 @@ def get_original_12k(
     Args:
         model_params (ModelParams): The parameters of the model
             Note that these will be overwritten
+        device (Optional[torch.device], optional): Device to use for the tensors.
+            Defaults to None.
 
     Returns:
         Sequential: The sequence which makes up the model.
@@ -173,11 +194,12 @@ def get_original_12k(
     model_params.hidden_layer_neurons = 200
     model_params.block_size = 3
 
-    return get_vanilla_model(model_params=model_params)
+    return get_vanilla_model(model_params=model_params, device=device)
 
 
 def get_context_8_22k(
     model_params: ModelParams,
+    device: Optional[torch.device] = None,
 ) -> Sequential:
     """Return the 22k model with context length of 8.
 
@@ -187,6 +209,8 @@ def get_context_8_22k(
     Args:
         model_params (ModelParams): The parameters of the model
             Note that these will be overwritten
+        device (Optional[torch.device], optional): Device to use for the tensors.
+            Defaults to None.
 
     Returns:
         Sequential: The sequence which makes up the model.
@@ -195,10 +219,13 @@ def get_context_8_22k(
     model_params.hidden_layer_neurons = 200
     model_params.block_size = 8
 
-    return get_vanilla_model(model_params=model_params)
+    return get_vanilla_model(model_params=model_params, device=device)
 
 
-def get_hierarchical_22k(model_params: ModelParams) -> Sequential:
+def get_hierarchical_22k(
+    model_params: ModelParams,
+    device: Optional[torch.device] = None,
+) -> Sequential:
     """Return the 22k model with hierarchical embedding of the layers.
 
     Approximate train loss: 1.911
@@ -214,10 +241,13 @@ def get_hierarchical_22k(model_params: ModelParams) -> Sequential:
     model_params.embedding_size = 10
     model_params.hidden_layer_neurons = 68
 
-    return get_hierarchical_model(model_params=model_params)
+    return get_hierarchical_model(model_params=model_params, device=device)
 
 
-def get_scaled_up_76k(model_params: ModelParams) -> Sequential:
+def get_scaled_up_76k(
+    model_params: ModelParams,
+    device: Optional[torch.device] = None,
+) -> Sequential:
     """Return the 76k model with hierarchical embedding of the layers.
 
     Approximate train loss: 1.769
@@ -226,6 +256,8 @@ def get_scaled_up_76k(model_params: ModelParams) -> Sequential:
     Args:
         model_params (ModelParams): The parameters of the model
             Note that these will be overwritten
+        device (Optional[torch.device], optional): Device to use for the tensors.
+            Defaults to None.
 
     Returns:
         Sequential: The sequence which makes up the model.
@@ -233,10 +265,13 @@ def get_scaled_up_76k(model_params: ModelParams) -> Sequential:
     model_params.embedding_size = 24
     model_params.hidden_layer_neurons = 128
 
-    return get_hierarchical_model(model_params=model_params)
+    return get_hierarchical_model(model_params=model_params, device=device)
 
 
-def get_scaled_up_77k(model_params: ModelParams) -> Sequential:
+def get_scaled_up_77k(
+    model_params: ModelParams,
+    device: Optional[torch.device] = None,
+) -> Sequential:
     """Return the 77k model with hierarchical embedding of the layers.
 
     Approximate train loss: 1.766
@@ -245,6 +280,8 @@ def get_scaled_up_77k(model_params: ModelParams) -> Sequential:
     Args:
         model_params (ModelParams): The parameters of the model
             Note that these will be overwritten
+        device (Optional[torch.device], optional): Device to use for the tensors.
+            Defaults to None.
 
     Returns:
         Sequential: The sequence which makes up the model.
@@ -252,4 +289,4 @@ def get_scaled_up_77k(model_params: ModelParams) -> Sequential:
     model_params.embedding_size = 26
     model_params.hidden_layer_neurons = 128
 
-    return get_hierarchical_model(model_params=model_params)
+    return get_hierarchical_model(model_params=model_params, device=device)

@@ -5,10 +5,8 @@ import sys
 from typing import List, Tuple
 
 import torch
-from makemore_wavenet.data_classes import ModelParams, OptimizationParams
+from makemore_wavenet.data_classes import ModelParams, OptimizationParams, ModelType
 from makemore_wavenet.module import Sequential
-from makemore_wavenet.ops.embedding import Embedding
-from makemore_wavenet.ops.linear import Linear
 from makemore_wavenet.train import train
 
 from makemore_wavenet import DEVICE, INDEX_TO_TOKEN, TOKEN_TO_INDEX
@@ -16,6 +14,7 @@ from makemore_wavenet import DEVICE, INDEX_TO_TOKEN, TOKEN_TO_INDEX
 
 def run_inference(
     model: Sequential,
+    model_params: ModelParams,
     n_samples: int = 20,
     seed: int = 2147483647,
 ) -> Tuple[str, ...]:
@@ -23,32 +22,14 @@ def run_inference(
 
     Args:
         model (Sequential): The model to run inference on.
+        model_params (ModelParams): The parameters of the model
         n_samples (int, optional): The number of inferences to run.
             Defaults to 20.
         seed (int, optional): The seed to use. Defaults to 2147483647.
 
-    Raises:
-        TypeError: If the first layer is not an Embedding
-        TypeError: If the second layer is not a Linear layer
-
     Returns:
         Tuple[str, ...]: The predictions
     """
-    # Obtain the embedding size from c
-    if not isinstance(model.layers[0], Embedding):
-        raise TypeError(
-            f"Expected the first layer to be an embedding, got {type(model.layers[0])}"
-        )
-    embedding_size = int(model.layers[0].weight.shape[-1])
-
-    # Obtain the block size from w1
-    if not isinstance(model.layers[2], Linear):
-        raise TypeError(
-            "Expected the second layer to be an linear layer, "
-            f"got {type(model.layers[1])}"
-        )
-    block_size = int(model.layers[2].weight.shape[-2] / embedding_size)
-
     # Disable training
     for layer in model.layers:
         if hasattr(layer, "training"):
@@ -59,7 +40,8 @@ def run_inference(
 
     for _ in range(n_samples):
         characters = ""
-        context = [TOKEN_TO_INDEX["."]] * block_size  # Initialize with stop characters
+        # Initialize with stop characters
+        context = [TOKEN_TO_INDEX["."]] * model_params.block_size
 
         while True:
             # Note the [] to get the batch shape correct
@@ -100,17 +82,16 @@ def parse_args(sys_args: List[str]) -> argparse.Namespace:
         help=("Number of names to predict"),
     )
     parser.add_argument(
-        "-m",
-        "--batch-normalize",
-        help=("Whether or not to use batch normalization"),
-        action="store_true",
-    )
-    parser.add_argument(
         "-t",
         "--model-type",
-        type=str,
-        choices=("explicit", "pytorch"),
-        help="What model type to use",
+        type=ModelType,
+        required=False,
+        default=ModelType.NONE,
+        choices=list(ModelType),
+        help=(
+            "The pre-defined models. "
+            "If selected, they will overwrite other parameters set in the input."
+        ),
     )
 
     args = parser.parse_args(sys_args)
@@ -136,9 +117,11 @@ def main(sys_args: List[str]):
     model, _ = train(
         model_params=model_params,
         optimization_params=optimization_params,
+        model_type=args.model_type,
     )
     predictions = run_inference(
         model=model,
+        model_params=model_params,
         n_samples=args.n_predictions,
     )
     for prediction in predictions:

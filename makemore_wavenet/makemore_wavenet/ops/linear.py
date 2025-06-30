@@ -30,8 +30,10 @@ class Linear(Module):
             seed (int): The seed to use in the random number generator
         """
         g = torch.Generator(device=device).manual_seed(seed)
-        self.weight = torch.randn((fan_in, fan_out), generator=g) / fan_in**0.5
-        self.bias = torch.zeros(fan_out) if bias else None
+        self.weight = (
+            torch.randn((fan_in, fan_out), generator=g, device=device) / fan_in**0.5
+        )
+        self.bias = torch.zeros(fan_out, device=device) if bias else None
         # NOTE: This is not implemented in the original torch layer, but is added
         #       for plotting convenience
         self.out = torch.empty(fan_out, device=device)
