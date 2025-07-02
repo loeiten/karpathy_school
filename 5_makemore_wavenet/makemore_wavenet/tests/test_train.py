@@ -10,6 +10,7 @@ from makemore_wavenet.data_classes import (
 from makemore_wavenet.models import get_vanilla_model
 from makemore_wavenet.preprocessing import get_dataset
 from makemore_wavenet.train import parse_args, train_neural_net_model
+from makemore_wavenet import DEVICE
 
 
 def test_train_neural_net_model() -> None:
@@ -26,7 +27,7 @@ def test_train_neural_net_model() -> None:
     dataset = get_dataset(block_size=model_params.block_size)
 
     # Obtain the model
-    model = get_vanilla_model(model_params)
+    model = get_vanilla_model(model_params, device=DEVICE)
 
     # Set the model options
     mini_batches_per_data_capture = 1
