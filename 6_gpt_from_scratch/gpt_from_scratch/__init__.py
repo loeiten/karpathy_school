@@ -2,7 +2,7 @@
 
 import torch
 
-torch.manual_seed(192837465) # type: ignore
+torch.manual_seed(192837465)  # type: ignore
 
 DEVICE = (
     torch.device("cuda")
