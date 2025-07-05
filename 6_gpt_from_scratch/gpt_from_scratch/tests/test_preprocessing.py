@@ -1,10 +1,25 @@
 """Contains tests for the preprocessing module."""
 
+import pytest
 from gpt_from_scratch.preprocessing import CharTokenizer
 
 
-def test_CharTokenizer__init__() -> None:
-    """Test the initializer of CharTokenizer."""
-    char_tokenizer = CharTokenizer("qwerty")
-    assert char_tokenizer.tokens == ["e", "q", "r", "t", "w", "y"]
-    assert char_tokenizer.vocab_size == 6
+@pytest.fixture
+def qwerty_tokenizer() -> CharTokenizer:
+    """Return the qweErTy tokenizer.
+
+    Returns:
+        CharTokenizer: The tokenizer
+    """
+    return CharTokenizer("qweErTy")
+
+
+def test_CharTokenizer__init__(qwerty_tokenizer: CharTokenizer) -> None:
+    """Test the initializer of CharTokenizer.
+
+    Args:
+        qwerty_tokenizer (CharTokenizer): The qweErTy tokenizer
+    """
+    # NOTE: sort sorts according to their ASCII values
+    assert qwerty_tokenizer.tokens == ["E", "T", "e", "q", "r", "w", "y"]
+    assert qwerty_tokenizer.vocab_size == 7
