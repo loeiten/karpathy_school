@@ -37,3 +37,17 @@ def test_CharTokenizer__encode__(qwerty_tokenizer: CharTokenizer) -> None:
         qwerty_tokenizer.encode("a")
 
     assert qwerty_tokenizer.encode("weTTer") == [5, 2, 1, 1, 2, 4]
+
+
+def test_CharTokenizer__decode__(qwerty_tokenizer: CharTokenizer) -> None:
+    """Test the CharTokenizer decoder.
+
+    Args:
+        qwerty_tokenizer (CharTokenizer): The qweErTy tokenizer
+    """
+    assert qwerty_tokenizer.decode([0, 1, 2, 3, 4, 5, 6]) == "ETeqrwy"
+
+    with pytest.raises(KeyError):
+        qwerty_tokenizer.decode([7])
+
+    assert qwerty_tokenizer.decode([5, 2, 1, 1, 2, 4]) == "weTTer"
