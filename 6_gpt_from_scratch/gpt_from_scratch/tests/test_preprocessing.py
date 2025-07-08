@@ -1,10 +1,11 @@
 """Contains tests for the preprocessing module."""
 
+import torch
 import pytest
-from gpt_from_scratch.preprocessing import CharTokenizer
+from gpt_from_scratch.preprocessing import CharTokenizer, DataPreprocessor
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def qwerty_tokenizer() -> CharTokenizer:
     """Return the qweErTy tokenizer.
 
@@ -14,7 +15,7 @@ def qwerty_tokenizer() -> CharTokenizer:
     return CharTokenizer("qweErTy")
 
 
-def test_CharTokenizer__init__(qwerty_tokenizer: CharTokenizer) -> None:
+def test_CharTokenizer___init__(qwerty_tokenizer: CharTokenizer) -> None:
     """Test the initializer of CharTokenizer.
 
     Args:
@@ -25,7 +26,7 @@ def test_CharTokenizer__init__(qwerty_tokenizer: CharTokenizer) -> None:
     assert qwerty_tokenizer.vocab_size == 7
 
 
-def test_CharTokenizer__encode__(qwerty_tokenizer: CharTokenizer) -> None:
+def test_CharTokenizer_encode(qwerty_tokenizer: CharTokenizer) -> None:
     """Test the CharTokenizer encoder.
 
     Args:
@@ -39,7 +40,7 @@ def test_CharTokenizer__encode__(qwerty_tokenizer: CharTokenizer) -> None:
     assert qwerty_tokenizer.encode("weTTer") == [5, 2, 1, 1, 2, 4]
 
 
-def test_CharTokenizer__decode__(qwerty_tokenizer: CharTokenizer) -> None:
+def test_CharTokenizer_decode(qwerty_tokenizer: CharTokenizer) -> None:
     """Test the CharTokenizer decoder.
 
     Args:
@@ -51,3 +52,13 @@ def test_CharTokenizer__decode__(qwerty_tokenizer: CharTokenizer) -> None:
         qwerty_tokenizer.decode([7])
 
     assert qwerty_tokenizer.decode([5, 2, 1, 1, 2, 4]) == "weTTer"
+
+
+def test_DataPreprocessor___init__() -> None:
+    """Test the initializer of DataPreprocessor."""
+    # NOTE: The init is pointing to the tiny Shakespare corpus
+    context_length = 3
+    data_preprocessor = DataPreprocessor(context_length=context_length)
+    assert data_preprocessor.train_split.size() == torch.Size([1003851])
+    assert data_preprocessor.validation_split.size() == torch.Size([111539])
+    assert data_preprocessor.context_length == context_length
