@@ -2,7 +2,7 @@
 
 import torch
 import pytest
-from gpt_from_scratch.preprocessing import CharTokenizer, DataPreprocessor
+from gpt_from_scratch.preprocessing import CharTokenizer, DataPreprocessor, DataSet
 
 
 @pytest.fixture(scope="session")
@@ -62,3 +62,16 @@ def test_DataPreprocessor___init__() -> None:
     assert data_preprocessor.train_split.size() == torch.Size([1003851])
     assert data_preprocessor.validation_split.size() == torch.Size([111539])
     assert data_preprocessor.context_length == context_length
+
+
+def test_DataPreprocessor_get_batch() -> None:
+    """Test the get batch of DataPreprocessor."""
+    context_length = 3
+    batch_size = 4
+    dp = DataPreprocessor(context_length=context_length)
+    xb, yb = dp.get_batch(sample_from=DataSet.TRAIN, batch_size=batch_size)
+    assert xb.size() == torch.Size([batch_size, context_length])
+    assert yb.size() == torch.Size([batch_size, context_length])
+    # Loop through the batches
+    for cur_batch_x, cur_batch_y in zip(xb, yb):
+        assert torch.equal(cur_batch_x[1:], cur_batch_y[:-1])
